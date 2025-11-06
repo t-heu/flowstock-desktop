@@ -1,18 +1,9 @@
-import { adminDb } from "../../firebase"; // sua instância do Firestore
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET || "dev_secret_key";
-const TOKEN_EXPIRES = "7d"; // 7 dias
-
-export interface AuthUser {
-  id: string;
-  name: string;
-  username: string;
-  email: string;
-  role: string;
-  branchId: string;
-}
+import { adminDb } from "../../firebase";
+import { AuthUser } from "../../../types";
+import { JWT_SECRET, TOKEN_EXPIRES } from "../../config/jwt";
 
 /**
  * 🔹 Login: autentica e gera token JWT

@@ -10,6 +10,7 @@ An Electron application with React and TypeScript
 
 ## 🖼️ Preview
 ![Screen 1](docs/image.png "Screen 1")
+![Screen 2](docs/image1.png "Screen 2")
 
 ## Project Setup
 

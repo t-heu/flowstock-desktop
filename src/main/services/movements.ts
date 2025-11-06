@@ -1,63 +1,35 @@
 import { adminDb } from "../firebase";
-
-export interface Movement {
-  id?: string;
-  productId: string;
-  branchId: string;
-  type: "entrada" | "saida";
-  quantity: number;
-  createdAt?: string;
-  product?: any;
-  branch?: any;
-}
+import { loadCache, getProductFromCache, getBranchFromCache } from "../cache";
+import { Movement } from "../../types";
 
 /**
  * 🔹 Buscar lista de movimentos (com produtos e filiais)
  */
-export const getMovements = async (typeFilter?: "entrada" | "saida"): Promise<{
-  ok: boolean;
-  data?: Movement[];
-  error?: string;
-}> => {
+export const getMovements = async (typeFilter?: "entrada" | "saida") => {
   try {
-    // Buscar movimentos
-    const snapshot = await adminDb.collection("movements").orderBy("createdAt", "desc").get();
+    await loadCache(); // ✅ carrega apenas 1 vez
+
+    const snapshot = await adminDb
+      .collection("movements")
+      .orderBy("createdAt", "desc")
+      .get();
+
     let movements = snapshot.docs.map((d) => ({ id: d.id, ...d.data() })) as Movement[];
 
-    // Filtrar por tipo, se necessário
-    if (typeFilter) {
-      movements = movements.filter((m) => m.type === typeFilter);
-    }
+    if (typeFilter) movements = movements.filter(m => m.type === typeFilter);
 
-    // Buscar produtos e filiais
-    const [productsSnap, branchesSnap] = await Promise.all([
-      adminDb.collection("products").get(),
-      adminDb.collection("branches").get(),
-    ]);
-
-    const products: Record<string, any> = {};
-    productsSnap.docs.forEach((doc) => {
-      const data = doc.data();
-      products[doc.id] = data;
-    });
-
-    const branches: Record<string, any> = {};
-    branchesSnap.docs.forEach((doc) => {
-      const data = doc.data();
-      branches[doc.id] = data;
-    });
-
-    // Enriquecer movimentos
-    const enriched = movements.map((m) => ({
+    // ✅ Join usando cache (sem get extra)
+    const enriched = movements.map(m => ({
       ...m,
-      product: products[m.productId] || null,
-      branch: branches[m.branchId] || null,
+      product: getProductFromCache(m.productId),
+      branch: getBranchFromCache(m.branchId),
     }));
 
     return { ok: true, data: enriched };
+
   } catch (error) {
     console.error("Erro ao buscar movimentos:", error);
-    throw new Error("Erro ao buscar filiais");
+    return { ok: false, error: "Erro ao buscar movimentos" };
   }
 };
 

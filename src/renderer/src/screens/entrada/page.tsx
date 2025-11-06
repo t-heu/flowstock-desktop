@@ -210,9 +210,9 @@ export default function EntradaPage() {
                       {new Date(entry.date).toLocaleDateString("pt-BR")}
                     </td>
                     <td className="p-4 text-sm text-gray-900 dark:text-white">
-                      {entry.product?.code} - {entry.product?.name}
+                      {entry.productCode} - {entry.productName}
                     </td>
-                    <td className="p-4 text-sm text-gray-900 dark:text-white">{entry.branch?.name}</td>
+                    <td className="p-4 text-sm text-gray-900 dark:text-white">{entry.branchName}</td>
                     <td className="p-4 text-sm">
                       <span className="font-semibold text-green-600 dark:text-green-400">+{entry.quantity}</span>
                     </td>

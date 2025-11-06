@@ -1,16 +1,20 @@
-import { adminDb } from "../firebase"; // sua instância do Firestore client-side
+import { adminDb } from "../firebase";
+import { Stats } from "../../types";
 
-export interface Stats {
-  totalProducts: number;
-  totalStock: number;
-  totalEntries: number;
-  totalExits: number;
-  totalBranches: number;
-}
+// Cache em memória
+let statsCache: Stats | null = null;
 
-// 🔹 Buscar estatísticas diretamente do Firestore
+/**
+ * 🔹 Buscar estatísticas com cache
+ */
 export const getStats = async (): Promise<Stats> => {
   try {
+    // Se cache existir → retorna direto (rápido)
+    if (statsCache !== null) {
+      return statsCache;
+    }
+
+    // Buscar Firestore em paralelo
     const [productsSnap, branchesSnap, movementsSnap, branchStockSnap] = await Promise.all([
       adminDb.collection("products").get(),
       adminDb.collection("branches").get(),
@@ -18,7 +22,6 @@ export const getStats = async (): Promise<Stats> => {
       adminDb.collection("branchStock").get(),
     ]);
 
-    const products = productsSnap.docs.map((d) => d.data());
     const movements = movementsSnap.docs.map((d) => d.data());
     const branchStock = branchStockSnap.docs.map((d) => d.data() as { quantity: number });
 
@@ -26,15 +29,26 @@ export const getStats = async (): Promise<Stats> => {
     const totalExits = movements.filter((m: any) => m.type === "saida").length;
     const totalStock = branchStock.reduce((sum, item) => sum + (item.quantity || 0), 0);
 
-    return {
-      totalProducts: products.length,
+    // Calcula estatísticas
+    statsCache = {
+      totalProducts: productsSnap.size,
       totalStock,
       totalEntries,
       totalExits,
       totalBranches: branchesSnap.size,
     };
+
+    return statsCache;
+
   } catch (error) {
     console.error("Erro ao buscar estatísticas:", error);
     throw new Error("Erro ao buscar estatísticas");
   }
+};
+
+/**
+ * 🔄 Chame isso sempre que algo mudar (product / movement / branch)
+ */
+export const invalidateStatsCache = () => {
+  statsCache = null;
 };

@@ -1,22 +1,18 @@
 import { adminDb } from "../firebase";
-
-export interface Product {
-  id: string;
-  name: string;
-  code: string;
-  description?: string;
-  unit: string;
-  createdAt?: string;
-}
+import { 
+  loadCache, 
+  getAllProductsFromCache,
+  invalidateProductCache
+} from "../cache";
+import { Product } from "../../types";
 
 /**
  * 🔹 Buscar todos os produtos
  */
 export const getProducts = async (): Promise<Product[]> => {
   try {
-    const snapshot = await adminDb.collection("products").get();
-    const products = snapshot.docs.map((d) => ({ id: d.id, ...d.data() })) as Product[];
-    return products;
+    await loadCache(); // ✅ carrega produtos no cache se necessário
+    return getAllProductsFromCache(); // ✅ retorna versão em memória (sem GET)
   } catch (error) {
     console.error("Erro ao buscar produtos:", error);
     throw new Error("Erro ao buscar produtos");
@@ -35,6 +31,8 @@ export const createProduct = async (product: Omit<Product, "id" | "createdAt">):
       ...product,
       createdAt: new Date().toISOString(),
     });
+
+    invalidateProductCache();
     return { ok: true };
   } catch (error) {
     console.error("Erro ao adicionar produto:", error);
@@ -51,7 +49,10 @@ export const updateProduct = async (id: string, updates: Partial<Product>): Prom
 }> => {
   try {
     if (!id || !updates) return { ok: false, error: "ID e updates são obrigatórios" };
+
     await adminDb.collection("products").doc(id).update(updates);
+
+    invalidateProductCache();
     return { ok: true };
   } catch (error) {
     console.error("Erro ao atualizar produto:", error);
@@ -68,7 +69,10 @@ export const deleteProduct = async (id: string): Promise<{
 }> => {
   try {
     if (!id) return { ok: false, error: "ID é obrigatório" };
+
     await adminDb.collection("products").doc(id).delete();
+
+    invalidateProductCache();
     return { ok: true };
   } catch (error) {
     console.error("Erro ao deletar produto:", error);

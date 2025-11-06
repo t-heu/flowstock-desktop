@@ -1,29 +1,38 @@
 import jwt from "jsonwebtoken";
-
-const JWT_SECRET = process.env.JWT_SECRET || "dev_secret_key";
-
-export interface AuthUser {
-  id: string;
-  name: string;
-  username: string;
-  email: string;
-  role: string;
-  branchId: string;
-}
+import { adminDb } from "../../firebase";
+import { AuthUser } from "../../../types";
+import { JWT_SECRET } from "../../config/jwt";
 
 /**
- * 🔹 Valida token JWT e retorna o usuário
+ * 🔹 Valida token JWT e retorna usuário atualizado do banco
  */
 export const getCurrentUser = async (token: string) => {
   try {
-    if (!token) {
-      throw new Error("Token ausente");
-    }
+    if (!token) throw new Error("Token ausente");
 
+    // Decodifica token
     const decoded = jwt.verify(token, JWT_SECRET) as AuthUser;
-    return { ok: true, user: decoded };
+
+    // Busca usuário atualizado no Firestore
+    const snap = await adminDb.collection("users").doc(decoded.id).get();
+    if (!snap.exists) throw new Error("Usuário não encontrado");
+
+    const userData = snap.data()!;
+
+    // Retorna sempre versões atualizadas
+    return {
+      ok: true,
+      user: {
+        id: decoded.id,
+        name: userData.name,
+        username: userData.username,
+        email: userData.email,
+        role: userData.role,
+        branchId: userData.branchId,
+      },
+    };
   } catch (error) {
     console.error("Token inválido:", error);
-    throw new Error("Token inválido");
+    return { ok: false, error: "Token inválido ou expirado" };
   }
 };

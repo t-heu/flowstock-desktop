@@ -30,8 +30,11 @@ function AppContent() {
   if (!user) return <Login />
 
   return (
-    <div className="flex min-h-screen bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-50">
-      <SidebarWrapper currentPage={currentPage} onNavigate={setCurrentPage} />
+    <div className="flex h-screen overflow-hidden bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-50">
+      <SidebarWrapper 
+        currentPage={currentPage} 
+        onNavigate={setCurrentPage} 
+      />
       <main className="flex-1 p-8 overflow-y-auto">
         {currentPage === 'dashboard' && <Home />}
         {currentPage === 'produtos' && <Produtos />}

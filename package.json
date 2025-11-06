@@ -1,10 +1,10 @@
 {
   "name": "flowstock-desktop",
   "version": "1.0.0",
-  "description": "An Electron application with React and TypeScript",
+  "description": "FlowStock - Sistema de Gestão de Materiais Internos",
   "main": "./out/main/index.js",
-  "author": "example.com",
-  "homepage": "https://electron-vite.org",
+  "author": "theu",
+  "homepage": "https://t-heu.github.io",
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint --cache .",
@@ -57,11 +57,12 @@
     "vite": "^7.1.6"
   },
   "build": {
-    "appId": "com.example.flowstock",
+    "appId": "com.theu.flowstock",
     "productName": "FlowStock",
     "win": {
       "target": "portable",
       "icon": "build/icon.ico",
+      "fileDescription": "FlowStock - Sistema de Gestão de Estoque Interno",
       "sign": false
     },
     "mac": null,

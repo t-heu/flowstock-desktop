@@ -1,54 +1,33 @@
-import { adminDb } from "../firebase"; // instância do Firestore client-side
+import { adminDb } from "../firebase";
 import bcrypt from "bcryptjs";
-
-export interface User {
-  id?: string;
-  name: string;
-  email: string;
-  role: string;
-  username: string;
-  branchId: string;
-  password?: string;
-  createdAt?: string;
-}
-
-export interface Branch {
-  id: string;
-  name: string;
-  code: string;
-}
+import { loadCache, getBranchFromCache } from "../cache";
+import { User } from "../../types";
 
 /**
- * 🔹 Lista todos os usuários com a filial vinculada
+ * 🔹 Lista todos os usuários com filial usando cache (sem GET extra)
  */
 export const getUsers = async (): Promise<User[]> => {
   try {
-    const [usersSnap, branchesSnap] = await Promise.all([
-      adminDb.collection("users").get(),
-      adminDb.collection("branches").get(),
-    ]);
+    // ✅ garante cache de filiais carregada
+    await loadCache();
 
+    const usersSnap = await adminDb.collection("users").get();
     const users = usersSnap.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     })) as User[];
 
-    const branches = branchesSnap.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as Branch[];
+    return users.map((user) => {
+      const branch = getBranchFromCache(user.branchId);
 
-    // vincula a filial a cada usuário
-    const usersWithBranch = users.map((user) => {
-      const branch = branches.find((b) => b.id === user.branchId);
       return {
         ...user,
-        password: undefined,
-        branch: branch ? { id: branch.id, name: branch.name, code: branch.code } : null,
+        password: undefined, // nunca retorna senha
+        branch: branch
+          ? { id: user.branchId, name: branch.name, code: branch.code }
+          : null,
       };
     });
-
-    return usersWithBranch;
   } catch (error) {
     console.error("Erro ao buscar usuários:", error);
     throw new Error("Erro ao buscar usuários");
@@ -56,7 +35,7 @@ export const getUsers = async (): Promise<User[]> => {
 };
 
 /**
- * 🔹 Cria novo usuário
+ * 🔹 Criar usuário
  */
 export const createUser = async (data: User): Promise<User> => {
   try {
@@ -78,26 +57,25 @@ export const createUser = async (data: User): Promise<User> => {
 };
 
 /**
- * 🔹 Atualiza usuário
+ * 🔹 Atualizar usuário
  */
 export const updateUser = async (id: string, updates: Partial<User>): Promise<User> => {
   try {
-    const userRef = adminDb.collection("users").doc(id);
-    const snap = await userRef.get();
+    const ref = adminDb.collection("users").doc(id);
+    const snap = await ref.get();
 
     if (!snap.exists) {
       throw new Error("Usuário não encontrado");
     }
 
-    // Se for atualizar a senha, hash antes
     if (updates.password) {
       updates.password = await bcrypt.hash(updates.password, 10);
     }
 
-    await userRef.update(updates);
-    const updatedSnap = await userRef.get();
+    await ref.update(updates);
 
-    return { id: updatedSnap.id, ...updatedSnap.data(), password: undefined } as User;
+    const updated = await ref.get();
+    return { id, ...updated.data(), password: undefined } as User;
   } catch (error) {
     console.error("Erro ao atualizar usuário:", error);
     throw new Error("Erro ao atualizar usuário");
@@ -105,7 +83,7 @@ export const updateUser = async (id: string, updates: Partial<User>): Promise<Us
 };
 
 /**
- * 🔹 Remove usuário
+ * 🔹 Excluir usuário
  */
 export const deleteUser = async (id: string): Promise<void> => {
   try {
@@ -115,3 +93,8 @@ export const deleteUser = async (id: string): Promise<void> => {
     throw new Error("Erro ao deletar usuário");
   }
 };
+
+/**
+ * ✅ Se algum usuário mudar de filial, talvez o nome da filial apareça diferente
+ * Então, **quando editar filiais**, faça: invalidateBranchesCache()
+ */

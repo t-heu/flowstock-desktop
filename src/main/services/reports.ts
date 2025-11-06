@@ -1,14 +1,5 @@
 import { adminDb } from "../firebase"
-
-export interface DetailedReportItem {
-  date: string
-  branchName: string
-  destinationBranchName: string
-  productCode: string
-  productName: string
-  quantity: number
-  notes?: string
-}
+import { DetailedReportItem } from "../../types";
 
 /**
  * 🔹 Buscar relatório detalhado de saídas
@@ -62,7 +53,7 @@ export const getDetailedReport = async (
 
     // Ordenar por data (mais recente primeiro)
     report.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-
+    
     return { ok: true, data: report }
   } catch (error) {
     console.error("Erro ao gerar relatório detalhado:", error)

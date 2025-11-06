@@ -1,50 +1,37 @@
-import { adminDb } from "../firebase"; // ajuste conforme o caminho do seu firebase client
+import { adminDb } from "../firebase";
+import { loadCache, getProductFromCache, getBranchFromCache } from "../cache";
+import { BranchStockItem, Product, Branch } from "../../types"; // ajuste o caminho
 
-export interface BranchStockItem {
-  branchId: string;
-  branchName?: string;
-  productId: string;
-  productName?: string;
-  quantity: number;
-  createdAt?: string;
-}
-
-/**
- * 🔹 Buscar o estoque detalhado das filiais (branchStock)
- */
 export const getBranchStock = async (): Promise<{
   ok: boolean;
   data?: BranchStockItem[];
   error?: string;
 }> => {
   try {
-    // Buscar coleções em paralelo
-    const [branchStockSnap, branchesSnap, productsSnap] = await Promise.all([
-      adminDb.collection("branchStock").get(),
-      adminDb.collection("branches").get(),
-      adminDb.collection("products").get(),
-    ]);
+    // 🔹 Garantir que cache está carregada
+    await loadCache();
 
-    // Mapear resultados
-    const branchStock = branchStockSnap.docs.map((d) => d.data()) as any[];
-    const branches = branchesSnap.docs.map((d) => ({ id: d.id, ...d.data() })) as any[];
-    const products = productsSnap.docs.map((d) => ({ id: d.id, ...d.data() })) as any[];
+    // 🔹 Buscar somente branchStock
+    const branchStockSnap = await adminDb.collection("branchStock").get();
+    const branchStock = branchStockSnap.docs.map(d => d.data()) as any[];
 
-    // Enriquecer dados
-    const detailedStock: BranchStockItem[] = branchStock.map((item) => {
-      const branch = branches.find((b) => b.id === item.branchId);
-      const product = products.find((p) => p.id === item.productId);
+    // 🔹 Enriquecer com cache
+    const detailedStock: BranchStockItem[] = branchStock.map(item => {
+      const branch: Branch | null = getBranchFromCache(item.branchId);
+      const product: Product | null = getProductFromCache(item.productId);
 
       return {
         branchId: item.branchId,
-        branchName: branch?.name || "Desconhecida",
+        branchName: branch?.name ?? "Desconhecida",
         productId: item.productId,
-        productName: product?.name || "Sem nome",
-        quantity: item.quantity || 0,
-        createdAt: item.createdAt || null,
+        productName: product?.name ?? "Sem nome",
+        quantity: item.quantity ?? 0,
+        createdAt: item.createdAt
+          ? (item.createdAt.toDate ? item.createdAt.toDate().toISOString() : item.createdAt)
+          : undefined,
       };
     });
-
+    
     return { ok: true, data: detailedStock };
   } catch (error) {
     console.error("Erro ao buscar branchStock detalhado:", error);
