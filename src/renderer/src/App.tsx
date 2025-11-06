@@ -14,8 +14,6 @@ import Reports from './screens/relatorios/page'
 
 import { SidebarWrapper } from './components/SidebarWrapper'
 
-import Versions from './components/Versions'
-
 function App(): React.JSX.Element {
   return (
     <AuthProvider>

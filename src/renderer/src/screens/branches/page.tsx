@@ -35,7 +35,7 @@ export default function BranchesPage() {
     }
   }
 
-  const handleDelete = async (id: string) => {
+  /*const handleDelete = async (id: string) => {
     if (confirm("Tem certeza que deseja excluir esta filial? 🏢")) {
       const result = await window.api.deleteBranch(id)
       if (result.ok) {
@@ -45,7 +45,7 @@ export default function BranchesPage() {
         alert(result.error || "Erro ao excluir filial ❌")
       }
     }
-  }
+  }*/
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">

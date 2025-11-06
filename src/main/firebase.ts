@@ -1,16 +1,20 @@
-import 'dotenv/config';
 import admin from "firebase-admin";
 
-if (!admin.apps.length) {
-  if (!process.env.FIREBASE_ADMIN_PROJECT_ID) {
-    throw new Error("FIREBASE_ADMIN_PROJECT_ID não está definido!");
-  }
+const projectId = import.meta.env.MAIN_VITE_FIREBASE_ADMIN_PROJECT_ID;
+const clientEmail = import.meta.env.MAIN_VITE_FIREBASE_ADMIN_CLIENT_EMAIL;
+const privateKey = import.meta.env.MAIN_VITE_FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, "\n");
 
+if (!projectId || !clientEmail || !privateKey) {
+  console.error("❌ Variáveis não carregadas:", { projectId, clientEmail, privateKey });
+  throw new Error("As variáveis do Firebase Admin não foram carregadas.");
+}
+
+if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert({
-      projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
-      privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-      clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
+      projectId,
+      clientEmail,
+      privateKey,
     }),
   });
 }

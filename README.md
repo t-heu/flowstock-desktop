@@ -1,10 +1,15 @@
-# electron-app
+# Flowstock
 
 An Electron application with React and TypeScript
+
+![logo](docs/logo.png)
 
 ## Recommended IDE Setup
 
 - [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+
+## 🖼️ Preview
+![Screen 1](docs/image.png "Screen 1")
 
 ## Project Setup
 
@@ -22,8 +27,24 @@ $ npm run dev
 
 ### Build
 
+### Environment Setup
+
+This project uses environment variables to configure secure and platform-dependent settings during the Electron build process.
+Before running or building the application, you must create an environment file based on the provided template.
+
+1. Copy the example environment file
 ```bash
-# For windows
+cp .env.example electron-builder.env
+
+# and
+cp .env.example .env
+
+```
+
+```bash
+# For windows - Abra PowerShell como Admin 
+$ cd "C:\Users\SEU_NOME\www\electron-app"
+$ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 $ npm run build:win
 
 # For macOS

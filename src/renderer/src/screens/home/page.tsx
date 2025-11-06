@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Package, TrendingUp, TrendingDown } from "lucide-react"
 
 export default function Home() {

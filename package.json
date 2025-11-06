@@ -25,6 +25,7 @@
     "@electron-toolkit/utils": "^4.0.0",
     "@tailwindcss/vite": "^4.1.16",
     "bcryptjs": "^3.0.3",
+    "dotenv": "^17.2.3",
     "firebase": "^12.5.0",
     "firebase-admin": "^13.5.0",
     "jsonwebtoken": "^9.0.2",
@@ -54,5 +55,16 @@
     "tailwindcss": "^4.1.16",
     "typescript": "^5.9.2",
     "vite": "^7.1.6"
+  },
+  "build": {
+    "appId": "com.example.flowstock",
+    "productName": "FlowStock",
+    "win": {
+      "target": "portable",
+      "icon": "build/icon.ico",
+      "sign": false
+    },
+    "mac": null,
+    "linux": null
   }
 }
