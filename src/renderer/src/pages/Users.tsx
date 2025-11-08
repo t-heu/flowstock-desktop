@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { UserPlus } from "lucide-react"
+import { Trash2 } from "lucide-react"
 
 import departments from "../../../config/departments.json";
 
@@ -204,11 +205,8 @@ export default function UsersPage() {
                     <td className="p-4 text-sm text-gray-900 dark:text-white">{u.role}</td>
                     <td className="p-4 text-sm text-gray-900 dark:text-white">{u.department}</td>
                     <td className="p-4 text-sm text-gray-900 dark:text-white">
-                      <button
-                        onClick={() => handleDelete(u.id)}
-                        className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm"
-                      >
-                        Excluir
+                      <button title="delete" onClick={() => handleDelete(u.id)} className="text-red-600 hover:text-red-800 transition-colors">
+                        <Trash2 className="w-5 h-5" />
                       </button>
                     </td>
                   </tr>

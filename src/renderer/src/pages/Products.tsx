@@ -44,7 +44,7 @@ export default function ProductsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const result = await window.api.createProduct(formData)
-    if (result.ok) {
+    if (result.success) {
       setFormData({ code: "", name: "", description: "", department: '', unit: "UN" })
       setIsFormOpen(false)
       loadProducts()
@@ -56,7 +56,7 @@ export default function ProductsPage() {
   const handleDelete = async (id: string) => {
     if (confirm("Tem certeza que deseja excluir este produto?")) {
       const result = await window.api.deleteProduct(id)
-      if (result.ok) loadProducts()
+      if (result.success) loadProducts()
       else alert(result.error || "Erro ao excluir produto")
     }
   }
@@ -204,7 +204,7 @@ export default function ProductsPage() {
                     <td className="p-4 text-sm text-gray-900 dark:text-white">{product.department}</td>
                     <td className="p-4">
                       {["admin", "manager"].includes(user?.role ?? "") && (
-                        <button onClick={() => handleDelete(product.id)} className="text-red-600 hover:text-red-800 transition-colors">
+                        <button title="delete" onClick={() => handleDelete(product.id)} className="text-red-600 hover:text-red-800 transition-colors">
                           <Trash2 className="w-5 h-5" />
                         </button>
                       )}

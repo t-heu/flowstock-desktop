@@ -38,7 +38,7 @@ export const getUsers = async (): Promise<User[]> => {
 /**
  * 🔹 Criar usuário
  */
-export const createUser = async (data: User): Promise<User> => {
+export const createUser = async (data: User): Promise<{ success: true }> => {
   try {
     const hashedPassword = await bcrypt.hash(data.password || "", 10);
 
@@ -50,9 +50,9 @@ export const createUser = async (data: User): Promise<User> => {
       createdAt: new Date().toISOString(),
     };
 
-    const docRef = await adminDb.collection("users").add(newUser);
+    await adminDb.collection("users").add(newUser);
 
-    return { ...newUser, id: docRef.id, password: undefined };
+    return { success: true };
   } catch (error) {
     console.error("Erro ao criar usuário:", error);
     throw new Error("Erro ao criar usuário");
@@ -62,7 +62,7 @@ export const createUser = async (data: User): Promise<User> => {
 /**
  * 🔹 Atualizar usuário
  */
-export const updateUser = async (id: string, updates: Partial<User>): Promise<User> => {
+export const updateUser = async (id: string, updates: Partial<User>): Promise<{ success: true }> => {
   try {
     const ref = adminDb.collection("users").doc(id);
     const snap = await ref.get();
@@ -81,8 +81,7 @@ export const updateUser = async (id: string, updates: Partial<User>): Promise<Us
 
     await ref.update(updates);
 
-    const updated = await ref.get();
-    return { id, ...updated.data(), password: undefined } as User;
+    return { success: true };
   } catch (error) {
     console.error("Erro ao atualizar usuário:", error);
     throw new Error("Erro ao atualizar usuário");

@@ -39,7 +39,7 @@ const api = {
   getDetailedReport: (branchId, startDate, endDate) =>
     ipcRenderer.invoke("get-detailed-report", branchId, startDate, endDate),
 
-  fetchNotice: (url: string) => ipcRenderer.invoke('fetch-notice', url),
+  fetchNotice: () => ipcRenderer.invoke('fetch-notice'),
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

@@ -70,7 +70,7 @@ export default function Sidebar({
         {/* Header Desktop */}
         <div className="p-6 border-b border-gray-200 dark:border-slate-700 hidden md:block">
           <h1 className="text-xl font-bold text-black">FlowStock</h1>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Sistema de Estoque</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Gestão de estoque interno</p>
         </div>
 
         {/* Navigation */}

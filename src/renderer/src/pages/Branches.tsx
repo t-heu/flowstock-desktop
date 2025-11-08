@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Building2, PlusCircle } from "lucide-react"
+import { Building2, PlusCircle, Trash2 } from "lucide-react"
 
 interface Branch {
   id: string
@@ -26,7 +26,7 @@ export default function BranchesPage() {
     if (!formData.name || !formData.code) return alert("Preencha todos os campos ⚠️")
 
     const result = await window.api.addBranch(formData)
-    if (result.ok) {
+    if (result.success) {
       setFormData({ name: "", code: "" })
       await loadBranches()
       alert("Filial criada com sucesso! 🎉")
@@ -35,17 +35,17 @@ export default function BranchesPage() {
     }
   }
 
-  /*const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm("Tem certeza que deseja excluir esta filial? 🏢")) {
       const result = await window.api.deleteBranch(id)
-      if (result.ok) {
+      if (result.success) {
         await loadBranches()
         alert("Filial removida 🗑️")
       } else {
         alert(result.error || "Erro ao excluir filial ❌")
       }
     }
-  }*/
+  }
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
@@ -98,6 +98,7 @@ export default function BranchesPage() {
             <tr>
               <th className="text-left p-4 text-sm font-semibold text-gray-900 dark:text-white">Código</th>
               <th className="text-left p-4 text-sm font-semibold text-gray-900 dark:text-white">Nome</th>
+              <th className="text-left p-4 text-sm font-semibold text-gray-900 dark:text-white">Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -112,6 +113,11 @@ export default function BranchesPage() {
                 <tr key={b.id} className="border-b border-gray-200 dark:border-slate-700">
                   <td className="p-4 text-sm text-gray-900 dark:text-white">{b.code}</td>
                   <td className="p-4 text-sm text-gray-900 dark:text-white">{b.name}</td>
+                  <td className="p-4">
+                    <button title="delete" onClick={() => handleDelete(b.id)} className="text-red-600 hover:text-red-800 transition-colors">
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </td>
                 </tr>
               ))
             )}

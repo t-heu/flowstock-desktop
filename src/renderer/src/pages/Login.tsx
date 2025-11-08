@@ -1,7 +1,7 @@
-import { useState, type FormEvent, useEffect } from "react"
+import { useState, type FormEvent } from "react"
 import { Lock, User } from "lucide-react"
 import { useAuth } from "../components/auth/auth-provider"
-import { NoticeModal, Notice } from '../components/NoticeModal';
+import { NoticeModal } from '../components/NoticeModal';
 
 import logo from "../assets/icon.png";
 
@@ -11,41 +11,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false);
-
-  const [notice, setNotice] = useState<Notice | null>(null);
-  const [seenIds, setSeenIds] = useState<string[]>(() => {
-    try {
-      return JSON.parse(localStorage.getItem('seenNotices') || '[]');
-    } catch {
-      return [];
-    }
-  });
-
-  // Carregar aviso remoto
-  useEffect(() => {
-    async function loadNotice() {
-      try {
-        const data = await window.api.fetchNotice(
-          'https://raw.githubusercontent.com/t-heu/flowstock-desktop/refs/heads/main/noticeApp.json'
-        );
-        if (!data) return;
-        if (data.showOnce && seenIds.includes(data.id)) return;
-        setNotice(data);
-      } catch (err) {
-        console.warn('Erro ao buscar notice via ipcMain:', err);
-      }
-    }
-    loadNotice();
-  }, [seenIds]);
-
-  const handleCloseNotice = () => {
-    if (notice?.showOnce) {
-      const updated = Array.from(new Set([...seenIds, notice.id]));
-      setSeenIds(updated);
-      localStorage.setItem('seenNotices', JSON.stringify(updated));
-    }
-    setNotice(null);
-  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -59,10 +24,9 @@ export default function LoginPage() {
 
   return (
     <>
-      <NoticeModal notice={notice} onClose={handleCloseNotice} />
+      <NoticeModal />
 
-      <div className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-gray-100 via-white to-gray-200 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 transition-all">
-
+      <div className="min-h-screen flex items-center justify-center p-6 from-gray-100 via-white to-gray-200 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 transition-all">
         <div className="w-full max-w-md backdrop-blur-xl bg-white/90 dark:bg-slate-800/70 border border-gray-200/50 dark:border-slate-700/50 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] p-10 animate-fadeIn">
 
           {/* Logo + Título */}

@@ -120,9 +120,10 @@ app.whenReady().then(() => {
   ipcMain.handle("get-detailed-report", async (_event, branchId, startDate, endDate) => await getDetailedReport(branchId, startDate, endDate))
 
   // 🔔 Buscar aviso remoto
-  ipcMain.handle('fetch-notice', async (_event, url: string): Promise<Notice | null> => {
+  ipcMain.handle('fetch-notice', async (_event): Promise<Notice | null> => {
     try {
-      const res = await fetch(url);
+      const res = await fetch('https://raw.githubusercontent.com/t-heu/flowstock-desktop/refs/heads/main/noticeApp.json');
+
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       const text = await res.text();

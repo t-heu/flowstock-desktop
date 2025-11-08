@@ -35,7 +35,7 @@ export const loginUser = async (username: string, password: string) => {
 
     const token = jwt.sign(user, JWT_SECRET, { expiresIn: TOKEN_EXPIRES });
 
-    return { ok: true, user, token };
+    return { success: true, user, token };
   } catch {
     throw new Error("Error 505");
   }

@@ -3,7 +3,7 @@ import { loadCache, getProductFromCache, getBranchFromCache } from "../cache";
 import { BranchStockItem } from "../../types";
 
 export const getBranchStock = async (): Promise<{
-  ok: boolean;
+  success: boolean;
   data?: BranchStockItem[];
   error?: string;
 }> => {
@@ -29,7 +29,7 @@ export const getBranchStock = async (): Promise<{
       };
     });
 
-    return { ok: true, data: detailedStock };
+    return { success: true, data: detailedStock };
   } catch (error) {
     console.error("Erro ao buscar branchStock detalhado:", error);
     throw new Error("Erro ao buscar branchStock");

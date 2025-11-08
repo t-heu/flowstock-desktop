@@ -25,7 +25,7 @@ export const getBranches = async (): Promise<Branch[]> => {
  */
 export const addBranch = async (
   newBranch: Omit<Branch, "id" | "createdAt">
-): Promise<{ ok: boolean }> => {
+): Promise<{ success: boolean }> => {
   try {
     const branchToAdd = {
       ...newBranch,
@@ -37,7 +37,7 @@ export const addBranch = async (
     // ⚠️ Filial mudou → cache inválido
     invalidateBranchCache();
 
-    return { ok: true };
+    return { success: true };;
 
   } catch (error) {
     console.error("Erro ao adicionar filial:", error);
@@ -48,7 +48,7 @@ export const addBranch = async (
 /**
  * 🔹 Excluir filial (e atualizar cache)
  */
-export const deleteBranch = async (docId: string): Promise<{ ok: boolean }> => {
+export const deleteBranch = async (docId: string): Promise<{ success: boolean }> => {
   try {
     if (!docId) throw new Error("ID é obrigatório");
 
@@ -57,7 +57,7 @@ export const deleteBranch = async (docId: string): Promise<{ ok: boolean }> => {
     // ⚠️ Filial removida → cache inválido
     invalidateBranchCache();
 
-    return { ok: true };
+    return { success: true };;
 
   } catch (error) {
     console.error("Erro ao deletar filial:", error);

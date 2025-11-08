@@ -32,7 +32,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const fetchUser = async () => {
       try {
         const current = await window.api.getCurrentUser(token)
-        if (current.ok) setUser(current.user)
+        if (current.success) setUser(current.user)
       } catch {
         setUser(null)
       } finally {
@@ -45,7 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function login(username: string, password: string) {
     try {
       const loggedUser = await window.api.loginUser(username, password)
-      if (loggedUser.ok) {
+      if (loggedUser.success) {
         setToken(loggedUser.token)
         setUser(loggedUser.user)
         return true

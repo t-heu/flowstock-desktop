@@ -11,12 +11,12 @@ export function checkPermission(
   allowedRoles: Array<User["role"]>
 ) {
   if (!user) {
-    return { ok: false, error: "Usuário não autenticado" };
+    return { success: false, error: "Usuário não autenticado" };
   }
 
   if (!allowedRoles.includes(user.role)) {
-    return { ok: false, error: "Você não tem permissão para realizar esta ação" };
+    return { success: false, error: "Você não tem permissão para realizar esta ação" };
   }
 
-  return { ok: true };
+  return { success: true };;
 }

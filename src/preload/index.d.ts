@@ -39,7 +39,7 @@ declare global {
         startDate?: string,
         endDate?: string
       ) => Promise<any>;
-      fetchNotice: (url: string) => Promise<any>;
+      fetchNotice: () => Promise<any>;
     }
   }
 }

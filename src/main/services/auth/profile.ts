@@ -16,7 +16,7 @@ export const getCurrentUser = async (token: string) => {
     const userData = snap.data()!;
 
     return {
-      ok: true,
+      success: true,
       user: {
         id: decoded.id,
         name: userData.name,

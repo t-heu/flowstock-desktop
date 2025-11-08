@@ -12,7 +12,7 @@ export const getDetailedReport = async (
   startDate?: string,
   endDate?: string
 ): Promise<{
-  ok: boolean
+  success: boolean
   data?: DetailedReportItem[]
   error?: string
 }> => {
@@ -54,7 +54,7 @@ export const getDetailedReport = async (
     // Ordenar por data (mais recente primeiro)
     report.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     
-    return { ok: true, data: report }
+    return { success: true, data: report }
   } catch (error) {
     console.error("Erro ao gerar relatório detalhado:", error);
     throw new Error("Erro ao gerar relatório detalhado");
