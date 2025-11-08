@@ -19,7 +19,7 @@ export interface Product {
   createdAt?: string;
 }
 
-export default function SaidaPage() {
+export default function ProductOutputPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [branches, setBranches] = useState<Branch[]>([])
   const [recentExits, setRecentExits] = useState<any[]>([])

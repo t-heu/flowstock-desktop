@@ -1,9 +1,9 @@
 import { useState, type FormEvent, useEffect } from "react"
 import { Lock, User } from "lucide-react"
-import { useAuth } from "../../components/auth/auth-provider"
-import { NoticeModal, Notice } from '../../components/NoticeModal';
+import { useAuth } from "../components/auth/auth-provider"
+import { NoticeModal, Notice } from '../components/NoticeModal';
 
-import logo from "../../assets/icon.png";
+import logo from "../assets/icon.png";
 
 export default function LoginPage() {
   const { login } = useAuth()

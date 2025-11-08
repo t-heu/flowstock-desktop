@@ -10,26 +10,18 @@ import { JWT_SECRET, TOKEN_EXPIRES } from "../../config/jwt";
  */
 export const loginUser = async (username: string, password: string) => {
   try {
-    if (!username || !password) {
-      throw new Error("Usuário e senha são obrigatórios");
-    }
-
     const usersSnap = await adminDb
       .collection("users")
       .where("username", "==", username)
       .get();
 
-    if (usersSnap.empty) {
-      throw new Error("Usuário ou senha inválidos");
-    }
+    if (usersSnap.empty) throw new Error("Usuário ou senha inválidos");
 
     const userDoc = usersSnap.docs[0];
     const userData = userDoc.data();
 
     const isValid = await bcrypt.compare(password, userData.password);
-    if (!isValid) {
-      throw new Error("Usuário ou senha inválidos");
-    }
+    if (!isValid) throw new Error("Usuário ou senha inválidos");
 
     const user: AuthUser = {
       id: userDoc.id,
@@ -38,13 +30,13 @@ export const loginUser = async (username: string, password: string) => {
       email: userData.email,
       role: userData.role,
       branchId: userData.branchId,
+      department: userData.department, // ✅ novo
     };
 
     const token = jwt.sign(user, JWT_SECRET, { expiresIn: TOKEN_EXPIRES });
 
     return { ok: true, user, token };
-  } catch (error) {
-    console.error("Erro no login:", error);
+  } catch {
     throw new Error("Error 505");
   }
 };

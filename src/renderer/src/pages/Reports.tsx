@@ -17,7 +17,7 @@ interface Branch {
   code: string
 }
 
-export default function RelatoriosPage() {
+export default function ReportsPage() {
   const [branches, setBranches] = useState<Branch[]>([])
   const [reportData, setReportData] = useState<DetailedExit[]>([])
   const [selectedBranch, setSelectedBranch] = useState<string>("all")

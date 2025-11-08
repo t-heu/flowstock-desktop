@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react"
 import { UserPlus } from "lucide-react"
 
+import departments from "../../../config/departments.json";
+
 interface Branch {
   id: string
   name: string
@@ -16,6 +18,7 @@ interface User {
     name: string
   }
   role: "admin" | "user" | "manager"
+  department: string | null
 }
 
 export default function UsersPage() {
@@ -70,7 +73,7 @@ export default function UsersPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="space-y-6 p-6 max-w-6xl mx-auto">
       <div>
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Usuários</h1>
         <p className="text-gray-600 dark:text-gray-400 mt-2">Gerencie os usuários e atribua filiais</p>
@@ -144,6 +147,16 @@ export default function UsersPage() {
             <option value="manager">Manager</option> 
           </select>
 
+          <select
+            value={formData.role}
+            onChange={(e) => setFormData({ ...formData, departments: e.target.value })}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+          >
+            <option value="" disabled>Selecione...</option>
+            {departments.allowed.map(d => (
+              <option key={d.id} value={d.id}>{d.label}</option>
+            ))}
+          </select>
           <button
             type="submit"
             className="w-full px-6 py-2.5 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
@@ -159,47 +172,51 @@ export default function UsersPage() {
         <div className="p-4 border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-700">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white">Usuários Cadastrados</h3>
         </div>
-        <table className="w-full">
-          <thead className="bg-gray-50 dark:bg-slate-700 border-b border-gray-200 dark:border-slate-600">
-            <tr>
-              <th className="text-left p-4 text-sm font-semibold text-gray-900 dark:text-white">Nome</th>
-              <th className="text-left p-4 text-sm font-semibold text-gray-900 dark:text-white">Username</th>
-              <th className="text-left p-4 text-sm font-semibold text-gray-900 dark:text-white">E-mail</th>
-              <th className="text-left p-4 text-sm font-semibold text-gray-900 dark:text-white">Filial</th>
-              <th className="text-left p-4 text-sm font-semibold text-gray-900 dark:text-white">Role</th>
-              <th className="p-4"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.length === 0 ? (
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-sm">
+            <thead className="bg-gray-50 dark:bg-slate-700 border-b border-gray-200 dark:border-slate-600">
               <tr>
-                <td colSpan={5} className="p-8 text-center text-gray-500 dark:text-gray-400">
-                  Nenhum usuário cadastrado.
-                </td>
+                <th className="text-left p-4 text-sm font-semibold text-gray-900 dark:text-white">Nome</th>
+                <th className="text-left p-4 text-sm font-semibold text-gray-900 dark:text-white">Username</th>
+                <th className="text-left p-4 text-sm font-semibold text-gray-900 dark:text-white">E-mail</th>
+                <th className="text-left p-4 text-sm font-semibold text-gray-900 dark:text-white">Filial</th>
+                <th className="text-left p-4 text-sm font-semibold text-gray-900 dark:text-white">Role</th>
+                <th className="text-left p-4 text-sm font-semibold text-gray-900 dark:text-white">Departamento</th>
+                <th className="p-4"></th>
               </tr>
-            ) : (
-              users.map((u) => (
-                <tr key={u.id} className="border-b border-gray-200 dark:border-slate-700">
-                  <td className="p-4 text-sm text-gray-900 dark:text-white">{u.name}</td>
-                  <td className="p-4 text-sm text-gray-900 dark:text-white">{u.username}</td>
-                  <td className="p-4 text-sm text-gray-900 dark:text-white">{u.email}</td>
-                  <td className="p-4 text-sm text-gray-900 dark:text-white">
-                    {u.branch?.name}
-                  </td>
-                  <td className="p-4 text-sm text-gray-900 dark:text-white">{u.role}</td>
-                  <td className="p-4 text-sm text-gray-900 dark:text-white">
-                    <button
-                      onClick={() => handleDelete(u.id)}
-                      className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm"
-                    >
-                      Excluir
-                    </button>
+            </thead>
+            <tbody>
+              {users.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-gray-500 dark:text-gray-400">
+                    Nenhum usuário cadastrado.
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                users.map((u) => (
+                  <tr key={u.id} className="border-b border-gray-200 dark:border-slate-700">
+                    <td className="p-4 text-sm text-gray-900 dark:text-white">{u.name}</td>
+                    <td className="p-4 text-sm text-gray-900 dark:text-white">{u.username}</td>
+                    <td className="p-4 text-sm text-gray-900 dark:text-white">{u.email}</td>
+                    <td className="p-4 text-sm text-gray-900 dark:text-white">
+                      {u.branch?.name}
+                    </td>
+                    <td className="p-4 text-sm text-gray-900 dark:text-white">{u.role}</td>
+                    <td className="p-4 text-sm text-gray-900 dark:text-white">{u.department}</td>
+                    <td className="p-4 text-sm text-gray-900 dark:text-white">
+                      <button
+                        onClick={() => handleDelete(u.id)}
+                        className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm"
+                      >
+                        Excluir
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   )

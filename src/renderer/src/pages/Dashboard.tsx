@@ -1,19 +1,23 @@
 import { useState, useEffect } from 'react';
-import { Package, TrendingUp, TrendingDown } from "lucide-react"
+import { Package, TrendingUp, TrendingDown } from "lucide-react";
 
-export default function Home() {
+export default function DashboardPage() {
   const [stats, setStats] = useState({
     totalProducts: 0,
     totalStock: 0,
     totalEntries: 0,
     totalExits: 0,
     totalBranches: 0,
-  })
+  });
 
-   useEffect(() => {
+  const [branches, setBranches] = useState<{ id: string; name: string }[]>([]);
+  const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
+
+  useEffect(() => {
     async function loadStats() {
       try {
-        const data = await window.api.getStats();
+        const data = await window.api.getStats(selectedBranch);
+
         setStats(data);
       } catch (err) {
         console.error("Erro ao carregar estatísticas:", err);
@@ -21,6 +25,18 @@ export default function Home() {
     }
 
     loadStats();
+  }, [selectedBranch]);
+
+  useEffect(() => {
+    async function loadBranches() {
+      try {
+        const list = await window.api.getBranches(); // ✅ você já tem isso no sistema
+        setBranches(list);
+      } catch (err) {
+        console.error("Erro ao carregar filiais:", err);
+      }
+    }
+    loadBranches();
   }, []);
 
   if (!stats) return <p>Carregando...</p>;
@@ -58,18 +74,33 @@ export default function Home() {
       color: "bg-white border-[#ddd]",
       textColor: "text-black",
     },
-  ]
+  ];
 
   return (
     <div className="space-y-8 max-w-6xl mx-auto">
-      <div>
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">Visão geral do sistema de controle de estoque</p>
+      {/* Título + Filtro de Filial */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">Visão geral do sistema de controle de estoque</p>
+        </div>
+
+        <select
+          value={selectedBranch ?? ''}
+          onChange={(e) => setSelectedBranch(e.target.value)}
+          className="px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white w-full md:w-64"
+        >
+          <option value="">Todas as Filiais</option>
+          {branches.map((b) => (
+            <option key={b.id} value={b.id}>{b.name}</option>
+          ))}
+        </select>
       </div>
 
+      {/* Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {cards.map((card) => {
-          const Icon = card.icon
+          const Icon = card.icon;
           return (
             <div key={card.title} className={`${card.color} border rounded-xl p-6`}>
               <div className="flex items-center justify-between">
@@ -77,13 +108,14 @@ export default function Home() {
                   <p className="text-sm font-medium text-[#737373]">{card.title}</p>
                   <p className={`text-3xl font-bold mt-2 ${card.textColor}`}>{card.value}</p>
                 </div>
-                <Icon className={`w-10 h-10 ${card.iconColor}`}/>
+                <Icon className={`w-10 h-10 ${card.iconColor}`} />
               </div>
             </div>
-          )
+          );
         })}
       </div>
 
+      {/* Card de Filiais */}
       <div className="mt-5 bg-white dark:bg-slate-800 border border-gray-200 rounded-xl p-6">
         <div className="flex items-center gap-3 mb-4">
           <Package className="w-6 h-6 text-black" />
@@ -93,5 +125,5 @@ export default function Home() {
         <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Filiais ativas no sistema</p>
       </div>
     </div>
-  )
+  );
 }

@@ -13,6 +13,7 @@ export interface Product {
   code: string;
   description?: string;
   unit: string;
+  department: "rh" | "transferencia";
   createdAt?: string;
 }
 
@@ -25,12 +26,13 @@ export interface Branch {
 }
 
 export interface User {
-  id?: string;
+  id: string;
   name: string;
   email: string;
-  role: string;
+  role:  "admin" | "manager" | "operator";
   username: string;
   branchId: string;
+  department: string | null;
   password?: string;
   createdAt?: string;
 }
@@ -49,8 +51,9 @@ export interface AuthUser {
   name: string;
   username: string;
   email: string;
-  role: string;
+  role: "admin" | "manager" | "operator";
   branchId: string;
+  department: "rh" | "transferencia";
 }
 
 export interface DetailedReportItem {

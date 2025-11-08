@@ -3,12 +3,12 @@ import { electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
 const api = {
-  getStats: () => ipcRenderer.invoke('get-stats'),
+  getStats: (branch?: string) => ipcRenderer.invoke('get-stats', branch),
   getCurrentUser: (token?: string) => ipcRenderer.invoke('get-current-user', token),
 
   // 🔐 Autenticação
   loginUser: (username: string, password: string) =>
-    ipcRenderer.invoke('login', username, password),
+    ipcRenderer.invoke('auth:login', username, password),
 
   // 📦 Produtos
   getProducts: () => ipcRenderer.invoke("get-products"),

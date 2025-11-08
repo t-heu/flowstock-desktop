@@ -24,6 +24,8 @@ import { getBranchStock } from "./services/branchStock"
 import { createUser, updateUser, getUsers, deleteUser } from "./services/users"
 import { getDetailedReport } from "./services/reports"
 
+import { setCurrentUser } from "./authSession"
+
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -77,77 +79,45 @@ app.whenReady().then(() => {
 
   // IPC test
   //ipcMain.on('ping', () => console.log('pong'))
-  ipcMain.handle("get-stats", async () => await getStats());
-  //ipcMain.handle("logout-user", async (_event, token: string) => await logoutUser(token));
+  ipcMain.handle("get-stats", async (_event, branch) => await getStats(branch));
   ipcMain.handle("get-current-user", async (_event, token: string) => await getCurrentUser(token))
-  ipcMain.handle("login", async (_event, username, password) =>  await loginUser(username, password))
+  ipcMain.handle("auth:login", async (_event, username, password) => {
+    const user = await loginUser(username, password);
+    if (!user)  throw new Error("Credenciais inválidas");
+    
+    setCurrentUser({
+      uid: user.user.id,
+      role: user.user.role,
+      department: user.user.department,
+      branchId: user.user.branchId
+    });
 
-  ipcMain.handle("get-products", async () => {
-    return await getProducts()
-  })
+    return user
+  });
 
-  ipcMain.handle("create-product", async (_event, product) => {
-    return await createProduct(product)
-  })
-
-  ipcMain.handle("update-product", async (_event, id, updates) => {
-    return await updateProduct(id, updates)
-  })
-
-  ipcMain.handle("delete-product", async (_event, id) => {
-    return await deleteProduct(id)
-  })
-
-  ipcMain.handle("get-branches", async () => {
-    return await getBranches()
-  })
-
-  ipcMain.handle("add-branch", async (_event, branch) => {
-    return await addBranch(branch)
-  })
-
-  ipcMain.handle("delete-branch", async (_event, id) => {
-    return await deleteBranch(id)
-  })
-
-  // 🔹 Buscar lista de movimentos
-  ipcMain.handle("get-movements", async (_event, typeFilter) => {
-    return await getMovements(typeFilter)
-  })
-
+  // 📦 Produtos
+  ipcMain.handle("get-products", async () => await getProducts())
+  ipcMain.handle("create-product", async (_event, product) => await createProduct(product))
+  ipcMain.handle("update-product", async (_event, id, updates) => await updateProduct(id, updates))
+  ipcMain.handle("delete-product", async (_event, id) => await deleteProduct(id))
+  // 🏬 Filiais
+  ipcMain.handle("get-branches", async () => await getBranches())
+  ipcMain.handle("add-branch", async (_event, branch) => await addBranch(branch))
+  ipcMain.handle("delete-branch", async (_event, id) => await deleteBranch(id))
+  ipcMain.handle("get-movements", async (_event, typeFilter) => await getMovements(typeFilter))
   // 🔹 Criar novo movimento (entrada ou saída)
-  ipcMain.handle("create-movement", async (_event, movement) => {
-    return await createMovement(movement)
-  })
-
+  ipcMain.handle("create-movement", async (_event, movement) => await createMovement(movement))
   // 🔹 Excluir movimento
-  ipcMain.handle("delete-movement", async (_event, id) => {
-    return await deleteMovement(id)
-  })
-
-  ipcMain.handle("get-branch-stock", async () => {
-    return await getBranchStock()
-  })
-
-  ipcMain.handle("get-users", async () => {
-    return await getUsers()
-  })
-
-  ipcMain.handle("create-user", async (_event, data) => {
-    return await createUser(data)
-  })
-
-  ipcMain.handle("update-user", async (_event, id, updates) => {
-    return await updateUser(id, updates)
-  })
-
-  ipcMain.handle("delete-user", async (_event, id) => {
-    return await deleteUser(id)
-  })
-  
-  ipcMain.handle("get-detailed-report", async (_event, branchId, startDate, endDate) => {
-    return await getDetailedReport(branchId, startDate, endDate)
-  })
+  ipcMain.handle("delete-movement", async (_event, id) => await deleteMovement(id))
+  // 🔹 Estoque por filial
+  ipcMain.handle("get-branch-stock", async () => await getBranchStock())
+  // 🔹 usuários
+  ipcMain.handle("get-users", async () => await getUsers())
+  ipcMain.handle("create-user", async (_event, data) => await createUser(data))
+  ipcMain.handle("update-user", async (_event, id, updates) => await updateUser(id, updates))
+  ipcMain.handle("delete-user", async (_event, id) => await deleteUser(id))
+  // 🔹 report 
+  ipcMain.handle("get-detailed-report", async (_event, branchId, startDate, endDate) => await getDetailedReport(branchId, startDate, endDate))
 
   // 🔔 Buscar aviso remoto
   ipcMain.handle('fetch-notice', async (_event, url: string): Promise<Notice | null> => {

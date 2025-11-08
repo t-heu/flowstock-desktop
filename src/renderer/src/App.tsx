@@ -2,15 +2,15 @@ import './index.css'
 import React, {useState} from 'react'
 import { AuthProvider, useAuth } from './components/auth/auth-provider'
 
-import Home from './screens/home/page'
-import Login from './screens/login/page'
-import Produtos from './screens/produtos/page'
-import Branches from './screens/branches/page'
-import Entrada from './screens/entrada/page'
-import Saida from './screens/saida/page'
-import Filiais from './screens/filiais/page'
-import Users from './screens/users/page'
-import Reports from './screens/relatorios/page'
+import Dashboard from './pages/Dashboard'
+import Login from './pages/Login'
+import Products from './pages/Products'
+import Branches from './pages/Branches'
+import ProductInput from './pages/ProductInput'
+import ProductOutput from './pages/ProductOutput'
+import Filiais from './pages/BranchStock'
+import Users from './pages/Users'
+import Reports from './pages/Reports'
 
 import { SidebarWrapper } from './components/SidebarWrapper'
 
@@ -36,11 +36,11 @@ function AppContent() {
         onNavigate={setCurrentPage} 
       />
       <main className="flex-1 p-8 overflow-y-auto">
-        {currentPage === 'dashboard' && <Home />}
-        {currentPage === 'produtos' && <Produtos />}
+        {currentPage === 'dashboard' && <Dashboard />}
+        {currentPage === 'produtos' && <Products />}
         {currentPage === 'branches' && <Branches />}
-        {currentPage === 'entrada' && <Entrada />}
-        {currentPage === 'saida' && <Saida />}
+        {currentPage === 'entrada' && <ProductInput />}
+        {currentPage === 'saida' && <ProductOutput />}
         {currentPage === 'filiais' && <Filiais />}
         {currentPage === 'users' && <Users />}
         {currentPage === 'relatorios' && <Reports />}

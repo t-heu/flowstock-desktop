@@ -1,0 +1,6 @@
+{
+  "allowed": [
+    { "id": "rh", "label": "RH" },
+    { "id": "transferencia", "label": "Transferência" }
+  ]
+}

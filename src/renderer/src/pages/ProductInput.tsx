@@ -19,7 +19,7 @@ export interface Product {
   createdAt?: string;
 }
 
-export default function EntradaPage() {
+export default function ProductInputPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [branches, setBranches] = useState<Branch[]>([])
   const [recentEntries, setRecentEntries] = useState<any[]>([])

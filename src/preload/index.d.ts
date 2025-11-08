@@ -6,6 +6,7 @@ export interface Product {
   code: string;
   description?: string;
   unit: string;
+  department: "rh" | "transferencia";
   createdAt?: string;
 }
 
@@ -13,7 +14,7 @@ declare global {
   interface Window {
     electron: ElectronAPI
     api: {
-      getStats: () => Promise<any>;
+      getStats: (branch: string | null) => Promise<any>;
       logoutUser: () => Promise<any>;
       loginUser: (username: string, password: string) => Promise<any>;
       logoutUser: (token: string) => Promise<any>;

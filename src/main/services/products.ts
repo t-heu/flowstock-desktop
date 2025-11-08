@@ -5,14 +5,28 @@ import {
   invalidateProductCache
 } from "../cache";
 import { Product } from "../../types";
+import { checkPermission } from "../checkPermission";
+import { getCurrentUser } from "../authSession"; // ⭐ novo
 
 /**
  * 🔹 Buscar todos os produtos
  */
 export const getProducts = async (): Promise<Product[]> => {
   try {
-    await loadCache(); // ✅ carrega produtos no cache se necessário
-    return getAllProductsFromCache(); // ✅ retorna versão em memória (sem GET)
+    await loadCache();
+    const user = getCurrentUser();
+    if (!user) throw new Error("Não autenticado");
+
+    // ✅ Agora a filtragem é feita aqui: lista só produtos do departamento do usuário
+     const products = getAllProductsFromCache();
+
+    // ✅ Se for admin → retorna tudo, sem filtro
+    if (user.role === "admin") {
+      return products;
+    }
+
+    // ✅ Se não for admin → filtra pelo departamento
+    return products.filter(p => p.department === user.department);
   } catch (error) {
     console.error("Erro ao buscar produtos:", error);
     throw new Error("Erro ao buscar produtos");
@@ -22,60 +36,95 @@ export const getProducts = async (): Promise<Product[]> => {
 /**
  * 🔹 Criar novo produto
  */
-export const createProduct = async (product: Omit<Product, "id" | "createdAt">): Promise<{
-  ok: boolean;
-  error?: string;
-}> => {
-  try {
-    await adminDb.collection("products").add({
-      ...product,
-      createdAt: new Date().toISOString(),
-    });
+export const createProduct = async (
+  product: Omit<Product, "id" | "createdAt">
+): Promise<{ ok: boolean; error?: string }> => {
 
+  const user = getCurrentUser();
+  if (!user) return { ok: false, error: "Não autenticado" };
+
+  const perm = checkPermission(user, ["admin", "manager"]);
+  if (!perm.ok) return perm;
+
+  try {
+    const productData = {
+      ...product,
+      department: user.department,
+      createdAt: new Date().toISOString(),
+    };
+
+    await adminDb.collection("products").add(productData);
     invalidateProductCache();
     return { ok: true };
   } catch (error) {
     console.error("Erro ao adicionar produto:", error);
-    throw new Error("Erro ao adicionar produto");
+    return { ok: false, error: "Erro ao adicionar produto" };
   }
 };
 
 /**
- * 🔹 Atualizar produto existente
+ * 🔹 Atualizar produto
  */
-export const updateProduct = async (id: string, updates: Partial<Product>): Promise<{
-  ok: boolean;
-  error?: string;
-}> => {
+export const updateProduct = async (
+  id: string,
+  updates: Partial<Product>
+): Promise<{ ok: boolean; error?: string }> => {
+
+  const user = getCurrentUser();
+  if (!user) return { ok: false, error: "Não autenticado" };
+
+  const perm = checkPermission(user, ["admin", "manager"]);
+  if (!perm.ok) return perm;
+
   try {
-    if (!id || !updates) return { ok: false, error: "ID e updates são obrigatórios" };
+    const ref = adminDb.collection("products").doc(id);
+    const doc = await ref.get();
+    if (!doc.exists) return { ok: false, error: "Produto não encontrado" };
 
-    await adminDb.collection("products").doc(id).update(updates);
+    const product = doc.data() as Product;
 
+    if (product.department !== user.department) {
+      return { ok: false, error: "Você não pode alterar produtos de outro departamento" };
+    }
+
+    await ref.update(updates);
     invalidateProductCache();
     return { ok: true };
   } catch (error) {
     console.error("Erro ao atualizar produto:", error);
-    throw new Error("Erro ao atualizar produto");
+    return { ok: false, error: "Erro ao atualizar produto" };
   }
 };
 
 /**
- * 🔹 Deletar produto
+ * 🔹 Remover produto
  */
-export const deleteProduct = async (id: string): Promise<{
-  ok: boolean;
-  error?: string;
-}> => {
+export const deleteProduct = async (
+  id: string
+): Promise<{ ok: boolean; error?: string }> => {
+
+  const user = getCurrentUser();
+  if (!user) return { ok: false, error: "Não autenticado" };
+
+  const perm = checkPermission(user, ["admin", "manager"]);
+  if (!perm.ok) return perm;
+
   try {
-    if (!id) return { ok: false, error: "ID é obrigatório" };
+    const ref = adminDb.collection("products").doc(id);
+    const doc = await ref.get();
+    if (!doc.exists) return { ok: false, error: "Produto não encontrado" };
 
-    await adminDb.collection("products").doc(id).delete();
+    const product = doc.data() as Product;
 
+    if (product.department !== user.department) {
+      return { ok: false, error: "Você não pode deletar produtos de outro departamento" };
+    }
+
+    await ref.delete();
     invalidateProductCache();
     return { ok: true };
   } catch (error) {
     console.error("Erro ao deletar produto:", error);
-    throw new Error("Erro ao deletar produto");
+    return { ok: false, error: "Erro ao deletar produto" };
   }
 };

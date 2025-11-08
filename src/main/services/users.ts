@@ -8,7 +8,6 @@ import { User } from "../../types";
  */
 export const getUsers = async (): Promise<User[]> => {
   try {
-    // ✅ garante cache de filiais carregada
     await loadCache();
 
     const usersSnap = await adminDb.collection("users").get();
@@ -22,7 +21,9 @@ export const getUsers = async (): Promise<User[]> => {
 
       return {
         ...user,
-        password: undefined, // nunca retorna senha
+        password: undefined,
+        role: user.role ?? "operator", // ✅ Garantir valor padrão
+        department: user.department ?? null, // ✅ Garantir que exista setor, mesmo que null
         branch: branch
           ? { id: user.branchId, name: branch.name, code: branch.code }
           : null,
@@ -43,6 +44,8 @@ export const createUser = async (data: User): Promise<User> => {
 
     const newUser: User = {
       ...data,
+      role: data.role ?? "operator", // ✅ nível padrão
+      department: data.department ?? null, // ✅ setor opcional
       password: hashedPassword,
       createdAt: new Date().toISOString(),
     };
@@ -72,6 +75,10 @@ export const updateUser = async (id: string, updates: Partial<User>): Promise<Us
       updates.password = await bcrypt.hash(updates.password, 10);
     }
 
+    // ✅ Garante valores válidos ao atualizar
+    if (updates.role === undefined) updates.role = "operator";
+    if (updates.department === undefined) updates.department = null;
+
     await ref.update(updates);
 
     const updated = await ref.get();
@@ -93,8 +100,3 @@ export const deleteUser = async (id: string): Promise<void> => {
     throw new Error("Erro ao deletar usuário");
   }
 };
-
-/**
- * ✅ Se algum usuário mudar de filial, talvez o nome da filial apareça diferente
- * Então, **quando editar filiais**, faça: invalidateBranchesCache()
- */

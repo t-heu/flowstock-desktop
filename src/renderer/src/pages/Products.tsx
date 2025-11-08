@@ -2,16 +2,20 @@ import type React from "react"
 import { useEffect, useState } from "react"
 import { Plus, Trash2, Package } from "lucide-react"
 
+import { useAuth } from "../components/auth/auth-provider";
+import departments from "../../../config/departments.json";
+
 export interface Product {
   id: string;
   name: string;
   code: string;
   description?: string;
   unit: string;
+  department: "rh" | "transferencia";
   createdAt?: string;
 }
 
-export default function ProdutosPage() {
+export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [formData, setFormData] = useState({
@@ -19,7 +23,10 @@ export default function ProdutosPage() {
     name: "",
     description: "",
     unit: "UN",
+    department: ''
   })
+
+  const { user } = useAuth();
 
   useEffect(() => {
     loadProducts()
@@ -38,7 +45,7 @@ export default function ProdutosPage() {
     e.preventDefault()
     const result = await window.api.createProduct(formData)
     if (result.ok) {
-      setFormData({ code: "", name: "", description: "", unit: "UN" })
+      setFormData({ code: "", name: "", description: "", department: '', unit: "UN" })
       setIsFormOpen(false)
       loadProducts()
     } else {
@@ -61,13 +68,15 @@ export default function ProdutosPage() {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Cadastro de Produtos</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">Gerencie os produtos do estoque</p>
         </div>
-        <button
-          onClick={() => setIsFormOpen(!isFormOpen)}
-          className="pointer flex items-center gap-2 px-4 py-2.5 bg-black hover:bg-[#333] text-white rounded-lg font-medium transition-colors"
-        >
-          <Plus className="w-5 h-5" />
-          Novo Produto
-        </button>
+        {["admin", "manager"].includes(user?.role ?? "") && (
+          <button
+            onClick={() => setIsFormOpen(!isFormOpen)}
+            className="pointer flex items-center gap-2 px-4 py-2.5 bg-black hover:bg-[#333] text-white rounded-lg font-medium transition-colors"
+          >
+            <Plus className="w-5 h-5" />
+            Novo Produto
+          </button>
+        )}
       </div>
 
       {isFormOpen && (
@@ -115,6 +124,22 @@ export default function ProdutosPage() {
               />
             </div>
             <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Departamento
+              </label>
+              <select
+                value={formData.department}
+                onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                required
+              >
+                <option value="" disabled>Selecione...</option>
+                {departments.allowed.map(d => (
+                  <option key={d.id} value={d.id}>{d.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Descrição</label>
               <input
                 type="text"
@@ -152,6 +177,7 @@ export default function ProdutosPage() {
                 <th className="text-left p-4 text-sm font-semibold text-gray-900 dark:text-white">Nome</th>
                 <th className="text-left p-4 text-sm font-semibold text-gray-900 dark:text-white">Descrição</th>
                 <th className="text-left p-4 text-sm font-semibold text-gray-900 dark:text-white">Unidade</th>
+                <th className="text-left p-4 text-sm font-semibold text-gray-900 dark:text-white">Departamento</th>
                 <th className="text-left p-4 text-sm font-semibold text-gray-900 dark:text-white">Ações</th>
               </tr>
             </thead>
@@ -175,13 +201,13 @@ export default function ProdutosPage() {
                     <td className="p-4 text-sm text-gray-900 dark:text-white">{product.name}</td>
                     <td className="p-4 text-sm text-gray-600 dark:text-gray-400">{product.description}</td>
                     <td className="p-4 text-sm text-gray-900 dark:text-white">{product.unit}</td>
+                    <td className="p-4 text-sm text-gray-900 dark:text-white">{product.department}</td>
                     <td className="p-4">
-                      <button
-                        onClick={() => handleDelete(product.id)}
-                        className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
+                      {["admin", "manager"].includes(user?.role ?? "") && (
+                        <button onClick={() => handleDelete(product.id)} className="text-red-600 hover:text-red-800 transition-colors">
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))

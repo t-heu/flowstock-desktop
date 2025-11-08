@@ -10,7 +10,7 @@ export interface BranchStock {
   createdAt?: string;
 }
 
-export default function FiliaisPage() {
+export default function BranchStockPage() {
   const [dados, setDados] = useState<BranchStock[]>([]);
   const [filialSelecionada, setFilialSelecionada] = useState<string>("");
 

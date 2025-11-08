@@ -8,18 +8,13 @@ import { JWT_SECRET } from "../../config/jwt";
  */
 export const getCurrentUser = async (token: string) => {
   try {
-    if (!token) throw new Error("Token ausente");
-
-    // Decodifica token
     const decoded = jwt.verify(token, JWT_SECRET) as AuthUser;
 
-    // Busca usuário atualizado no Firestore
     const snap = await adminDb.collection("users").doc(decoded.id).get();
     if (!snap.exists) throw new Error("Usuário não encontrado");
 
     const userData = snap.data()!;
 
-    // Retorna sempre versões atualizadas
     return {
       ok: true,
       user: {
@@ -29,10 +24,10 @@ export const getCurrentUser = async (token: string) => {
         email: userData.email,
         role: userData.role,
         branchId: userData.branchId,
+        department: userData.department, // ✅ importante
       },
     };
-  } catch (error) {
-    console.error("Token inválido:", error);
+  } catch {
     return { ok: false, error: "Token inválido ou expirado" };
   }
 };

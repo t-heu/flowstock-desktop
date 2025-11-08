@@ -4,7 +4,9 @@ export interface User {
   id: string
   username: string
   name: string
-  role: string
+  role: "admin" | "manager" | "operator"
+  branchId: string
+  department: "rh" | "transferencia" // ✅ novo
 }
 
 interface AuthContextType {
