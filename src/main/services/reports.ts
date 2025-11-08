@@ -56,7 +56,7 @@ export const getDetailedReport = async (
     
     return { ok: true, data: report }
   } catch (error) {
-    console.error("Erro ao gerar relatório detalhado:", error)
-    return { ok: false, error: "Erro ao gerar relatório detalhado" }
+    console.error("Erro ao gerar relatório detalhado:", error);
+    throw new Error("Erro ao gerar relatório detalhado");
   }
 }

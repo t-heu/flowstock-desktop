@@ -58,7 +58,7 @@ export const createProduct = async (
     return { ok: true };
   } catch (error) {
     console.error("Erro ao adicionar produto:", error);
-    return { ok: false, error: "Erro ao adicionar produto" };
+    throw new Error("Erro ao adicionar produto");
   }
 };
 
@@ -92,7 +92,7 @@ export const updateProduct = async (
     return { ok: true };
   } catch (error) {
     console.error("Erro ao atualizar produto:", error);
-    return { ok: false, error: "Erro ao atualizar produto" };
+    throw new Error("Erro ao atualizar produto");
   }
 };
 
@@ -125,6 +125,6 @@ export const deleteProduct = async (
     return { ok: true };
   } catch (error) {
     console.error("Erro ao deletar produto:", error);
-    return { ok: false, error: "Erro ao deletar produto" };
+    throw new Error("Erro ao deletar produto");
   }
 };

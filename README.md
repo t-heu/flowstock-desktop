@@ -44,7 +44,7 @@ cp .env.example .env
 
 ```bash
 # For windows - Abra PowerShell como Admin 
-$ cd "C:\Users\SEU_NOME\www\electron-app"
+$ cd "C:\Users\SEU_NOME\www\flowstock-desktop"
 $ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 $ npm run build:win
 

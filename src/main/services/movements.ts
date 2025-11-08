@@ -29,7 +29,7 @@ export const getMovements = async (typeFilter?: "entrada" | "saida") => {
 
   } catch (error) {
     console.error("Erro ao buscar movimentos:", error);
-    return { ok: false, error: "Erro ao buscar movimentos" };
+    throw new Error("Erro ao buscar movimentos");
   }
 };
 

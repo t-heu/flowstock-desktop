@@ -52,7 +52,7 @@ export const createUser = async (data: User): Promise<User> => {
 
     const docRef = await adminDb.collection("users").add(newUser);
 
-    return { id: docRef.id, ...newUser, password: undefined };
+    return { ...newUser, id: docRef.id, password: undefined };
   } catch (error) {
     console.error("Erro ao criar usuário:", error);
     throw new Error("Erro ao criar usuário");

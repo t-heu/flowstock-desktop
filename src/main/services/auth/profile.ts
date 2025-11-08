@@ -28,6 +28,6 @@ export const getCurrentUser = async (token: string) => {
       },
     };
   } catch {
-    return { ok: false, error: "Token inválido ou expirado" };
+    throw new Error("Token inválido ou expirado");
   }
 };

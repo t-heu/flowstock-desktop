@@ -1,6 +1,6 @@
 {
   "name": "flowstock-desktop",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "FlowStock - Sistema de Gestão de Materiais Internos",
   "main": "./out/main/index.js",
   "author": "theu",
@@ -62,7 +62,6 @@
     "win": {
       "target": "portable",
       "icon": "build/icon.ico",
-      "fileDescription": "FlowStock - Sistema de Gestão de Estoque Interno",
       "sign": false
     },
     "mac": null,
