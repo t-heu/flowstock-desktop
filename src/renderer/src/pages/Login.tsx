@@ -26,7 +26,7 @@ export default function LoginPage() {
     async function loadNotice() {
       try {
         const data = await window.api.fetchNotice(
-          'https://gist.githubusercontent.com/t-heu/3dbf7d48d0a06fed3f8d61d720ee62f4/raw/93578613298f0d9a124e9dca8d921072459a9c9b/noticeApp.json'
+          'https://raw.githubusercontent.com/t-heu/flowstock-desktop/refs/heads/main/noticeApp.json'
         );
         if (!data) return;
         if (data.showOnce && seenIds.includes(data.id)) return;
