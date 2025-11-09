@@ -17,6 +17,14 @@ export interface Product {
   createdAt?: string;
 }
 
+export interface IProduct {
+  name: string;
+  code: string;
+  description?: string;
+  unit: string;
+  department: "rh" | "transferencia" | "";
+}
+
 export interface Branch {
   id?: string;
   name: string;

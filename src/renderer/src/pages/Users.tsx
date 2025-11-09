@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { UserPlus } from "lucide-react"
 import { Trash2 } from "lucide-react"
 
-import departments from "../../../config/departments.json";
+import departments from "../../../shared/config/departments.json";
 
 interface Branch {
   id: string
@@ -25,7 +25,7 @@ interface User {
 export default function UsersPage() {
   const [branches, setBranches] = useState<Branch[]>([])
   const [users, setUsers] = useState<User[]>([])
-  const [formData, setFormData] = useState<any>({ name: "", email: "", username: "", branchId: "", role: "user", password: "" })
+  const [formData, setFormData] = useState<any>({ name: "", email: "", username: "", branchId: "", role: "user" })
 
   // 🔹 Carrega filiais e usuários
   useEffect(() => {
@@ -55,7 +55,7 @@ export default function UsersPage() {
       await window.api.createUser(formData);
 
       // Reseta formulário
-      setFormData({ name: "", username: "", email: "", branchId: "", role: "user", password: "" });
+      setFormData({ name: "", username: "", email: "", branchId: "", role: "user"});
 
       alert("Usuário criado com sucesso!");
     } catch (err: any) {
@@ -111,15 +111,6 @@ export default function UsersPage() {
             placeholder="E-mail"
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
-            required
-          />
-
-          <input
-            type="password"
-            placeholder="Senha"
-            value={formData.password || ""}
-            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
             required
           />

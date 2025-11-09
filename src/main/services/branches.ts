@@ -4,7 +4,7 @@ import {
   getAllBranchesFromCache,
   invalidateBranchCache
 } from "../cache";
-import { Branch } from "../../types";
+import { Branch } from "../../shared/types";
 
 /**
  * 🔹 Buscar todas as filiais (com cache)

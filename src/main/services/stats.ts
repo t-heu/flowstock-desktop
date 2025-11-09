@@ -1,6 +1,5 @@
 import { adminDb } from "../firebase";
-import { Stats } from "../../types";
-import { getCurrentUser } from "../authSession";
+import { Stats } from "../../shared/types";
 
 let statsCache: Record<string, Stats> = {};
 
@@ -9,12 +8,8 @@ let statsCache: Record<string, Stats> = {};
  * - Filtrar por departamento (se não for admin)
  * - Filtrar por filial (opcional)
  */
-export const getStats = async (branchFilter?: string): Promise<Stats> => {
+export const getStats = async (user: any, branchFilter?: string): Promise<Stats> => {
   try {
-    const user = getCurrentUser();
-    if (!user) throw new Error("Não autenticado");
-
-    // Chave do cache (admin pode ver todas, user só seu dep)
     const cacheKey = `${user.role}-${user.department}-${branchFilter ?? "ALL"}`;
     if (statsCache[cacheKey]) return statsCache[cacheKey];
 

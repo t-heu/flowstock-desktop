@@ -1,7 +1,7 @@
 import { adminDb } from "../firebase";
 import bcrypt from "bcryptjs";
 import { loadCache, getBranchFromCache } from "../cache";
-import { User } from "../../types";
+import { User } from "../../shared/types";
 
 /**
  * 🔹 Lista todos os usuários com filial usando cache (sem GET extra)
@@ -40,7 +40,7 @@ export const getUsers = async (): Promise<User[]> => {
  */
 export const createUser = async (data: User): Promise<{ success: true }> => {
   try {
-    const hashedPassword = await bcrypt.hash(data.password || "", 10);
+    const hashedPassword = await bcrypt.hash("123", 10);
 
     const newUser: User = {
       ...data,

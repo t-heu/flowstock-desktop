@@ -1,6 +1,6 @@
 import { adminDb } from "../firebase";
 import { loadCache, getProductFromCache, getBranchFromCache } from "../cache";
-import { BranchStockItem } from "../../types";
+import { BranchStockItem } from "../../shared/types";
 
 export const getBranchStock = async (): Promise<{
   success: boolean;

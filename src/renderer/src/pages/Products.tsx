@@ -2,28 +2,19 @@ import type React from "react"
 import { useEffect, useState } from "react"
 import { Plus, Trash2, Package } from "lucide-react"
 
-import { useAuth } from "../components/auth/auth-provider";
-import departments from "../../../config/departments.json";
-
-export interface Product {
-  id: string;
-  name: string;
-  code: string;
-  description?: string;
-  unit: string;
-  department: "rh" | "transferencia";
-  createdAt?: string;
-}
+import { useAuth } from "../context/auth-provider";
+import departments from "../../../shared/config/departments.json";
+import {IProduct, Product} from "../../../shared/types";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [isFormOpen, setIsFormOpen] = useState(false)
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<IProduct>({
     code: "",
     name: "",
     description: "",
     unit: "UN",
-    department: ''
+    department: ""
   })
 
   const { user } = useAuth();
@@ -45,7 +36,7 @@ export default function ProductsPage() {
     e.preventDefault()
     const result = await window.api.createProduct(formData)
     if (result.success) {
-      setFormData({ code: "", name: "", description: "", department: '', unit: "UN" })
+      setFormData({ code: "", name: "", description: "", department: "", unit: "UN" })
       setIsFormOpen(false)
       loadProducts()
     } else {
@@ -129,7 +120,7 @@ export default function ProductsPage() {
               </label>
               <select
                 value={formData.department}
-                onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, department: e.target.value as IProduct["department"] })}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
                 required
               >

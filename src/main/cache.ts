@@ -1,5 +1,5 @@
 import { adminDb } from "./firebase";
-import { Product, Branch } from "../types";
+import { Product, Branch } from "../shared/types";
 
 let productsCache: Record<string, Product> | null = null;
 let branchesCache: Record<string, Branch> | null = null;

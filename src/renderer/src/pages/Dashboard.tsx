@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Package, TrendingUp, TrendingDown } from "lucide-react";
 
+import LoadingSpinner from "../components/LoadingSpinner";
+
 export default function DashboardPage() {
   const [stats, setStats] = useState({
     totalProducts: 0,
@@ -11,7 +13,7 @@ export default function DashboardPage() {
   });
 
   const [branches, setBranches] = useState<{ id: string; name: string }[]>([]);
-  const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
+  const [selectedBranch, setSelectedBranch] = useState<string>('');
 
   useEffect(() => {
     async function loadStats() {
@@ -30,7 +32,7 @@ export default function DashboardPage() {
   useEffect(() => {
     async function loadBranches() {
       try {
-        const list = await window.api.getBranches(); // ✅ você já tem isso no sistema
+        const list = await window.api.getBranches();
         setBranches(list);
       } catch (err) {
         console.error("Erro ao carregar filiais:", err);
@@ -39,7 +41,13 @@ export default function DashboardPage() {
     loadBranches();
   }, []);
 
-  if (!stats) return <p>Carregando...</p>;
+  if (!stats) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <LoadingSpinner size={60} />
+      </div>
+    );
+  }
 
   const cards = [
     {

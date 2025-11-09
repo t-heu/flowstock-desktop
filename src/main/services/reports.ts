@@ -1,5 +1,5 @@
 import { adminDb } from "../firebase"
-import { DetailedReportItem } from "../../types";
+import { DetailedReportItem } from "../../shared/types";
 
 /**
  * 🔹 Buscar relatório detalhado de saídas

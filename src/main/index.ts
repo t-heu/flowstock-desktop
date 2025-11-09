@@ -2,6 +2,7 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import fetch from 'node-fetch'; // se estiver no Node 18+ pode usar global fetch
+import { store } from "./store";
 
 export type Notice = {
   id: string;
@@ -24,7 +25,7 @@ import { getBranchStock } from "./services/branchStock"
 import { createUser, updateUser, getUsers, deleteUser } from "./services/users"
 import { getDetailedReport } from "./services/reports"
 
-import { setCurrentUser } from "./authSession"
+import { authenticated } from "./authMiddleware";
 
 function createWindow(): void {
   // Create the browser window.
@@ -79,45 +80,79 @@ app.whenReady().then(() => {
 
   // IPC test
   //ipcMain.on('ping', () => console.log('pong'))
-  ipcMain.handle("get-stats", async (_event, branch) => await getStats(branch));
-  ipcMain.handle("get-current-user", async (_event, token: string) => await getCurrentUser(token))
-  ipcMain.handle("auth:login", async (_event, username, password) => {
-    const user = await loginUser(username, password);
-    if (!user)  throw new Error("Credenciais inválidas");
-    
-    setCurrentUser({
-      uid: user.user.id,
-      role: user.user.role,
-      department: user.user.department,
-      branchId: user.user.branchId
-    });
-
-    return user
+  // Salvar token
+  ipcMain.handle("auth:set-token", (_, token) => {
+    store.set("auth.token", token);
   });
 
-  // 📦 Produtos
-  ipcMain.handle("get-products", async () => await getProducts())
-  ipcMain.handle("create-product", async (_event, product) => await createProduct(product))
-  ipcMain.handle("update-product", async (_event, id, updates) => await updateProduct(id, updates))
-  ipcMain.handle("delete-product", async (_event, id) => await deleteProduct(id))
-  // 🏬 Filiais
-  ipcMain.handle("get-branches", async () => await getBranches())
-  ipcMain.handle("add-branch", async (_event, branch) => await addBranch(branch))
-  ipcMain.handle("delete-branch", async (_event, id) => await deleteBranch(id))
-  ipcMain.handle("get-movements", async (_event, typeFilter) => await getMovements(typeFilter))
-  // 🔹 Criar novo movimento (entrada ou saída)
-  ipcMain.handle("create-movement", async (_event, movement) => await createMovement(movement))
-  // 🔹 Excluir movimento
-  ipcMain.handle("delete-movement", async (_event, id) => await deleteMovement(id))
-  // 🔹 Estoque por filial
-  ipcMain.handle("get-branch-stock", async () => await getBranchStock())
-  // 🔹 usuários
-  ipcMain.handle("get-users", async () => await getUsers())
-  ipcMain.handle("create-user", async (_event, data) => await createUser(data))
-  ipcMain.handle("update-user", async (_event, id, updates) => await updateUser(id, updates))
-  ipcMain.handle("delete-user", async (_event, id) => await deleteUser(id))
-  // 🔹 report 
-  ipcMain.handle("get-detailed-report", async (_event, branchId, startDate, endDate) => await getDetailedReport(branchId, startDate, endDate))
+  // Obter token
+  ipcMain.handle("auth:get-token", () => {
+    return store.get("auth.token");
+  });
+
+  // Remover token (logout)
+  ipcMain.handle("auth:logout", () => {
+    store.delete("auth.token");
+    return { success: true };
+  });
+
+  ipcMain.handle("auth:login", async (_event, username, password) => {
+    const result = await loginUser(username, password);
+
+     if (!result || !result.success) {
+      throw new Error("Credenciais inválidas");
+    }
+
+    // 🔥 Salva token seguro no main
+    store.set("auth.token", result.token);
+
+    return result;
+  });
+
+  ipcMain.handle("get-stats", authenticated(async (user, branch) => {
+    return await getStats(user, branch);
+  }));
+
+  ipcMain.handle("get-current-user", authenticated(async (user) => {
+    return await getCurrentUser(user.id);
+  }));
+
+  ipcMain.handle("get-products", authenticated(async (user) => {
+    return await getProducts(user);
+  }));
+  ipcMain.handle("create-product", authenticated(async (user, product) => {
+    if (user.role !== "admin") throw new Error("Sem permissão");
+    return await createProduct(user, product);
+  }));
+
+  ipcMain.handle("update-product", authenticated(async (user, { id, updates }) => {
+    return await updateProduct(user, id, updates);
+  }));
+
+  ipcMain.handle("delete-product", authenticated(async (user, id) => {
+    return await deleteProduct(user, id);
+  }));
+
+  ipcMain.handle("get-branches", authenticated(async () => await getBranches()));
+  ipcMain.handle("add-branch", authenticated(async (_, branch) => await addBranch(branch)));
+  ipcMain.handle("delete-branch", authenticated(async (_, id) => await deleteBranch(id)));
+
+  ipcMain.handle("get-movements", authenticated(async (user, typeFilter) => {
+    return await getMovements(user, typeFilter);
+  }));
+  ipcMain.handle("create-movement", authenticated(async (_, movement) => await createMovement(movement)));
+  ipcMain.handle("delete-movement", authenticated(async (_, id) => await deleteMovement(id)));
+
+  ipcMain.handle("get-branch-stock", authenticated(async () => await getBranchStock()));
+
+  ipcMain.handle("get-users", authenticated(async () => await getUsers()));
+  ipcMain.handle("create-user", authenticated(async (_, data) => await createUser(data)));
+  ipcMain.handle("update-user", authenticated(async (_, { id, updates }) => await updateUser(id, updates)));
+  ipcMain.handle("delete-user", authenticated(async (_, id) => await deleteUser(id)));
+
+  ipcMain.handle("get-detailed-report", authenticated(async (_, { branchId, startDate, endDate }) =>
+    await getDetailedReport(branchId, startDate, endDate)
+  ));
 
   // 🔔 Buscar aviso remoto
   ipcMain.handle('fetch-notice', async (_event): Promise<Notice | null> => {

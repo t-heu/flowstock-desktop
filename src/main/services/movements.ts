@@ -1,16 +1,13 @@
 import { adminDb } from "../firebase";
 import { loadCache, getProductFromCache, getBranchFromCache } from "../cache";
-import { Movement } from "../../types";
-import { getCurrentUser } from "../authSession";
+import { Movement } from "../../shared/types";
+
 /**
  * 🔹 Buscar lista de movimentos (com produtos e filiais)
  */
-export const getMovements = async (typeFilter?: "entrada" | "saida") => {
+export const getMovements = async (user: any, typeFilter?: "entrada" | "saida") => {
   try {
     await loadCache(); // carrega produtos e branches
-
-    const user = getCurrentUser();
-    if (!user) throw new Error("Não autenticado");
 
     // Monta query
     let query: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> = 

@@ -4,18 +4,15 @@ import {
   getAllProductsFromCache,
   invalidateProductCache
 } from "../cache";
-import { Product } from "../../types";
+import { Product } from "../../shared/types";
 import { checkPermission } from "../checkPermission";
-import { getCurrentUser } from "../authSession"; // ⭐ novo
 
 /**
  * 🔹 Buscar todos os produtos
  */
-export const getProducts = async (): Promise<Product[]> => {
+export const getProducts = async (user: any): Promise<Product[]> => {
   try {
     await loadCache();
-    const user = getCurrentUser();
-    if (!user) throw new Error("Não autenticado");
 
     // ✅ Agora a filtragem é feita aqui: lista só produtos do departamento do usuário
      const products = getAllProductsFromCache();
@@ -37,11 +34,9 @@ export const getProducts = async (): Promise<Product[]> => {
  * 🔹 Criar novo produto
  */
 export const createProduct = async (
+  user: any,
   product: Omit<Product, "id" | "createdAt">
 ): Promise<{ success: boolean; error?: string }> => {
-
-  const user = getCurrentUser();
-  if (!user) return { success: false, error: "Não autenticado" };
 
   const perm = checkPermission(user, ["admin", "manager"]);
   if (!perm.success) return perm;
@@ -66,13 +61,10 @@ export const createProduct = async (
  * 🔹 Atualizar produto
  */
 export const updateProduct = async (
+  user: any,
   id: string,
   updates: Partial<Product>
 ): Promise<{ success: boolean; error?: string }> => {
-
-  const user = getCurrentUser();
-  if (!user) return { success: false, error: "Não autenticado" };
-
   const perm = checkPermission(user, ["admin", "manager"]);
   if (!perm.success) return perm;
 
@@ -100,12 +92,9 @@ export const updateProduct = async (
  * 🔹 Remover produto
  */
 export const deleteProduct = async (
+  user: any,
   id: string
 ): Promise<{ success: boolean; error?: string }> => {
-
-  const user = getCurrentUser();
-  if (!user) return { success: false, error: "Não autenticado" };
-
   const perm = checkPermission(user, ["admin", "manager"]);
   if (!perm.success) return perm;
 

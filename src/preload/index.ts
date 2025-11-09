@@ -3,16 +3,25 @@ import { electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
 const api = {
+  // Autenticação
+  loginUser: (username, password) =>
+    ipcRenderer.invoke('auth:login', username, password),
+
+  saveToken: (token) =>
+    ipcRenderer.invoke("auth:set-token", token),
+
+  getToken: () =>
+    ipcRenderer.invoke("auth:get-token"),
+
+  logout: () =>
+    ipcRenderer.invoke("auth:logout"),
+
   getStats: (branch?: string) => ipcRenderer.invoke('get-stats', branch),
   getCurrentUser: (token?: string) => ipcRenderer.invoke('get-current-user', token),
 
-  // 🔐 Autenticação
-  loginUser: (username: string, password: string) =>
-    ipcRenderer.invoke('auth:login', username, password),
-
   // 📦 Produtos
   getProducts: () => ipcRenderer.invoke("get-products"),
-  createProduct: (product) => ipcRenderer.invoke("create-product", product),
+  createProduct: (product: any) => ipcRenderer.invoke("create-product", product),
   updateProduct: (id, updates) => ipcRenderer.invoke("update-product", id, updates),
   deleteProduct: (id) => ipcRenderer.invoke("delete-product", id),
 

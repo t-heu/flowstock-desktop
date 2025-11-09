@@ -1,45 +1,49 @@
-import { ElectronAPI } from '@electron-toolkit/preload'
-
-export interface Product {
-  id: string;
-  name: string;
-  code: string;
-  description?: string;
-  unit: string;
-  department: "rh" | "transferencia";
-  createdAt?: string;
-}
+import { ElectronAPI } from "@electron-toolkit/preload"
+import { IProduct } from "../shared/types"
 
 declare global {
   interface Window {
     electron: ElectronAPI
     api: {
-      getStats: (branch: string | null) => Promise<any>;
-      logoutUser: () => Promise<any>;
-      loginUser: (username: string, password: string) => Promise<any>;
-      logoutUser: (token: string) => Promise<any>;
-      getCurrentUser: (token: string) => Promise<any>;
-      getProducts: () => Promise<Product[]>;
-      createProduct: (product) => Promise<any>
-      updateProduct: (id, updates) => Promise<any>
-      deleteProduct: (id) => Promise<any>;
-      getBranches: () => Promise<any>;
-      addBranch: (branch) => Promise<any>;
-      deleteBranch: (id) => Promise<any>;
-      getMovements: (typeFilter) => Promise<any>
-      createMovement: (movement) => Promise<any>
-      deleteMovement: (id) => Promise<any>
-      getBranchStock: () => Promise<any>;
-      getUsers: () => Promise<any>;
-      createUser: (user) => Promise<any>;
-      updateUser: (id: string, updates: any) => Promise<any>;
-      deleteUser: (id: string) => Promise<any>;
-      getDetailedReport: (
-        branchId: string,
-        startDate?: string,
-        endDate?: string
-      ) => Promise<any>;
-      fetchNotice: () => Promise<any>;
+      // 📊 Dashboard
+      getStats: (branch?: string) => Promise<any>
+
+      // 🔐 Auth
+      loginUser: (username: string, password: string) => Promise<{ success: boolean; token: string; user: any }>
+      saveToken: (token: string) => Promise<void>
+      logout: () => Promise<void>
+      getCurrentUser: () => Promise<{ success: boolean; user?: any }>
+
+      // 📦 Produtos
+      getProducts: () => Promise<Product[]>
+      createProduct: (product: IProduct) => Promise<any>
+      updateProduct: (id: string, updates: Partial<Product>) => Promise<any>
+      deleteProduct: (id: string) => Promise<any>
+
+      // 🏬 Filiais
+      getBranches: () => Promise<any>
+      addBranch: (branch: any) => Promise<any>
+      deleteBranch: (id: string) => Promise<any>
+
+      // 📈 Movimentos
+      getMovements: (typeFilter?: string) => Promise<any>
+      createMovement: (movement: any) => Promise<any>
+      deleteMovement: (id: string) => Promise<any>
+
+      // 🏗️ Estoque
+      getBranchStock: () => Promise<any>
+
+      // 👥 Usuários
+      getUsers: () => Promise<any>
+      createUser: (user: any) => Promise<any>
+      updateUser: (id: string, updates: any) => Promise<any>
+      deleteUser: (id: string) => Promise<any>
+
+      // 📄 Relatório
+      getDetailedReport: (branchId: string, startDate?: string, endDate?: string) => Promise<any>
+
+      // 🔔 Notificações
+      fetchNotice: () => Promise<any>
     }
   }
 }

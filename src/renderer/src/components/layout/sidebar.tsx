@@ -11,7 +11,7 @@ import {
   Warehouse
 } from "lucide-react"
 
-import { useAuth } from '../../components/auth/auth-provider'
+import { useAuth } from '../../context/auth-provider'
 
 import {can} from "../../lib/permissions"
 

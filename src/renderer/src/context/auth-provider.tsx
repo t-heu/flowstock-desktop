@@ -6,7 +6,7 @@ export interface User {
   name: string
   role: "admin" | "manager" | "operator"
   branchId: string
-  department: "rh" | "transferencia" // ✅ novo
+  department: "rh" | "transferencia"
 }
 
 interface AuthContextType {
@@ -26,39 +26,42 @@ const AuthContext = createContext<AuthContextType>({
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
-  const [token, setToken] = useState('')
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const loadUser = async () => {
       try {
-        const current = await window.api.getCurrentUser(token)
-        if (current.success) setUser(current.user)
+        const response = await window.api.getCurrentUser()
+        if (response?.success) setUser(response.user)
       } catch {
         setUser(null)
       } finally {
         setLoading(false)
       }
     }
-    fetchUser()
-  }, [token])
+
+    loadUser()
+  }, [])
 
   async function login(username: string, password: string) {
     try {
-      const loggedUser = await window.api.loginUser(username, password)
-      if (loggedUser.success) {
-        setToken(loggedUser.token)
-        setUser(loggedUser.user)
+      const res = await window.api.loginUser(username, password)
+
+      if (res.success) {
+        await window.api.saveToken(res.token) // ✅ agora salva no electron-store
+        setUser(res.user)
         return true
       }
+
       return false
-    } catch (e) {
-      console.error(e)
+    } catch (err) {
+      console.error(err)
       return false
     }
   }
 
   async function logout() {
     setUser(null)
+    await window.api.logout() // ✅ remove token do store
   }
 
   return (

@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 import { adminDb } from "../../firebase";
-import { AuthUser } from "../../../types";
+import { AuthUser } from "../../../shared/types";
 import { JWT_SECRET, TOKEN_EXPIRES } from "../../config/jwt";
 
 /**

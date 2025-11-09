@@ -1,6 +1,6 @@
 import './index.css'
 import React, {useState} from 'react'
-import { AuthProvider, useAuth } from './components/auth/auth-provider'
+import { AuthProvider, useAuth } from './context/auth-provider'
 
 import Dashboard from './pages/Dashboard'
 import Login from './pages/Login'
@@ -12,7 +12,8 @@ import Filiais from './pages/BranchStock'
 import Users from './pages/Users'
 import Reports from './pages/Reports'
 
-import { SidebarWrapper } from './components/SidebarWrapper'
+import { SidebarWrapper } from './components/SidebarWrapper';
+import LoadingSpinner from "./components/LoadingSpinner";
 
 function App(): React.JSX.Element {
   return (
@@ -26,7 +27,13 @@ function AppContent() {
   const { user, loading } = useAuth()
   const [currentPage, setCurrentPage] = useState('dashboard');
 
-  if (loading) return <div className="flex justify-center items-center h-screen">Carregando...</div>
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <LoadingSpinner size={60} />
+      </div>
+    );
+  }
   if (!user) return <Login />
 
   return (
