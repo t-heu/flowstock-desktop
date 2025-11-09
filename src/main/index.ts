@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import fetch from 'node-fetch'; // se estiver no Node 18+ pode usar global fetch
@@ -63,6 +63,22 @@ function createWindow(): void {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
 }
+
+process.on("uncaughtException", (error) => {
+  dialog.showErrorBox(
+    "Erro inesperado",
+    "Ocorreu um erro interno. O aplicativo pode precisar ser reiniciado.\n\n" +
+    (error?.message || error)
+  );
+});
+
+process.on("unhandledRejection", (reason: any) => {
+  dialog.showErrorBox(
+    "Erro inesperado",
+    "Ocorreu um erro interno. O aplicativo pode precisar ser reiniciado.\n\n" +
+    (reason?.message ?? String(reason))
+  );
+});
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
