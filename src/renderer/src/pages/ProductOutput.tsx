@@ -126,7 +126,10 @@ export default function ProductOutputPage() {
           {/* Grid com produto e filial origem */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Produto</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Produto
+                <span className="text-red-600"> *</span>
+              </label>
               <select
                 value={formData.productId}
                 onChange={(e) => handleProductChange(e.target.value)}
@@ -143,7 +146,10 @@ export default function ProductOutputPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Filial Origem</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Filial Origem
+                <span className="text-red-600"> *</span>
+              </label>
               <select
                 value={formData.branchId}
                 onChange={(e) => setFormData({ ...formData, branchId: e.target.value })}
@@ -162,7 +168,10 @@ export default function ProductOutputPage() {
 
           {/* Grid com filial destino */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Filial Destino</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Filial Destino
+              <span className="text-red-600"> *</span>
+            </label>
             <select
               value={formData.destinationBranchName} // agora guarda o nome
               onChange={(e) => setFormData({ ...formData, destinationBranchName: e.target.value })}
@@ -182,7 +191,7 @@ export default function ProductOutputPage() {
           {selectedProduct && formData.branchId && (
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
               <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-black dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                <AlertCircle className="w-5 h-5 text-black dark:text-blue-400 shrink-0 mt-0.5" />
                 <div>
                   <p className="text-sm font-medium text-gray-900 dark:text-white">Estoque Disponível</p>
                   <p className="text-2xl font-bold text-black dark:text-blue-400 mt-1">
@@ -195,7 +204,10 @@ export default function ProductOutputPage() {
 
           {/* Quantidade */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Quantidade</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Quantidade
+              <span className="text-red-600"> *</span>
+            </label>
             <input
               type="number"
               value={formData.quantity}

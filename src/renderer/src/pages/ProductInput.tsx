@@ -92,7 +92,10 @@ export default function ProductInputPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Produto</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Produto
+                <span className="text-red-600"> *</span>
+              </label>
               <select
                 value={formData.productId}
                 onChange={(e) => setFormData({ ...formData, productId: e.target.value })}
@@ -109,7 +112,10 @@ export default function ProductInputPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Filial</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Filial
+                <span className="text-red-600"> *</span>
+              </label>
               <select
                 value={formData.branchId}
                 onChange={(e) => setFormData({ ...formData, branchId: e.target.value })}
@@ -127,7 +133,10 @@ export default function ProductInputPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Quantidade</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Quantidade
+              <span className="text-red-600"> *</span>
+            </label>
             <input
               type="number"
               value={formData.quantity}
@@ -141,7 +150,9 @@ export default function ProductInputPage() {
 
           {/* Campo de Observações */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Observações</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Observações
+            </label>
             <input
               type="text"
               value={formData.notes}
@@ -153,9 +164,13 @@ export default function ProductInputPage() {
 
           {/* Novo campo Número da Nota Fiscal */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Número da Nota Fiscal</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Número da Nota Fiscal
+              <span className="text-red-600"> *</span>
+            </label>
             <input
               type="text"
+              required
               value={formData.invoiceNumber}
               onChange={(e) => setFormData({ ...formData, invoiceNumber: e.target.value })}
               placeholder="Digite o número da nota fiscal"

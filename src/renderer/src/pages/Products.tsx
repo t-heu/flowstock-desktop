@@ -76,7 +76,10 @@ export default function ProductsPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Código</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Código
+                  <span className="text-red-600"> *</span>
+                </label>
                 <input
                   type="text"
                   value={formData.code}
@@ -87,7 +90,10 @@ export default function ProductsPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Unidade</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Unidade
+                  <span className="text-red-600"> *</span>
+                </label>
                 <select
                   value={formData.unit}
                   onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
@@ -104,7 +110,10 @@ export default function ProductsPage() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nome do Produto</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Nome do Produto
+                <span className="text-red-600"> *</span>
+              </label>
               <input
                 type="text"
                 value={formData.name}
@@ -117,6 +126,7 @@ export default function ProductsPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Departamento
+                <span className="text-red-600"> *</span>
               </label>
               <select
                 value={formData.department}

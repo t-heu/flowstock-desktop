@@ -131,6 +131,7 @@ export default function UsersPage() {
 
           <select
             value={formData.role}
+            required
             onChange={(e) => setFormData({ ...formData, role: e.target.value as "admin" | "user" | "manager" })}
             className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
           >
@@ -141,6 +142,7 @@ export default function UsersPage() {
 
           <select
             value={formData.department}
+            required
             onChange={(e) => setFormData({ ...formData, department: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
           >
