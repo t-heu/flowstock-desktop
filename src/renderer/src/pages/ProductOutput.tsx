@@ -37,7 +37,8 @@ export default function ProductOutputPage() {
     async function loadData() {
       setProducts(await window.api.getProducts())
       setBranches(await window.api.getBranches())
-      setBranchStock(await window.api.getBranchStock());
+      const res = await window.api.getBranchStock();
+      setBranchStock(res.data || []);
 
       loadRecentExits()
     }
@@ -76,16 +77,15 @@ export default function ProductOutputPage() {
 
     try {
       await window.api.createMovement({
-        productId: formData.productId,
-        branchId: formData.branchId,
-        destinationBranchName: branchDestino.name,
+        product_id: formData.productId,
+        branch_id: formData.branchId,
+        destination_branch_id: branchDestino.id,
         type: "saida",
         quantity,
-        date: new Date().toISOString(),
         notes: formData.notes,
-        productName: selectedProduct.name,
-        productCode: selectedProduct.code,
-        branchName: branchOrigem.name,
+        product_name: selectedProduct.name,
+        product_code: selectedProduct.code,
+        branch_name: branchOrigem.name,
       })
 
       setFormData({ productId: "", branchId: "", destinationBranchName: "", quantity: "", notes: "" })
@@ -100,14 +100,14 @@ export default function ProductOutputPage() {
 
   // Dentro do componente, baseado no produto e filial selecionados
   const availableStock = selectedProduct && formData.branchId
-    ? branchStock
-        .filter(
-          (item) =>
-            item.productId === selectedProduct.id &&
-            item.branchId === formData.branchId
-        )
-        .reduce((sum, item) => sum + item.quantity, 0)
-    : 0;
+  ? branchStock
+      .filter(
+        (item) =>
+          String(item.productId) === String(selectedProduct.id) &&
+          String(item.branchId) === String(formData.branchId)
+      )
+      .reduce((sum, item) => sum + Number(item.quantity), 0)
+  : 0;
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
@@ -266,13 +266,13 @@ export default function ProductOutputPage() {
                     className="border-b border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/50"
                   >
                     <td className="p-4 text-sm text-gray-900 dark:text-white">
-                      {new Date(exit.date).toLocaleDateString("pt-BR")}
+                      {new Date(exit.created_at).toLocaleDateString("pt-BR")}
                     </td>
                     <td className="p-4 text-sm text-gray-900 dark:text-white">
-                      {exit.productCode} - {exit.productName}
+                      {exit.product_code} - {exit.product_name}
                     </td>
-                    <td className="p-4 text-sm text-gray-900 dark:text-white">{exit.branchName}</td>
-                    <td className="p-4 text-sm text-gray-900 dark:text-white">{exit.destinationBranchName || "-"}</td>
+                    <td className="p-4 text-sm text-gray-900 dark:text-white">{exit.branch_name}</td>
+                    <td className="p-4 text-sm text-gray-900 dark:text-white">{exit.destination_branch_name || "-"}</td>
                     <td className="p-4 text-sm">
                       <span className="font-semibold text-red-600 dark:text-red-400">-{exit.quantity}</span>
                     </td>

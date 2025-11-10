@@ -59,16 +59,15 @@ export default function ProductInputPage() {
     const selectedBranch = branches.find(b => b.id === formData.branchId)
 
     await window.api.createMovement({
-      productId: formData.productId,
-      branchId: formData.branchId,
+      product_id: formData.productId,
+      branch_id: formData.branchId,
       type: "entrada",
       quantity,
-      date: new Date().toISOString(),
       notes: formData.notes,
-      invoiceNumber: formData.invoiceNumber,
-      productName: selectedProduct?.name || "",
-      productCode: selectedProduct?.code || "",
-      branchName: selectedBranch?.name || "",
+      invoice_number: formData.invoiceNumber,
+      product_name: selectedProduct?.name || "",
+      product_code: selectedProduct?.code || "",
+      branch_name: selectedBranch?.name || "",
     })
 
     setFormData({ productId: "", branchId: "", quantity: "", notes: "", invoiceNumber: "" })
@@ -207,17 +206,17 @@ export default function ProductInputPage() {
                     className="border-b border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/50"
                   >
                     <td className="p-4 text-sm text-gray-900 dark:text-white">
-                      {new Date(entry.date).toLocaleDateString("pt-BR")}
+                      {new Date(entry.created_at).toLocaleDateString("pt-BR")}
                     </td>
                     <td className="p-4 text-sm text-gray-900 dark:text-white">
-                      {entry.productCode} - {entry.productName}
+                      {entry.product_code} - {entry.product_name}
                     </td>
-                    <td className="p-4 text-sm text-gray-900 dark:text-white">{entry.branchName}</td>
+                    <td className="p-4 text-sm text-gray-900 dark:text-white">{entry.branch_name}</td>
                     <td className="p-4 text-sm">
                       <span className="font-semibold text-green-600 dark:text-green-400">+{entry.quantity}</span>
                     </td>
                     <td className="p-4 text-sm text-gray-600 dark:text-gray-400">{entry.notes || "-"}</td>
-                    <td className="p-4 text-sm text-gray-600 dark:text-gray-400">{entry.invoiceNumber || "-"}</td>
+                    <td className="p-4 text-sm text-gray-600 dark:text-gray-400">{entry.invoice_number || "-"}</td>
                   </tr>
                 ))
               )}

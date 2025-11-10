@@ -1,13 +1,84 @@
-import { adminDb } from "../firebase";
+import { supabase } from "../supabaseClient";
 import { Stats } from "../../shared/types";
 
 let statsCache: Record<string, Stats> = {};
 
-/**
- * 🔹 Buscar estatísticas com suporte a:
- * - Filtrar por departamento (se não for admin)
- * - Filtrar por filial (opcional)
- */
+export const getStats = async (user: any, branchFilter?: string): Promise<Stats> => {
+  try {
+    const cacheKey = `${user.role}-${user.department}-${branchFilter ?? "ALL"}`;
+    if (statsCache[cacheKey]) return statsCache[cacheKey];
+
+    const [
+      { data: productsRows, error: prodErr },
+      { data: branchesRows, error: branchErr },
+      { data: movementsRows, error: movErr },
+      { data: branchStockRows, error: stockErr }
+    ] = await Promise.all([
+      supabase.from("products").select("*"),
+      supabase.from("branches").select("*"),
+      supabase.from("movements").select("*"),
+      supabase.from("branch_stock").select("*"),
+    ]);
+
+    if (prodErr || branchErr || movErr || stockErr) {
+      throw new Error("Erro ao carregar dados do Supabase");
+    }
+
+    let products = productsRows || [];
+    let movements = movementsRows || [];
+    let branchStock = branchStockRows || [];
+
+    // 🔹 Se não for admin → filtra por departamento
+    if (user.role !== "admin") {
+      products = products.filter(p => p.department === user.department);
+
+      const allowedProductIds = new Set(products.map(p => p.id));
+
+      movements = movements.filter(m => allowedProductIds.has(m.product_id));
+      branchStock = branchStock.filter(b => allowedProductIds.has(b.product_id));
+    }
+
+    // 🔹 Filtra filial
+    if (branchFilter) {
+      branchStock = branchStock.filter(b => b.branch_id === branchFilter);
+      movements = movements.filter(m => m.branch_id === branchFilter);
+    }
+
+    // 🔹 Cálculo das estatísticas
+    const totalEntries = movements.filter(m => m.type === "entrada").length;
+    const totalExits = movements.filter(m => m.type === "saida").length;
+
+    const totalStock = branchStock.reduce(
+      (sum, item) => sum + Number(item.quantity || 0),
+      0
+    );
+
+    const stats: Stats = {
+      totalProducts: products.length,
+      totalStock,
+      totalEntries,
+      totalExits,
+      totalBranches: (branchesRows || []).length,
+    };
+
+    statsCache[cacheKey] = stats;
+    return stats;
+  } catch (error) {
+    console.error("Erro ao buscar estatísticas:", error);
+    throw new Error("Erro ao buscar estatísticas");
+  }
+};
+
+export const invalidateStatsCache = () => {
+  statsCache = {};
+};
+
+
+/*import { adminDb } from "../firebase";
+import { Stats } from "../../shared/types";
+
+let statsCache: Record<string, Stats> = {};
+
 export const getStats = async (user: any, branchFilter?: string): Promise<Stats> => {
   try {
     const cacheKey = `${user.role}-${user.department}-${branchFilter ?? "ALL"}`;
@@ -64,3 +135,4 @@ export const getStats = async (user: any, branchFilter?: string): Promise<Stats>
 export const invalidateStatsCache = () => {
   statsCache = {};
 };
+*/

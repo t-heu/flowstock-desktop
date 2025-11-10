@@ -65,13 +65,13 @@ export interface AuthUser {
 }
 
 export interface DetailedReportItem {
-  date: string;
   branchName: string;
   destinationBranchName: string;
   productCode: string;
   productName: string;
   quantity: number;
   notes?: string;
+  createdAt?: string;
 }
 
 export interface Stats {

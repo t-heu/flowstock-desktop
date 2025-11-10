@@ -95,7 +95,6 @@ app.whenReady().then(() => {
   })
 
   // IPC test
-  //ipcMain.on('ping', () => console.log('pong'))
   // Salvar token
   ipcMain.handle("auth:set-token", (_, token) => {
     store.set("auth.token", token);

@@ -1,4 +1,45 @@
-import { adminDb } from "./firebase";
+import { supabase } from "./supabaseClient";
+import { Product, Branch } from "../shared/types";
+
+let productsCache: Record<string, Product> | null = null;
+let branchesCache: Record<string, Branch> | null = null;
+
+export const loadCache = async () => {
+  if (!productsCache) {
+    const { data, error } = await supabase.from<Product>("products").select("*");
+    if (error) throw error;
+    productsCache = {};
+    data.forEach(d => {
+      if (d.id) productsCache![d.id] = d;
+    });
+  }
+
+  if (!branchesCache) {
+    const { data, error } = await supabase.from<Branch>("branches").select("*");
+    if (error) throw error;
+    branchesCache = {};
+    data.forEach(d => {
+      if (d.id) branchesCache![d.id] = d;
+    });
+  }
+};
+
+export const getProductFromCache = (id: string): Product | null =>
+  productsCache?.[id] ?? null;
+
+export const getBranchFromCache = (id: string): Branch | null =>
+  branchesCache?.[id] ?? null;
+
+export const getAllProductsFromCache = (): Product[] =>
+  productsCache ? Object.values(productsCache) : [];
+
+export const getAllBranchesFromCache = (): Branch[] =>
+  branchesCache ? Object.values(branchesCache) : [];
+
+export const invalidateProductCache = () => { productsCache = null; };
+export const invalidateBranchCache = () => { branchesCache = null; };
+
+/*import { adminDb } from "./firebase";
 import { Product, Branch } from "../shared/types";
 
 let productsCache: Record<string, Product> | null = null;
@@ -38,3 +79,4 @@ export const getAllBranchesFromCache = (): Branch[] =>
 
 export const invalidateProductCache = () => { productsCache = null; };
 export const invalidateBranchCache = () => { branchesCache = null; };
+*/

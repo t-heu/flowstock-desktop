@@ -1,11 +1,76 @@
-import { adminDb } from "../firebase";
+import bcrypt from "bcryptjs";
+import { v4 as uuidv4 } from "uuid";
+
+import { loadCache, getBranchFromCache } from "../cache";
+import { User } from "../../shared/types";
+
+import { supabase } from "../supabaseClient";
+
+/** 🔹 Lista usuários */
+export const getUsers = async (): Promise<User[]> => {
+  await loadCache();
+
+  const { data, error } = await supabase.from("users").select("*");
+  if (error) throw error;
+
+  return data.map(user => {
+    const branch = getBranchFromCache(user.branch_id);
+    return {
+      ...user,
+      password: undefined,
+      role: user.role ?? "operator",
+      department: user.department ?? null,
+      created_at: new Date().toISOString(),
+      branch: branch ? { id: branch.id, name: branch.name, code: branch.code } : null,
+    };
+  });
+};
+
+/** 🔹 Criar usuário */
+export const createUser = async (data: User): Promise<{ success: true }> => {
+  const hashedPassword = await bcrypt.hash("123", 10);
+
+  const newUser = {
+    id: uuidv4(),
+    name: data.name,
+    username: data.username,
+    email: data.email,
+    role: data.role ?? "operator",
+    department: data.department ?? null,
+    password: hashedPassword,
+    branch_id: data.branchId,
+    created_at: new Date().toISOString(),
+  };
+
+  const { error } = await supabase.from("users").insert([newUser]);
+  if (error) throw error;
+
+  return { success: true };
+};
+
+/** 🔹 Atualizar usuário */
+export const updateUser = async (id: string, updates: Partial<User>): Promise<{ success: true }> => {
+  if (updates.password) updates.password = await bcrypt.hash(updates.password, 10);
+  if (updates.role === undefined) updates.role = "operator";
+  if (updates.department === undefined) updates.department = null;
+
+  const { error } = await supabase.from("users").update(updates).eq("id", id);
+  if (error) throw error;
+
+  return { success: true };
+};
+
+/** 🔹 Excluir usuário */
+export const deleteUser = async (id: string): Promise<void> => {
+  const { error } = await supabase.from("users").delete().eq("id", id);
+  if (error) throw error;
+};
+
+/*import { adminDb } from "../firebase";
 import bcrypt from "bcryptjs";
 import { loadCache, getBranchFromCache } from "../cache";
 import { User } from "../../shared/types";
 
-/**
- * 🔹 Lista todos os usuários com filial usando cache (sem GET extra)
- */
 export const getUsers = async (): Promise<User[]> => {
   try {
     await loadCache();
@@ -35,9 +100,6 @@ export const getUsers = async (): Promise<User[]> => {
   }
 };
 
-/**
- * 🔹 Criar usuário
- */
 export const createUser = async (data: User): Promise<{ success: true }> => {
   try {
     const hashedPassword = await bcrypt.hash("123", 10);
@@ -59,9 +121,6 @@ export const createUser = async (data: User): Promise<{ success: true }> => {
   }
 };
 
-/**
- * 🔹 Atualizar usuário
- */
 export const updateUser = async (id: string, updates: Partial<User>): Promise<{ success: true }> => {
   try {
     const ref = adminDb.collection("users").doc(id);
@@ -88,9 +147,6 @@ export const updateUser = async (id: string, updates: Partial<User>): Promise<{ 
   }
 };
 
-/**
- * 🔹 Excluir usuário
- */
 export const deleteUser = async (id: string): Promise<void> => {
   try {
     await adminDb.collection("users").doc(id).delete();
@@ -99,3 +155,4 @@ export const deleteUser = async (id: string): Promise<void> => {
     throw new Error("Erro ao deletar usuário");
   }
 };
+*/

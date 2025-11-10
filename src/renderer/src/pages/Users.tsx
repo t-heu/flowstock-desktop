@@ -25,7 +25,7 @@ interface User {
 export default function UsersPage() {
   const [branches, setBranches] = useState<Branch[]>([])
   const [users, setUsers] = useState<User[]>([])
-  const [formData, setFormData] = useState<any>({ name: "", email: "", username: "", branchId: "", role: "user" })
+  const [formData, setFormData] = useState<any>({ name: "", email: "", department: "", username: "", branchId: "", role: "user" })
 
   // 🔹 Carrega filiais e usuários
   useEffect(() => {
@@ -55,7 +55,7 @@ export default function UsersPage() {
       await window.api.createUser(formData);
 
       // Reseta formulário
-      setFormData({ name: "", username: "", email: "", branchId: "", role: "user"});
+      setFormData({ name: "", username: "", email: "", department: "", branchId: "", role: "user"});
 
       alert("Usuário criado com sucesso!");
     } catch (err: any) {
@@ -134,14 +134,14 @@ export default function UsersPage() {
             onChange={(e) => setFormData({ ...formData, role: e.target.value as "admin" | "user" | "manager" })}
             className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
           >
-            <option value="user">Usuário</option>
+            <option value="operator">Operador</option>
             <option value="admin">Administrador</option>
             <option value="manager">Manager</option> 
           </select>
 
           <select
-            value={formData.role}
-            onChange={(e) => setFormData({ ...formData, departments: e.target.value })}
+            value={formData.department}
+            onChange={(e) => setFormData({ ...formData, department: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
           >
             <option value="" disabled>Selecione...</option>

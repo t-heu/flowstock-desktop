@@ -1,6 +1,6 @@
 {
   "name": "flowstock-desktop",
-  "version": "1.0.2",
+  "version": "1.1.2",
   "description": "FlowStock - Sistema de Gestão de Materiais Internos",
   "main": "./out/main/index.js",
   "author": "theu",
@@ -23,6 +23,7 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
+    "@supabase/supabase-js": "^2.80.0",
     "@tailwindcss/vite": "^4.1.16",
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.2.3",
@@ -31,7 +32,8 @@
     "firebase-admin": "^13.5.0",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.552.0",
-    "react-modal": "^3.16.3"
+    "react-modal": "^3.16.3",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",

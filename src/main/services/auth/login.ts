@@ -1,13 +1,38 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { supabase } from "../../supabaseClient";
+import { AuthUser } from "../../../shared/types";
+import { JWT_SECRET, TOKEN_EXPIRES } from "../../config/jwt";
+
+/** 🔹 Login */
+export const loginUser = async (username: string, password: string) => {
+  const { data, error } = await supabase.from("users").select("*").eq("username", username).single();
+  if (error || !data) throw new Error("Usuário ou senha inválidos");
+
+  const isValid = await bcrypt.compare(password, data.password);
+  if (!isValid) throw new Error("Usuário ou senha inválidos");
+
+  const user: AuthUser = {
+    id: data.id,
+    name: data.name,
+    username: data.username,
+    email: data.email,
+    role: data.role,
+    branchId: data.branch_id,
+    department: data.department,
+  };
+
+  const token = jwt.sign(user, JWT_SECRET, { expiresIn: TOKEN_EXPIRES });
+  return { success: true, user, token };
+};
+
+/*import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 import { adminDb } from "../../firebase";
 import { AuthUser } from "../../../shared/types";
 import { JWT_SECRET, TOKEN_EXPIRES } from "../../config/jwt";
 
-/**
- * 🔹 Login: autentica e gera token JWT
- */
 export const loginUser = async (username: string, password: string) => {
   try {
     const usersSnap = await adminDb
@@ -40,3 +65,4 @@ export const loginUser = async (username: string, password: string) => {
     throw new Error("Error 505");
   }
 };
+*/

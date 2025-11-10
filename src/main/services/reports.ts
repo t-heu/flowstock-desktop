@@ -1,12 +1,77 @@
-import { adminDb } from "../firebase"
+import { supabase } from "../supabaseClient";
+import { DetailedReportItem } from "../../shared/types";
+import { loadCache, getBranchFromCache } from "../cache";
+/**
+ * 🔹 Buscar relatório detalhado de saídas (type: "saida")
+ */
+export const getDetailedReport = async (
+  branchId: string = "all",
+  startDate?: string,
+  endDate?: string
+): Promise<{
+  success: boolean;
+  data?: DetailedReportItem[];
+  error?: string;
+}> => {
+  try {
+    let query = supabase
+      .from("movements")
+      .select("*")
+      .eq("type", "saida"); // Apenas saídas
+
+    // Filtrar por filial se não for "all"
+    if (branchId !== "all") {
+      query = query.eq("branch_id", branchId);
+    }
+
+    // Filtro de data inicial
+    if (startDate) {
+      query = query.gte("date", startDate);
+    }
+
+    // Filtro de data final
+    if (endDate) {
+      query = query.lte("date", endDate);
+    }
+
+    const { data: movements, error } = await query;
+    if (error) throw error;
+
+    await loadCache(); // 🔹 Para conseguir pegar nomes das filiais no cache
+
+    const report: DetailedReportItem[] = (movements || []).map((m: any) => ({
+      date: m.date,
+      branchName:
+        m.branch_name ??
+        getBranchFromCache(m.branch_id)?.name ??
+        "Desconhecida",
+
+      destinationBranchName:
+        m.destination_branch_name ??
+        (m.destination_branch_id
+          ? getBranchFromCache(m.destination_branch_id)?.name
+          : "-") ??
+        "-",
+
+      productCode: m.product_code ?? m.productCode ?? "-",
+      productName: m.product_name ?? m.productName ?? "-",
+      quantity: Number(m.quantity ?? 0),
+      notes: m.notes ?? "-",
+    }));
+
+    // Ordenar por data (mais recente primeiro)
+    report.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+    return { success: true, data: report };
+  } catch (err: any) {
+    console.error("Erro ao gerar relatório detalhado:", err);
+    return { success: false, error: err.message || "Erro ao gerar relatório detalhado" };
+  }
+};
+
+/*import { adminDb } from "../firebase"
 import { DetailedReportItem } from "../../shared/types";
 
-/**
- * 🔹 Buscar relatório detalhado de saídas
- * @param branchId - ID da filial ou "all" para todas
- * @param startDate - Data inicial opcional (ISO string)
- * @param endDate - Data final opcional (ISO string)
- */
 export const getDetailedReport = async (
   branchId: string = "all",
   startDate?: string,
@@ -60,3 +125,4 @@ export const getDetailedReport = async (
     throw new Error("Erro ao gerar relatório detalhado");
   }
 }
+*/
