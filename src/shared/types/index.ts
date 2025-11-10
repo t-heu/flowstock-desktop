@@ -14,7 +14,7 @@ export interface Product {
   description?: string;
   unit: string;
   department: "rh" | "transferencia";
-  createdAt?: string;
+  created_at?: string;
 }
 
 export interface IProduct {
@@ -30,7 +30,7 @@ export interface Branch {
   name: string;
   code: string;
   location?: string;
-  createdAt?: string;
+  created_at?: string;
 }
 
 export interface User {
@@ -42,7 +42,7 @@ export interface User {
   branchId: string;
   department: string | null;
   password?: string;
-  createdAt?: string;
+  created_at?: string;
 }
 
 export interface Movement {
@@ -51,7 +51,7 @@ export interface Movement {
   branchId: string;
   type: "entrada" | "saida";
   quantity: number;
-  createdAt?: string;
+  created_at?: string;
 }
 
 export interface AuthUser {
@@ -71,7 +71,7 @@ export interface DetailedReportItem {
   productName: string;
   quantity: number;
   notes?: string;
-  createdAt?: string;
+  created_at: string;
 }
 
 export interface Stats {

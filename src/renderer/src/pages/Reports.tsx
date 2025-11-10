@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { Download, Filter } from "lucide-react"
 
 interface DetailedExit {
-  date: string
+  created_at: string
   branchName: string
   destinationBranchName: string
   productCode: string
@@ -42,7 +42,7 @@ export default function ReportsPage() {
   const handleExport = () => {
     let csv = "Data;Filial Origem;Filial Destino;Código Produto;Nome Produto;Quantidade;Observações\n"
     reportData.forEach((item) => {
-      csv += `${item.date};${item.branchName};${item.destinationBranchName};${item.productCode};${item.productName};${item.quantity};${item.notes}\n`
+      csv += `${item.created_at};${item.branchName};${item.destinationBranchName};${item.productCode};${item.productName};${item.quantity};${item.notes}\n`
     })
     const blob = new Blob([csv], { type: "text/csv" })
     const url = window.URL.createObjectURL(blob)
@@ -160,7 +160,7 @@ export default function ReportsPage() {
               ) : (
                 reportData.map((item, idx) => (
                   <tr key={idx} className="border-b border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/50">
-                    <td className="p-4 text-sm text-gray-900 dark:text-white">{new Date(item.date).toLocaleDateString("pt-BR")}</td>
+                    <td className="p-4 text-sm text-gray-900 dark:text-white">{new Date(item.created_at).toLocaleDateString("pt-BR")}</td>
                     <td className="p-4 text-sm text-gray-900 dark:text-white">{item.branchName}</td>
                     <td className="p-4 text-sm text-gray-900 dark:text-white">{item.destinationBranchName}</td>
                     <td className="p-4 text-sm text-gray-900 dark:text-white">{item.productCode}</td>

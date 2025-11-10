@@ -6,7 +6,7 @@ let branchesCache: Record<string, Branch> | null = null;
 
 export const loadCache = async () => {
   if (!productsCache) {
-    const { data, error } = await supabase.from<Product>("products").select("*");
+    const { data, error } = await supabase.from("products").select("*");
     if (error) throw error;
     productsCache = {};
     data.forEach(d => {
@@ -15,7 +15,7 @@ export const loadCache = async () => {
   }
 
   if (!branchesCache) {
-    const { data, error } = await supabase.from<Branch>("branches").select("*");
+    const { data, error } = await supabase.from("branches").select("*");
     if (error) throw error;
     branchesCache = {};
     data.forEach(d => {

@@ -45,18 +45,17 @@ export const getDetailedReport = async (
         m.branch_name ??
         getBranchFromCache(m.branch_id)?.name ??
         "Desconhecida",
-
       destinationBranchName:
         m.destination_branch_name ??
         (m.destination_branch_id
           ? getBranchFromCache(m.destination_branch_id)?.name
           : "-") ??
         "-",
-
       productCode: m.product_code ?? m.productCode ?? "-",
       productName: m.product_name ?? m.productName ?? "-",
       quantity: Number(m.quantity ?? 0),
       notes: m.notes ?? "-",
+      created_at: m.created_at,
     }));
 
     // Ordenar por data (mais recente primeiro)
