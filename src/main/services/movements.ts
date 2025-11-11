@@ -65,6 +65,7 @@ export const createMovement = async (movement: {
       product_department: product.department,
       product_name: product.name,
       product_code: product.code,
+      branch_name: getBranchFromCache(movement.branch_id)?.name || "-",
     };
 
     // --- ESTOQUE ---

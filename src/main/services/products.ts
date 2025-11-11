@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 
 import { supabase } from "../supabaseClient";
-import { Product } from "../../shared/types";
+import { IProduct, Product } from "../../shared/types";
 import { loadCache, getAllProductsFromCache, invalidateProductCache } from "../cache";
 import { checkPermission } from "../checkPermission";
 
@@ -14,7 +14,7 @@ export const getProducts = async (user: any): Promise<Product[]> => {
 };
 
 /** 🔹 Criar produto */
-export const createProduct = async (user: any, product: Omit<Product, "id" | "createdAt">) => {
+export const createProduct = async (user: any, product: Omit<IProduct, "id" | "createdAt">) => {
   const perm = checkPermission(user, ["admin", "manager"]);
   if (!perm.success) return perm;
 

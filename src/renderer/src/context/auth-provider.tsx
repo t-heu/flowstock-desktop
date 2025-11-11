@@ -47,7 +47,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const res = await window.api.loginUser(username, password)
 
       if (res.success) {
-        await window.api.saveToken(res.token) // ✅ agora salva no electron-store
         setUser(res.user)
         return true
       }

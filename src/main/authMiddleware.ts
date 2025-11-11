@@ -1,7 +1,8 @@
 import jwt from "jsonwebtoken";
 
 import { JWT_SECRET } from "./config/jwt";
-import { store } from "./store";
+import { getTokenForWindow, clearTokenForWindow } from "./authSession";
+//import { store } from "./store";
 
 export function requireAuth(token: string) {
   try {
@@ -16,8 +17,10 @@ export function requireAuth(token: string) {
  * Wrapper para IPCs autenticados
  */
 export function authenticated(handler) {
-  return async (_event, ...args) => {
-    const token = store.get("auth.token") as string | null;;
+  return async (event, ...args) => {
+    //const token = store.get("auth.token") as string | null;;
+    const senderId = event.sender.id;
+    const token = getTokenForWindow(senderId);
 
     if (!token) throw new Error("Não autenticado");
 
@@ -25,7 +28,8 @@ export function authenticated(handler) {
     try {
       decoded = jwt.verify(token, JWT_SECRET);
     } catch {
-      store.delete("auth.token");
+      //store.delete("auth.token");
+      clearTokenForWindow(senderId);
       throw new Error("Sessão expirada, faça login novamente");
     }
 

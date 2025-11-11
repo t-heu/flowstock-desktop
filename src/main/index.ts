@@ -2,19 +2,12 @@ import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import fetch from 'node-fetch'; // se estiver no Node 18+ pode usar global fetch
-import { store } from "./store";
-
-export type Notice = {
-  id: string;
-  title?: string;
-  message: string;
-  level?: 'info' | 'warning' | 'critical';
-  showOnce?: boolean;
-  expiresAt?: string;
-};
+import { z } from "zod";
 
 import icon from '../../resources/icon.png?asset'
 
+import { Notice } from "../shared/types";
+import { setTokenForWindow, getTokenForWindow, clearTokenForWindow } from "./authSession";
 import {getStats} from './services/stats';
 import {getCurrentUser} from './services/auth/profile';
 import {loginUser} from './services/auth/login';
@@ -27,6 +20,56 @@ import { getDetailedReport } from "./services/reports"
 
 import { authenticated } from "./authMiddleware";
 
+// Schemas de validação
+const LoginSchema = z.object({
+  username: z.string().min(1).max(80),
+  password: z.string().min(1).max(120)
+});
+const IdSchema = z.string().uuid();
+const UpdateProductSchema = z.object({
+  id: z.string().uuid(),
+  updates: z.object({
+    name: z.string().min(1).max(120).optional(),
+    price: z.number().nonnegative().optional()
+  })
+});
+const MovementSchema = z.object({
+  product_id: z.string().uuid(),
+  branch_id: z.string().uuid(),
+  // Destino pode existir só se for transferência, não é obrigatório
+  destination_branch_id: z.string().uuid().optional(),
+  quantity: z.number().int().min(1).max(999999), // limite pra evitar enviar "1 milhão" por acidente
+  type: z.enum(["entrada", "saida"]),
+  notes: z.string().max(500).optional(),           // protege contra entrada gigante
+  invoice_number: z.string().max(64).optional(),   // protege contra colisão de XML & injeções
+});
+const ProductSchema = z.object({
+  name: z.string().min(1, "Nome obrigatório"),
+  code: z.string().min(1, "Código obrigatório"),
+  description: z.string().optional(),
+  unit: z.string().min(1, "Unidade obrigatória"),
+  department: z.enum(["rh", "transferencia", ""])
+});
+const CreateUserSchema = z.object({
+  name: z.string().min(1),
+  username: z.string().min(3),
+  email: z.string().email(),
+  role: z.enum(["admin", "operator", "manager"]).default("operator"),
+  department: z.string().nullable().optional().transform(val => val ?? null),
+  branchId: z.string().uuid("branchId inválido"),
+});
+const BranchSchema = z.object({
+  name: z.string().min(1, "Nome é obrigatório"),
+  code: z.string().min(1, "Código é obrigatório").max(10, "Código muito longo"),
+});
+const ReportFilterSchema = z.object({
+  branchId: z.string().uuid().or(z.literal("all")),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+});
+
+app.disableHardwareAcceleration();
+
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -37,7 +80,9 @@ function createWindow(): void {
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
+      sandbox: false,
+      nodeIntegration: false,
+      contextIsolation: true,
     }
   })
 
@@ -95,35 +140,6 @@ app.whenReady().then(() => {
   })
 
   // IPC test
-  // Salvar token
-  ipcMain.handle("auth:set-token", (_, token) => {
-    store.set("auth.token", token);
-  });
-
-  // Obter token
-  ipcMain.handle("auth:get-token", () => {
-    return store.get("auth.token");
-  });
-
-  // Remover token (logout)
-  ipcMain.handle("auth:logout", () => {
-    store.delete("auth.token");
-    return { success: true };
-  });
-
-  ipcMain.handle("auth:login", async (_event, username, password) => {
-    const result = await loginUser(username, password);
-
-     if (!result || !result.success) {
-      throw new Error("Credenciais inválidas");
-    }
-
-    // 🔥 Salva token seguro no main
-    store.set("auth.token", result.token);
-
-    return result;
-  });
-
   ipcMain.handle("get-stats", authenticated(async (user, branch) => {
     return await getStats(user, branch);
   }));
@@ -132,42 +148,92 @@ app.whenReady().then(() => {
     return await getCurrentUser(user.id);
   }));
 
+  // LOGIN
+  ipcMain.handle("auth:login", async (event, data) => {
+    const { username, password } = LoginSchema.parse(data);
+
+    const result = await loginUser(username, password);
+    if (!result || !result.success) throw new Error("Credenciais inválidas");
+
+    setTokenForWindow(event.sender.id, result.token);
+    return result;
+  });
+
+  // LOGOUT
+  ipcMain.handle("auth:logout", (event) => {
+    clearTokenForWindow(event.sender.id);
+    return { success: true };
+  });
+
+  // GET TOKEN (apenas se realmente precisar no renderer — se não, REMOVA)
+  ipcMain.handle("auth:get-token", (event) => {
+    return getTokenForWindow(event.sender.id) ?? null;
+  });
+
+  // PRODUTOS
   ipcMain.handle("get-products", authenticated(async (user) => {
     return await getProducts(user);
   }));
-  ipcMain.handle("create-product", authenticated(async (user, product) => {
+
+  ipcMain.handle("create-product", authenticated(async (user, data) => {
     if (user.role !== "admin") throw new Error("Sem permissão");
+
+    const product = ProductSchema.parse(data);
+
     return await createProduct(user, product);
   }));
 
-  ipcMain.handle("update-product", authenticated(async (user, { id, updates }) => {
+  ipcMain.handle("update-product", authenticated(async (user, payload) => {
+    const { id, updates } = UpdateProductSchema.parse(payload);
     return await updateProduct(user, id, updates);
   }));
 
   ipcMain.handle("delete-product", authenticated(async (user, id) => {
-    return await deleteProduct(user, id);
+    const validId = IdSchema.parse(id);
+    return await deleteProduct(user, validId);
   }));
 
+  // FILIAIS
   ipcMain.handle("get-branches", authenticated(async () => await getBranches()));
-  ipcMain.handle("add-branch", authenticated(async (_, branch) => await addBranch(branch)));
-  ipcMain.handle("delete-branch", authenticated(async (_, id) => await deleteBranch(id)));
-
-  ipcMain.handle("get-movements", authenticated(async (user, typeFilter) => {
-    return await getMovements(user, typeFilter);
+  ipcMain.handle("add-branch", authenticated(async (_, data) => {
+    const branch = BranchSchema.parse(data); // ✅ valida aqui
+    return await addBranch(branch);
   }));
-  ipcMain.handle("create-movement", authenticated(async (_, movement) => await createMovement(movement)));
-  ipcMain.handle("delete-movement", authenticated(async (_, id) => await deleteMovement(id)));
+  ipcMain.handle("delete-branch", authenticated(async (_, id) => await deleteBranch(IdSchema.parse(id))));
+
+  // MOVIMENTOS
+  ipcMain.handle("get-movements", authenticated(async (user, filter) => {
+    return await getMovements(user, filter);
+  }));
+
+  ipcMain.handle("create-movement", authenticated(async (_, movement) => {
+    const valid = MovementSchema.parse(movement);
+    return await createMovement(valid);
+  }));
+
+  ipcMain.handle("delete-movement", authenticated(async (_, id) => {
+    return await deleteMovement(IdSchema.parse(id));
+  }));
 
   ipcMain.handle("get-branch-stock", authenticated(async () => await getBranchStock()));
 
+  // USERS
   ipcMain.handle("get-users", authenticated(async () => await getUsers()));
-  ipcMain.handle("create-user", authenticated(async (_, data) => await createUser(data)));
-  ipcMain.handle("update-user", authenticated(async (_, { id, updates }) => await updateUser(id, updates)));
-  ipcMain.handle("delete-user", authenticated(async (_, id) => await deleteUser(id)));
+  ipcMain.handle("create-user", authenticated(async (_, data) => {
+    const parsed = CreateUserSchema.parse(data);
+    return await createUser(parsed);
+  }));
+  ipcMain.handle("update-user", authenticated(async (_, { id, updates }) => await updateUser(IdSchema.parse(id), updates)));
+  ipcMain.handle("delete-user", authenticated(async (_, id) => await deleteUser(IdSchema.parse(id))));
 
-  ipcMain.handle("get-detailed-report", authenticated(async (_, { branchId, startDate, endDate }) =>
-    await getDetailedReport(branchId, startDate, endDate)
-  ));
+  // RELATÓRIOS
+  ipcMain.handle(
+    "get-detailed-report",
+    authenticated(async (_, raw) => {
+      const { branchId, startDate, endDate } = ReportFilterSchema.parse(raw);
+      return await getDetailedReport(branchId, startDate, endDate);
+    })
+  );
 
   // 🔔 Buscar aviso remoto
   ipcMain.handle('fetch-notice', async (_event): Promise<Notice | null> => {
@@ -209,6 +275,14 @@ app.on('window-all-closed', () => {
     app.quit()
   }
 })
+
+app.on('render-process-gone', (_, webContents) => {
+  const win = BrowserWindow.fromWebContents(webContents);
+  if (win && !win.isDestroyed()) {
+    win.destroy();
+    createWindow();
+  }
+});
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.

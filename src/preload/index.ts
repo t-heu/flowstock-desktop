@@ -5,10 +5,9 @@ import { electronAPI } from '@electron-toolkit/preload'
 const api = {
   // Autenticação
   loginUser: (username, password) =>
-    ipcRenderer.invoke('auth:login', username, password),
+    ipcRenderer.invoke('auth:login', {username, password}),
 
-  saveToken: (token) =>
-    ipcRenderer.invoke("auth:set-token", token),
+  //saveToken: (token) => ipcRenderer.invoke("auth:set-token", token),
 
   getToken: () =>
     ipcRenderer.invoke("auth:get-token"),
@@ -46,7 +45,7 @@ const api = {
 
   // 📄 Relatório detalhado (novo)
   getDetailedReport: (branchId, startDate, endDate) =>
-    ipcRenderer.invoke("get-detailed-report", branchId, startDate, endDate),
+    ipcRenderer.invoke("get-detailed-report", {branchId, startDate, endDate}),
 
   fetchNotice: () => ipcRenderer.invoke('fetch-notice'),
 }

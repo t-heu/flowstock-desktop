@@ -10,7 +10,7 @@ declare global {
 
       // 🔐 Auth
       loginUser: (username: string, password: string) => Promise<{ success: boolean; token: string; user: any }>
-      saveToken: (token: string) => Promise<void>
+      //saveToken: (token: string) => Promise<void>
       logout: () => Promise<void>
       getCurrentUser: () => Promise<{ success: boolean; user?: any }>
 

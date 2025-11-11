@@ -29,7 +29,6 @@ export interface Branch {
   id?: string;
   name: string;
   code: string;
-  location?: string;
   created_at?: string;
 }
 
@@ -43,6 +42,15 @@ export interface User {
   department: string | null;
   password?: string;
   created_at?: string;
+}
+
+export interface IUser {
+  name: string;
+  email: string;
+  role:  "admin" | "manager" | "operator";
+  username: string;
+  branchId: string;
+  department: string | null;
 }
 
 export interface Movement {
@@ -81,3 +89,12 @@ export interface Stats {
   totalExits: number;
   totalBranches: number;
 }
+
+export type Notice = {
+  id: string;
+  title?: string;
+  message: string;
+  level?: 'info' | 'warning' | 'critical';
+  showOnce?: boolean;
+  expiresAt?: string;
+};

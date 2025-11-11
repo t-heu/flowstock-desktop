@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
 
 import { loadCache, getBranchFromCache } from "../cache";
-import { User } from "../../shared/types";
+import { User, IUser } from "../../shared/types";
 
 import { supabase } from "../supabaseClient";
 
@@ -27,7 +27,7 @@ export const getUsers = async (): Promise<User[]> => {
 };
 
 /** 🔹 Criar usuário */
-export const createUser = async (data: User): Promise<{ success: true }> => {
+export const createUser = async (data: IUser): Promise<{ success: true }> => {
   const hashedPassword = await bcrypt.hash("123", 10);
 
   const newUser = {
