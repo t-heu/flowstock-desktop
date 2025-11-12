@@ -8,6 +8,7 @@ export type Notice = {
   level?: 'info' | 'warning' | 'critical';
   showOnce?: boolean;
   expiresAt?: string;
+  link?: string;
 };
 
 export const NoticeModal = () => {
@@ -59,7 +60,9 @@ export const NoticeModal = () => {
     setNotice(null);
   };
 
-  const isExpired = notice?.expiresAt && new Date(notice.expiresAt) < new Date();
+  const isExpired = notice?.expiresAt
+  ? new Date(notice.expiresAt).getTime() < Date.now()
+  : false;
 
   return (
     <Modal
@@ -75,7 +78,17 @@ export const NoticeModal = () => {
             {notice.title || (notice.level === 'critical' ? 'Atenção' : 'Aviso')}
           </h2>
           <p className="mb-6">{notice.message}</p>
-          <div className="text-right">
+          <div className="text-right flex justify-end gap-2">
+            {notice.link && (
+              <a
+                href={notice.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md"
+              >
+                Ir para link
+              </a>
+            )}
             <button
               onClick={handleCloseNotice}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md"

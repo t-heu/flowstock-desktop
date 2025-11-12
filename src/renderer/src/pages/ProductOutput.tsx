@@ -36,68 +36,99 @@ export default function ProductOutputPage() {
 
   useEffect(() => {
     async function loadData() {
-      setProducts(await window.api.getProducts())
-      setBranches(await window.api.getBranches())
-      const res = await window.api.getBranchStock();
-      setBranchStock(res.data || []);
+      const productsRes = await window.api.getProducts();
+      if (productsRes.success) {
+        setProducts(productsRes.data || []);
+      } else {
+        toast.error(productsRes.error || "Erro ao carregar produtos");
+      }
 
-      loadRecentExits()
+      const branchesRes = await window.api.getBranches();
+      if (branchesRes.success) {
+        setBranches(branchesRes.data || []);
+      } else {
+        toast.error(branchesRes.error || "Erro ao carregar filiais");
+      }
+
+      const stockRes = await window.api.getBranchStock();
+      if (stockRes.success) {
+        setBranchStock(stockRes.data || []);
+      } else {
+        toast.error(stockRes.error || "Erro ao carregar estoque das filiais");
+      }
+
+      loadRecentExits();
     }
 
-    loadData()
-  }, [])
+    loadData();
+  }, []);
 
   async function loadRecentExits() {
-    const movements = await window.api.getMovements("saida");
-    setRecentExits(movements.data);
+    const movementsRes = await window.api.getMovements("saida");
+    if (movementsRes.success) {
+      setRecentExits(movementsRes.data || []);
+    } else {
+      toast.error(movementsRes.error || "Erro ao carregar saídas recentes");
+    }
   }
 
   const handleProductChange = (productId: string) => {
-    setFormData({ ...formData, productId })
-    const product = products.find((p) => p.id === productId)
-    setSelectedProduct(product || null)
-  }
+    setFormData({ ...formData, productId });
+    const product = products.find((p) => p.id === productId);
+    setSelectedProduct(product || null);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    try {
-      e.preventDefault()
+    e.preventDefault();
 
-      const quantity = Number.parseInt(formData.quantity)
-      if (quantity <= 0) {
-        toast.error("A quantidade deve ser maior que zero")
-        return
-      }
-
-      const selectedProduct = products.find(p => p.id === formData.productId)
-      const branchOrigem = branches.find(b => b.id === formData.branchId)
-      const branchDestino = branches.find(b => b.name === formData.destinationBranchName)
-
-      if (!selectedProduct || !branchOrigem || !branchDestino) {
-        toast.error("Selecione produto e filiais válidos")
-        return
-      }
-
-      await window.api.createMovement({
-        product_id: formData.productId,
-        branch_id: formData.branchId,
-        destination_branch_id: branchDestino.id,
-        type: "saida",
-        quantity,
-        notes: formData.notes,
-        product_name: selectedProduct.name,
-        product_code: selectedProduct.code,
-        branch_name: branchOrigem.name,
-      })
-
-      setFormData({ productId: "", branchId: "", destinationBranchName: "", quantity: "", notes: "" })
-      setSelectedProduct(null)
-      setProducts(await window.api.getProducts())
-      loadRecentExits()
-      toast.success("Saída registrada com sucesso!")
-    } catch (err: any) {
-      toast.error(err.message || "Erro ao registrar saída")
+    const quantity = Number.parseInt(formData.quantity);
+    if (quantity <= 0) {
+      toast.error("A quantidade deve ser maior que zero");
+      return;
     }
-  }
+
+    const selectedProduct = products.find((p) => p.id === formData.productId);
+    const branchOrigem = branches.find((b) => b.id === formData.branchId);
+    const branchDestino = branches.find((b) => b.name === formData.destinationBranchName);
+
+    if (!selectedProduct || !branchOrigem || !branchDestino) {
+      toast.error("Selecione produto e filiais válidos");
+      return;
+    }
+
+    const res = await window.api.createMovement({
+      product_id: formData.productId,
+      branch_id: formData.branchId,
+      destination_branch_id: branchDestino.id,
+      type: "saida",
+      quantity,
+      notes: formData.notes,
+      product_name: selectedProduct.name,
+      product_code: selectedProduct.code,
+      branch_name: branchOrigem.name,
+    });
+
+    if (!res.success) {
+      toast.error(res.error || "Erro ao registrar saída");
+      return;
+    }
+
+    // Atualiza dados
+    setFormData({
+      productId: "",
+      branchId: "",
+      destinationBranchName: "",
+      quantity: "",
+      notes: "",
+    });
+    setSelectedProduct(null);
+
+    const productsRes = await window.api.getProducts();
+    if (productsRes.success) setProducts(productsRes.data || []);
+
+    loadRecentExits();
+    toast.success("Saída registrada com sucesso!");
+  };
 
   // Dentro do componente, baseado no produto e filial selecionados
   const availableStock = selectedProduct && formData.branchId
@@ -109,6 +140,8 @@ export default function ProductOutputPage() {
       )
       .reduce((sum, item) => sum + Number(item.quantity), 0)
   : 0;
+
+  const isFormEmpty = Object.values(formData).every(value => !value);
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
@@ -236,7 +269,7 @@ export default function ProductOutputPage() {
           {/* Botão */}
           <button
             type="submit"
-            disabled={!selectedProduct}
+            disabled={isFormEmpty}
             className="px-6 py-2.5 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors"
           >
             <TrendingDown className="w-4 h-4" />

@@ -1,6 +1,6 @@
 import type React from "react"
 import { useEffect, useState } from "react"
-import { Plus, Trash2, Package } from "lucide-react"
+import { Plus, Trash2, Package, Pencil, Ban } from "lucide-react"
 import toast from "react-hot-toast"
 
 import { useAuth } from "../context/auth-provider";
@@ -17,6 +17,7 @@ export default function ProductsPage() {
     unit: "UN",
     department: ""
   })
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   const { user } = useAuth();
 
@@ -25,35 +26,65 @@ export default function ProductsPage() {
   }, [])
 
   const loadProducts = async () => {
-    const result = await window.api.getProducts() || []
-    if (result) {
-      setProducts(result)
+    try {
+      const {data} = await window.api.getProducts()
+      setProducts(data || [])
+    } catch (error) {
+      console.error("Erro ao carregar produtos:", error)
+      toast.error("Falha ao carregar produtos")
+      setProducts([])
     }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    try {
+      e.preventDefault();
 
-    const result = await window.api.createProduct(formData)
+      let result;
+      if (editingProduct) {
+        // Atualiza produto
+        result = await window.api.updateProduct({id: editingProduct.id, updates: formData });
+      } else {
+        // Cria novo produto
+        result = await window.api.createProduct(formData);
+      }
 
-    if (result.success) {
-      toast.success("Produto criado com sucesso!")
-      setFormData({ code: "", name: "", description: "", department: "", unit: "UN" })
-      setIsFormOpen(false)
-      loadProducts()
-    } else {
-      toast.error(result.error || "Erro ao salvar produto")
+      if (result?.success) {
+        toast.success(editingProduct ? "Produto atualizado com sucesso!" : "Produto criado com sucesso!");
+        setFormData({ code: "", name: "", description: "", department: "", unit: "UN" });
+        setEditingProduct(null);
+        setIsFormOpen(false);
+        loadProducts();
+      } else {
+        toast.error(result?.error || "Erro ao salvar produto");
+      }
+    } catch (error) {
+      console.error("Erro ao salvar produto:", error);
+      toast.error("Falha ao salvar produto");
     }
   }
 
+  // 🔹 Função para abrir formulário de edição
+  const handleEdit = (product: Product) => {
+    setEditingProduct(product);
+    setFormData(product);
+    setIsFormOpen(true);
+  }
+
   const handleDelete = async (id: string) => {
-    if (confirm("Tem certeza que deseja excluir este produto?")) {
+    try {
+      if (!confirm("Tem certeza que deseja excluir este produto?")) return
+
       const result = await window.api.deleteProduct(id)
-      if (result.success) {
-        toast.success("Produto excluído!") 
+      if (result?.success) {
+        toast.success("Produto excluído!")
         loadProducts()
+      } else {
+        toast.error(result?.error || "Erro ao excluir produto")
       }
-      else toast.error(result.error || "Erro ao excluir produto")
+    } catch (error) {
+      console.error("Erro ao excluir produto:", error)
+      toast.error("Falha ao excluir produto")
     }
   }
 
@@ -77,7 +108,9 @@ export default function ProductsPage() {
 
       {isFormOpen && (
         <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Adicionar Produto</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+            {editingProduct ? "Editar Produto" : "Adicionar Produto"}
+          </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -160,7 +193,7 @@ export default function ProductsPage() {
                 type="submit"
                 className="px-4 py-2 bg-black hover:bg-[#333] text-white rounded-lg font-medium transition-colors"
               >
-                Salvar Produto
+                {editingProduct ? "Atualizar Produto" : "Salvar Produto"}
               </button>
               <button
                 type="button"
@@ -208,11 +241,26 @@ export default function ProductsPage() {
                     <td className="p-4 text-sm text-gray-600 dark:text-gray-400">{product.description}</td>
                     <td className="p-4 text-sm text-gray-900 dark:text-white">{product.unit}</td>
                     <td className="p-4 text-sm text-gray-900 dark:text-white">{product.department}</td>
-                    <td className="p-4">
-                      {["admin", "manager"].includes(user?.role ?? "") && (
-                        <button title="delete" onClick={() => handleDelete(product.id)} className="text-red-600 hover:text-red-800 transition-colors">
-                          <Trash2 className="w-5 h-5" />
-                        </button>
+                    <td className="p-4 flex justify-center items-center gap-3">
+                      {["admin", "manager"].includes(user?.role ?? "") ? (
+                        <>
+                          <button
+                            title="editar"
+                            onClick={() => handleEdit(product)}
+                            className="text-blue-600 hover:text-blue-800 transition-colors"
+                          >
+                            <Pencil className="w-5 h-5" />
+                          </button>
+                          <button
+                            title="delete"
+                            onClick={() => handleDelete(product.id)}
+                            className="text-red-600 hover:text-red-800 transition-colors"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </button>
+                        </>
+                      ): (
+                        <Ban color="red" className="w-5 h-5" />
                       )}
                     </td>
                   </tr>

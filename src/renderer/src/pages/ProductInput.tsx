@@ -2,7 +2,6 @@ import type React from "react"
 import { useEffect, useState } from "react"
 import { Package, TrendingUp } from "lucide-react"
 import toast from "react-hot-toast"
-import { ca } from "zod/locales";
 
 export interface Branch {
   id?: string;
@@ -35,53 +34,75 @@ export default function ProductInputPage() {
 
   useEffect(() => {
     async function loadData() {
-      setProducts(await window.api.getProducts())
-      setBranches(await window.api.getBranches())
-      loadRecentEntries()
+      const productsRes = await window.api.getProducts();
+      if (productsRes.success) {
+        setProducts(productsRes.data || []);
+      } else {
+        toast.error(productsRes.error || "Erro ao carregar produtos");
+      }
+
+      const branchesRes = await window.api.getBranches();
+      if (branchesRes.success) {
+        setBranches(branchesRes.data || []);
+      } else {
+        toast.error(branchesRes.error || "Erro ao carregar filiais");
+      }
+
+      loadRecentEntries();
     }
 
-    loadData()
-  }, [])
+    loadData();
+  }, []);
 
   async function loadRecentEntries() {
-    const movements = await window.api.getMovements("entrada")
-    setRecentEntries(movements.data);
+    const movementsRes = await window.api.getMovements("entrada");
+    if (movementsRes.success) {
+      setRecentEntries(movementsRes.data || []);
+    } else {
+      toast.error(movementsRes.error || "Erro ao carregar entradas recentes");
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    try {
-      e.preventDefault()
-  
-      const quantity = Number.parseInt(formData.quantity)
-      if (quantity <= 0) {
-        toast.error("A quantidade deve ser maior que zero")
-        return
-      }
-  
-      const selectedProduct = products.find(p => p.id === formData.productId)
-      const selectedBranch = branches.find(b => b.id === formData.branchId)
-  
-      await window.api.createMovement({
-        product_id: formData.productId,
-        branch_id: formData.branchId,
-        type: "entrada",
-        quantity,
-        notes: formData.notes,
-        invoice_number: formData.invoiceNumber,
-        product_name: selectedProduct?.name || "",
-        product_code: selectedProduct?.code || "",
-        branch_name: selectedBranch?.name || "",
-      })
-  
-      setFormData({ productId: "", branchId: "", quantity: "", notes: "", invoiceNumber: "" })
-      setProducts(await window.api.getProducts())
-      loadRecentEntries()
-      toast.success("Entrada registrada com sucesso!")
-    } catch (error) {
-      toast.error("Falha ao registrar entrada: " + error)
-      return
+    e.preventDefault();
+
+    const quantity = Number.parseInt(formData.quantity);
+    if (quantity <= 0) {
+      toast.error("A quantidade deve ser maior que zero");
+      return;
     }
-  }
+
+    const selectedProduct = products.find(p => p.id === formData.productId);
+    const selectedBranch = branches.find(b => b.id === formData.branchId);
+
+    const res = await window.api.createMovement({
+      product_id: formData.productId,
+      branch_id: formData.branchId,
+      type: "entrada",
+      quantity,
+      notes: formData.notes,
+      invoice_number: formData.invoiceNumber,
+      product_name: selectedProduct?.name || "",
+      product_code: selectedProduct?.code || "",
+      branch_name: selectedBranch?.name || "",
+    });
+
+    if (!res.success) {
+      toast.error(res.error || "Falha ao registrar entrada");
+      return;
+    }
+
+    // Atualiza dados
+    setFormData({ productId: "", branchId: "", quantity: "", notes: "", invoiceNumber: "" });
+
+    const productsRes = await window.api.getProducts();
+    if (productsRes.success) setProducts(productsRes.data || []);
+
+    loadRecentEntries();
+    toast.success("Entrada registrada com sucesso!");
+  };
+
+  const isFormEmpty = Object.values(formData).every(value => !value);
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
@@ -187,7 +208,8 @@ export default function ProductInputPage() {
 
           <button
             type="submit"
-            className="px-6 py-2.5 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+            disabled={isFormEmpty}
+            className="px-6 py-2.5 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <TrendingUp className="w-4 h-4" />
             Registrar Entrada

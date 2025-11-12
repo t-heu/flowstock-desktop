@@ -39,7 +39,8 @@ export const getStats = async (user: any, branchFilter?: string): Promise<Stats>
     }
 
     // 🔹 Filtra filial
-    if (branchFilter) {
+    // 🔹 Filtra filial (somente se branchFilter definido e diferente de "ALL")
+    if (branchFilter && branchFilter !== "ALL") {
       movements = movements.filter(m => m.branch_id === branchFilter);
       branchStock = branchStock.filter(b => b.branch_id === branchFilter);
     }

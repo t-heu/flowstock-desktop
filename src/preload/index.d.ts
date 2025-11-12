@@ -15,9 +15,9 @@ declare global {
       getCurrentUser: () => Promise<{ success: boolean; user?: any }>
 
       // 📦 Produtos
-      getProducts: () => Promise<Product[]>
+      getProducts: () => Promise<any>
       createProduct: (product: IProduct) => Promise<any>
-      updateProduct: (id: string, updates: Partial<Product>) => Promise<any>
+      updateProduct: ({id, updates}: {id: string, updates: Partial<Product>}) => Promise<any>
       deleteProduct: (id: string) => Promise<any>
 
       // 🏬 Filiais

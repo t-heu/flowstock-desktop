@@ -1,5 +1,7 @@
 import { useState } from "react"
+import toast from "react-hot-toast"
 import { User, Save } from "lucide-react"
+
 import { useAuth } from "../context/auth-provider"
 
 export default function ProfilePage() {
@@ -13,31 +15,34 @@ export default function ProfilePage() {
     email: user?.email || "",
   })
   const [isSaving, setIsSaving] = useState(false)
-  const [message, setMessage] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSaving(true)
-    setMessage(null)
 
     try {
+      if (!user) {
+        throw new Error("Usuário não autenticado.")
+      }
+
       const payload = { ...formData }
       if (!payload.password) delete payload.password
-
-      if (!user) throw new Error("Usuário não autenticado.")
 
       const result = await window.api.updateUser({
         id: user.id,
         updates: payload,
       })
 
-      if (!result.success) {
-        setMessage("Erro ao atualizar perfil.")
+      if (result?.success) {
+        toast.success("Perfil atualizado com sucesso!")
       } else {
-        setMessage("Perfil atualizado com sucesso!")
+        const errorMsg = result?.error || "Erro ao atualizar perfil."
+        toast.error(errorMsg)
       }
-    } catch (err: any) {
-      setMessage("Erro: " + err.message)
+    } catch (error: any) {
+      console.error("Erro ao atualizar perfil:", error)
+      const errMsg = error?.message || "Falha ao atualizar perfil."
+      toast.error(errMsg)
     } finally {
       setIsSaving(false)
     }
@@ -78,16 +83,6 @@ export default function ProfilePage() {
             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
           />
-
-          {message && (
-            <div
-              className={`p-3 rounded-md ${
-                message.includes("sucesso") ? "bg-green-600 text-white" : "bg-red-600 text-white"
-              }`}
-            >
-              {message}
-            </div>
-          )}
 
           <button
             type="submit"

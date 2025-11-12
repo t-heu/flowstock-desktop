@@ -16,16 +16,25 @@ export default function BranchStockPage() {
   const [filialSelecionada, setFilialSelecionada] = useState<string>("");
 
   useEffect(() => {
-    async function carregar() {
+    async function load() {
       try {
-        const res = await window.api.getBranchStock();
-        setDados(res.data);
-      } catch (err) {
-        toast.error("Erro ao carregar branchStock:" + err);
+        const result = await window.api.getBranchStock()
+
+        if (!result?.success) {
+          const msg = result?.error || "Erro ao carregar branch stock."
+          toast.error(msg)
+          return
+        }
+
+        setDados(result.data || [])
+      } catch (error: any) {
+        console.error("Erro ao carregar branchStock:", error)
+        toast.error("Falha ao carregar branchStock: " + (error?.message || "Erro desconhecido"))
       }
     }
-    carregar();
-  }, []);
+
+    load()
+  }, [])
 
   const dadosFiltrados = filialSelecionada
     ? dados.filter((d) => d.branchName === filialSelecionada)

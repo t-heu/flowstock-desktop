@@ -2,9 +2,10 @@ import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import fetch from 'node-fetch'; // se estiver no Node 18+ pode usar global fetch
-import { z, ZodError } from "zod";
 
 import icon from '../../resources/icon.png?asset'
+
+import { safeIpc } from "./ipc-utils";
 
 import { Notice } from "../shared/types";
 import { setTokenForWindow, getTokenForWindow, clearTokenForWindow } from "./authSession";
@@ -19,54 +20,10 @@ import { createUser, updateUser, getUsers, deleteUser } from "./services/users"
 import { getDetailedReport } from "./services/reports"
 
 import { authenticated } from "./authMiddleware";
-
-// Schemas de validação
-const LoginSchema = z.object({
-  username: z.string().min(1).max(80),
-  password: z.string().min(1).max(120)
-});
-const IdSchema = z.string().uuid();
-const UpdateProductSchema = z.object({
-  id: z.string().uuid(),
-  updates: z.object({
-    name: z.string().min(1).max(120).optional(),
-    price: z.number().nonnegative().optional()
-  })
-});
-const MovementSchema = z.object({
-  product_id: z.string().uuid(),
-  branch_id: z.string().uuid(),
-  // Destino pode existir só se for transferência, não é obrigatório
-  destination_branch_id: z.string().uuid().optional(),
-  quantity: z.number().int().min(1).max(999999), // limite pra evitar enviar "1 milhão" por acidente
-  type: z.enum(["entrada", "saida"]),
-  notes: z.string().max(500).optional(),           // protege contra entrada gigante
-  invoice_number: z.string().max(64).optional(),   // protege contra colisão de XML & injeções
-});
-const ProductSchema = z.object({
-  name: z.string().min(3, "Nome obrigatório"),
-  code: z.string().min(2, "Código obrigatório"),
-  description: z.string().optional(),
-  unit: z.string().min(2, "Unidade obrigatória"),
-  department: z.enum(["rh", "transferencia", ""])
-});
-const CreateUserSchema = z.object({
-  name: z.string().min(1),
-  username: z.string().min(3),
-  email: z.string().email(),
-  role: z.enum(["admin", "operator", "manager"]).default("operator"),
-  department: z.string().nullable().optional().transform(val => val ?? null),
-  branchId: z.string().uuid("branchId inválido"),
-});
-const BranchSchema = z.object({
-  name: z.string().min(1, "Nome é obrigatório"),
-  code: z.string().min(1, "Código é obrigatório").max(10, "Código muito longo"),
-});
-const ReportFilterSchema = z.object({
-  branchId: z.string().uuid().or(z.literal("all")),
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
-});
+import { 
+  ProductSchema, UpdateProductSchema, BranchSchema, IdSchema,
+  MovementSchema, CreateUserSchema, ReportFilterSchema, LoginSchema
+} from "./schemas";
 
 app.disableHardwareAcceleration();
 
@@ -140,6 +97,7 @@ app.whenReady().then(() => {
   })
 
   // IPC test
+  /*
   ipcMain.handle("get-stats", authenticated(async (user, branch) => {
     return await getStats(user, branch);
   }));
@@ -251,7 +209,92 @@ app.whenReady().then(() => {
       const { branchId, startDate, endDate } = ReportFilterSchema.parse(raw);
       return await getDetailedReport(branchId, startDate, endDate);
     })
-  );
+  );*/
+  // STATS
+  ipcMain.handle("get-stats", authenticated(safeIpc(getStats, "Erro ao obter estatísticas")));
+  ipcMain.handle("get-current-user", authenticated(safeIpc(getCurrentUser, "Erro ao obter usuário atual")));
+
+  // LOGIN / LOGOUT
+  ipcMain.handle("auth:login", safeIpc(async (event, data) => {
+    const { username, password } = LoginSchema.parse(data);
+    const result = await loginUser(username, password);
+    if (!result || !result.success) throw new Error("Credenciais inválidas");
+    setTokenForWindow(event.sender.id, result.token);
+    return result;
+  }, "Erro ao fazer login"));
+
+  ipcMain.handle("auth:logout", safeIpc(async (event) => {
+    clearTokenForWindow(event.sender.id);
+    return { success: true };
+  }, "Erro ao fazer logout"));
+
+  ipcMain.handle("auth:get-token", safeIpc(async (event) => {
+    return getTokenForWindow(event.sender.id) ?? null;
+  }, "Erro ao obter token"));
+
+  // PRODUTOS
+  ipcMain.handle("get-products", authenticated(safeIpc(getProducts, "Erro ao carregar produtos")));
+
+  ipcMain.handle("create-product", authenticated(safeIpc(async (user, data) => {
+    const product = ProductSchema.parse(data);
+    return await createProduct(user, product);
+  }, "Erro ao criar produto")));
+
+  ipcMain.handle("update-product", authenticated(safeIpc(async (user, payload) => {
+    const { id, updates } = UpdateProductSchema.parse(payload);
+    
+    return await updateProduct(user, id, updates);
+  }, "Erro ao atualizar produto")));
+
+  ipcMain.handle("delete-product", authenticated(safeIpc(async (user, id) => {
+    const validId = IdSchema.parse(id);
+    return await deleteProduct(user, validId);
+  }, "Erro ao excluir produto")));
+
+  // FILIAIS
+  ipcMain.handle("get-branches", authenticated(safeIpc(getBranches, "Erro ao obter filiais")));
+  ipcMain.handle("add-branch", authenticated(safeIpc(async (_, data) => {
+    const branch = BranchSchema.parse(data);
+    return await addBranch(branch);
+  }, "Erro ao adicionar filial")));
+  ipcMain.handle("delete-branch", authenticated(safeIpc(async (_, id) => {
+    const validId = IdSchema.parse(id);
+    return await deleteBranch(validId);
+  }, "Erro ao excluir filial")));
+
+  // MOVIMENTOS
+  ipcMain.handle("get-movements", authenticated(safeIpc(getMovements, "Erro ao obter movimentos")));
+  ipcMain.handle("create-movement", authenticated(safeIpc(async (_, movement) => {
+    const valid = MovementSchema.parse(movement);
+    return await createMovement(valid);
+  }, "Erro ao criar movimento")));
+  ipcMain.handle("delete-movement", authenticated(safeIpc(async (_, id) => {
+    const validId = IdSchema.parse(id);
+    return await deleteMovement(validId);
+  }, "Erro ao excluir movimento")));
+  ipcMain.handle("get-branch-stock", authenticated(safeIpc(getBranchStock, "Erro ao obter estoque")));
+
+  // USERS
+  ipcMain.handle("get-users", authenticated(safeIpc(getUsers, "Erro ao carregar usuários")));
+  ipcMain.handle("create-user", authenticated(safeIpc(async (_, data) => {
+    const parsed = CreateUserSchema.parse(data);
+    await createUser(parsed);
+    return { success: true };
+  }, "Erro ao criar usuário")));
+  ipcMain.handle("update-user", authenticated(safeIpc(async (_, { id, updates }) => {
+    const validId = IdSchema.parse(id);
+    return await updateUser(validId, updates);
+  }, "Erro ao atualizar usuário")));
+  ipcMain.handle("delete-user", authenticated(safeIpc(async (_, id) => {
+    const validId = IdSchema.parse(id);
+    return await deleteUser(validId);
+  }, "Erro ao excluir usuário")));
+
+  // RELATÓRIOS
+  ipcMain.handle("get-detailed-report", authenticated(safeIpc(async (_, raw) => {
+    const { branchId, startDate, endDate } = ReportFilterSchema.parse(raw);
+    return await getDetailedReport(branchId, startDate, endDate);
+  }, "Erro ao gerar relatório detalhado")));
 
   // 🔔 Buscar aviso remoto
   ipcMain.handle('fetch-notice', async (_event): Promise<Notice | null> => {

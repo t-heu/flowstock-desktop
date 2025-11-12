@@ -37,7 +37,7 @@ export const updateProduct = async (user: any, id: string, updates: Partial<Prod
 
   const { data: product, error: fetchErr } = await supabase.from("products").select("*").eq("id", id).single();
   if (fetchErr || !product) return { success: false, error: "Produto não encontrado" };
-  if (product.department !== user.department) return { success: false, error: "Você não pode alterar produtos de outro departamento" };
+  if (user.role !== 'admin' && product.department !== user.department) return { success: false, error: "Você não pode alterar produtos de outro departamento" };
 
   const { error } = await supabase.from("products").update(updates).eq("id", id);
   if (error) throw error;
@@ -53,7 +53,9 @@ export const deleteProduct = async (user: any, id: string) => {
 
   const { data: product, error: fetchErr } = await supabase.from("products").select("*").eq("id", id).single();
   if (fetchErr || !product) return { success: false, error: "Produto não encontrado" };
-  if (product.department !== user.department) return { success: false, error: "Você não pode deletar produtos de outro departamento" };
+  if (user.role !== 'admin' && product.department !== user.department) {
+    return { success: false, error: "Você não pode deletar produtos de outro departamento" };
+  }
 
   const { error } = await supabase.from("products").delete().eq("id", id);
   if (error) throw error;

@@ -1,10 +1,11 @@
 {
   "id": "notice-2025-11-05-1",
   "title": "Manutenção agendada",
-  "message": "Hoje, 05/11, faremos manutenção entre 23:00 e 00:30. App pode ficar lento.",
+  "message": "Hoje, 11/11, faremos manutenção entre 23:00 e 00:30. App pode ficar lento.",
   "level": "info",
   "showOnce": false,
   "expiresAt": "2025-12-06T00:30:00Z",
   "minAppVersion": "1.2.0",
-  "app": "flowstock"
+  "app": "flowstock",
+  "link": null
 }

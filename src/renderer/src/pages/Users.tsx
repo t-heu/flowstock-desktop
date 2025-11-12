@@ -34,78 +34,110 @@ export default function UsersPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        const [branchesData, usersData] = await Promise.all([window.api.getBranches(), window.api.getUsers()]);
-        setBranches(branchesData);
-        setUsers(usersData);
-      } catch (err) {
-        toast.error("Falha ao carregar dados. Tente novamente mais tarde.");
+        const [branchesData, usersData] = await Promise.all([
+          window.api.getBranches(),
+          window.api.getUsers()
+        ])
+
+        setBranches(branchesData.data || [])
+        setUsers(usersData.data || [])
+      } catch (error: any) {
+        console.error("Erro ao carregar dados iniciais:", error)
+        toast.error("Falha ao carregar dados. Tente novamente mais tarde.")
       }
     }
+
     load()
   }, [])
 
-  // 🔹 Cria novo usuário
+  // 🔹 Criar novo usuário
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
     if (!formData.name || !formData.email || !formData.branchId) {
-      toast.error("Preencha todos os campos obrigatórios");
-      return;
+      toast.error("Preencha todos os campos obrigatórios.")
+      return
     }
 
     try {
-      const result = await window.api.createUser(formData);
-
-      if (!result.success) {
-        toast.error(result.message);
-        return;
+      const result = await window.api.createUser(formData)
+      
+      if (!result?.success) {
+        const msg = result?.error || "Erro ao criar usuário."
+        toast.error(msg)
+        return
       }
 
-      // Reseta formulário
-      setFormData({ name: "", username: "", email: "", department: "", branchId: "", role: "operator"});
+      // ✅ Reseta formulário
+      setFormData({
+        name: "",
+        username: "",
+        email: "",
+        department: "",
+        branchId: "",
+        role: "operator"
+      })
 
-      toast.success("Usuário criado com sucesso!");
-    } catch (err: any) {
-      toast.error('Error: ' + err.message || "Erro ao criar usuário");
+      // Atualiza lista local sem recarregar toda a página
+      const updatedUsers = await window.api.getUsers()
+      setUsers(updatedUsers || [])
+
+      toast.success("Usuário criado com sucesso!")
+    } catch (error: any) {
+      console.error("Erro ao criar usuário:", error)
+      toast.error("Erro: " + (error?.message || "Falha ao criar usuário."))
     }
-  };
+  }
 
+  // 🔹 Editar usuário
   const handleEditSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editUser) return;
+    e.preventDefault()
+    if (!editUser) return
 
-    const payload: any = { ...editUser };
-
-    // 🔹 Se a senha estiver vazia, não enviar
-    if (!payload.password) {
-      delete payload.password;
-    }
+    const payload = { ...editUser }
+    if (!payload.password) delete payload.password
 
     try {
-      const result = await window.api.updateUser({ id: editUser.id, updates: payload });
+      const result = await window.api.updateUser({
+        id: editUser.id,
+        updates: payload
+      })
 
-      if (!result.success) {
-        toast.error(result.message);
-        return;
+      if (!result?.success) {
+        const msg = result?.error || "Erro ao atualizar usuário."
+        toast.error(msg)
+        return
       }
 
       // Atualiza lista local
-      setUsers(users.map(u => u.id === editUser.id ? { ...u, ...payload } : u));
-      setEditUser(null);
-      toast.success("Usuário atualizado com sucesso!");
-    } catch (err: any) {
-      toast.error("Erro ao atualizar usuário: " + err.message);
-    }
-  };
+      setUsers(users.map(u => (u.id === editUser.id ? { ...u, ...payload } : u)))
+      setEditUser(null)
 
-  // 🔹 Remove usuário
+      toast.success("Usuário atualizado com sucesso!")
+    } catch (error: any) {
+      console.error("Erro ao atualizar usuário:", error)
+      toast.error("Erro: " + (error?.message || "Falha ao atualizar usuário."))
+    }
+  }
+
+  // 🔹 Remover usuário
   const handleDelete = async (id: string) => {
+    if (!confirm("Tem certeza que deseja excluir este usuário?")) return
+
     try {
-      await window.api.deleteUser(id)
+      const result = await window.api.deleteUser(id)
+
+      if (!result?.success) {
+        const msg = result?.error || "Erro ao excluir usuário."
+        toast.error(msg)
+        return
+      }
+
       setUsers(users.filter(u => u.id !== id))
       toast.success("Usuário excluído com sucesso!")
-    } catch(e) {
-      toast.error("Falha ao salvar o movimento:" + e)
+    } catch (error: any) {
+      console.error("Erro ao excluir usuário:", error)
+      toast.error("Falha ao excluir usuário: " + (error?.message || "Erro desconhecido"))
     }
   }
 

@@ -27,18 +27,36 @@ export default function ReportsPage() {
 
   useEffect(() => {
     async function loadData() {
-      setBranches(await window.api.getBranches() || [])
-      generateReport()
+      try {
+        const {data} = await window.api.getBranches()
+        setBranches(data || [])
+        await generateReport()
+      } catch (error: any) {
+        console.error("Erro ao carregar filiais:", error)
+        toast.error("Falha ao carregar filiais.")
+      }
     }
+
     loadData()
   }, [])
 
   const generateReport = async () => {
     try {
-      const report = await window.api.getDetailedReport(selectedBranch, startDate, endDate)
-      setReportData(report.data)
-    } catch (err) {
-      toast.error("Erro ao gerar relatório:" + err)
+      const result = await window.api.getDetailedReport(selectedBranch, startDate, endDate)
+      
+
+      if (!result?.success) {
+        const msg = result?.error || "Erro ao gerar relatório."
+        toast.error(msg)
+        setReportData([])
+        return
+      }
+
+      setReportData(result?.data || [])
+    } catch (error: any) {
+      console.error("Erro ao gerar relatório:", error)
+      toast.error("Erro ao gerar relatório: " + (error?.message || "Falha desconhecida"))
+      setReportData([])
     }
   }
 

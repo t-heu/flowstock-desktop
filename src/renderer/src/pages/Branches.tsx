@@ -17,9 +17,9 @@ export default function BranchesPage() {
   }, [])
 
   const loadBranches = async () => {
-    const result = await window.api.getBranches()
-    if (result) setBranches(result)
-    else toast.error(result.error || "Erro ao carregar filiais 😢")
+    const {data, error} = await window.api.getBranches()
+    if (data) setBranches(data)
+    else toast.error(error || "Erro ao carregar filiais 😢")
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -29,13 +29,13 @@ export default function BranchesPage() {
       return
     }
 
-    const result = await window.api.addBranch(formData)
-    if (result.success) {
+    const {error, success} = await window.api.addBranch(formData)
+    if (success) {
       setFormData({ name: "", code: "" })
       await loadBranches()
       toast.success("Filial criada com sucesso! 🎉")
     } else {
-      toast.error(result.error || "Erro ao criar filial ❌")
+      toast.error(error || "Erro ao criar filial ❌")
     }
   }
 

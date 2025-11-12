@@ -37,7 +37,7 @@ function AppContent() {
       </div>
     );
   }
-  if (!user) return <Login />
+  if (!user) return <Login onNavigate={setCurrentPage} />
 
   return (
     <div className="flex h-screen overflow-hidden bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-50">

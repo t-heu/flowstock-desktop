@@ -1,26 +1,34 @@
 import { useState, type FormEvent } from "react"
 import { Lock, User } from "lucide-react"
+import toast from "react-hot-toast"
 
 import { useAuth } from "../context/auth-provider"
 import { NoticeModal } from '../components/NoticeModal';
 
 import logo from "../assets/icon.png";
 
-export default function LoginPage() {
+export default function LoginPage({onNavigate}: {onNavigate: (page: string) => void}) {
   const { login } = useAuth()
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    setError("")
     setLoading(true)
 
-    const success = await login(username, password)
-    if (!success) setError("Usuário ou senha inválidos")
-    setLoading(false)
+    try {
+      const success = await login(username, password)
+      if (!success) {
+        toast.error("Usuário ou senha inválidos")
+      }
+      onNavigate('dashboard');
+    } catch (err: any) {
+      console.error("Erro ao fazer login:", err)
+      toast.error("Falha ao tentar logar: " + (err?.message || "Erro desconhecido"))
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -85,13 +93,6 @@ export default function LoginPage() {
                 />
               </div>
             </div>
-
-            {/* Erro */}
-            {error && (
-              <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg text-sm text-center">
-                {error}
-              </div>
-            )}
 
             {/* Botão */}
             <button

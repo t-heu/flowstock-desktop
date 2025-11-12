@@ -12,35 +12,54 @@ export default function DashboardPage() {
     totalExits: 0,
     totalBranches: 0,
   });
-
   const [branches, setBranches] = useState<{ id: string; name: string }[]>([]);
   const [selectedBranch, setSelectedBranch] = useState<string>('');
 
   useEffect(() => {
-    async function loadStats() {
-      try {
-        const data = await window.api.getStats(selectedBranch);
-
-        setStats(data);
-      } catch (err) {
-        toast.error("Erro ao carregar estatísticas:" + err);
-      }
-    }
-
-    loadStats();
-  }, [selectedBranch]);
-
-  useEffect(() => {
     async function loadBranches() {
       try {
-        const list = await window.api.getBranches();
-        setBranches(list);
-      } catch (err) {
-        toast.error("Erro ao carregar filiais:" + err);
+        const result = await window.api.getBranches()
+        const data = Array.isArray(result) ? result : result?.data || []
+
+        setBranches(data)
+
+        // Seleciona a primeira filial automaticamente se não tiver
+        if (data.length > 0 && !selectedBranch) {
+          setSelectedBranch(data[0].id)
+        }
+      } catch (error: any) {
+        console.error("Erro ao carregar filiais:", error)
+        toast.error("Falha ao carregar filiais: " + (error?.message || "Erro desconhecido"))
+        setBranches([])
       }
     }
-    loadBranches();
-  }, []);
+
+    loadBranches()
+  }, [])
+
+  useEffect(() => {
+    async function loadStats() {
+      if (!selectedBranch) return
+
+      try {
+        const result = await window.api.getStats(selectedBranch)
+        const data = result?.data || result || []
+        setStats(data)
+      } catch (error: any) {
+        console.error("Erro ao carregar estatísticas:", error)
+        toast.error("Falha ao carregar estatísticas: " + (error?.message || "Erro desconhecido"))
+        setStats({
+          totalProducts: 0,
+          totalStock: 0,
+          totalEntries: 0,
+          totalExits: 0,
+          totalBranches: 0,
+        })
+      }
+    }
+
+    loadStats()
+  }, [selectedBranch])
 
   if (!stats) {
     return (
@@ -99,7 +118,7 @@ export default function DashboardPage() {
           onChange={(e) => setSelectedBranch(e.target.value)}
           className="px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white w-full md:w-64"
         >
-          <option value="">Todas as Filiais</option>
+          <option value="ALL">Todas as Filiais</option>
           {branches.map((b) => (
             <option key={b.id} value={b.id}>{b.name}</option>
           ))}

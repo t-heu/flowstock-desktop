@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react"
+import toast from "react-hot-toast"
 
 export interface User {
   id: string
@@ -42,26 +43,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     loadUser()
   }, [])
-
+  
   async function login(username: string, password: string) {
     try {
       const res = await window.api.loginUser(username, password)
 
-      if (res.success) {
+      if (res?.success) {
         setUser(res.user)
+        toast.success("Login realizado com sucesso!")
         return true
       }
 
       return false
-    } catch (err) {
-      console.error(err)
+    } catch (err: any) {
+      console.error("Erro no login:", err)
+      toast.error("Falha ao tentar logar: " + (err?.message || "Erro desconhecido"))
       return false
     }
   }
 
   async function logout() {
-    setUser(null)
-    await window.api.logout() // ✅ remove token do store
+    try {
+      setUser(null)
+      await window.api.logout() // ✅ remove token do store
+      toast.success("Logout realizado com sucesso!")
+    } catch (err: any) {
+      console.error("Erro ao deslogar:", err)
+      toast.error("Falha ao deslogar: " + (err?.message || "Erro desconhecido"))
+    }
   }
 
   return (
