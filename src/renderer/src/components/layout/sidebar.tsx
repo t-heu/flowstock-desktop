@@ -8,7 +8,8 @@ import {
   TrendingUp,
   TrendingDown,
   Users,
-  Warehouse
+  Warehouse,
+  User
 } from "lucide-react"
 
 import { useAuth } from '../../context/auth-provider'
@@ -130,6 +131,21 @@ export default function Sidebar({
               Usuários
             </button>
           )}
+
+          <button
+            onClick={() => {
+              onNavigate("profile")
+              setIsOpen(false)
+            }}
+            className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-sm font-medium ${
+              currentPage === "profile"
+                ? "bg-black text-white"
+                : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700"
+            }`}
+          >
+            <User className="w-5 h-5" />
+            Meu Perfil
+          </button>
         </nav>
 
         {/* User Section */}

@@ -2,7 +2,7 @@ import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import fetch from 'node-fetch'; // se estiver no Node 18+ pode usar global fetch
-import { z } from "zod";
+import { z, ZodError } from "zod";
 
 import icon from '../../resources/icon.png?asset'
 
@@ -44,10 +44,10 @@ const MovementSchema = z.object({
   invoice_number: z.string().max(64).optional(),   // protege contra colisão de XML & injeções
 });
 const ProductSchema = z.object({
-  name: z.string().min(1, "Nome obrigatório"),
-  code: z.string().min(1, "Código obrigatório"),
+  name: z.string().min(3, "Nome obrigatório"),
+  code: z.string().min(2, "Código obrigatório"),
   description: z.string().optional(),
-  unit: z.string().min(1, "Unidade obrigatória"),
+  unit: z.string().min(2, "Unidade obrigatória"),
   department: z.enum(["rh", "transferencia", ""])
 });
 const CreateUserSchema = z.object({
@@ -176,11 +176,18 @@ app.whenReady().then(() => {
   }));
 
   ipcMain.handle("create-product", authenticated(async (user, data) => {
-    if (user.role !== "admin") throw new Error("Sem permissão");
-
-    const product = ProductSchema.parse(data);
-
-    return await createProduct(user, product);
+    try {
+      if (user.role !== "admin") throw new Error("Sem permissão");
+  
+      const product = ProductSchema.parse(data);
+  
+      return await createProduct(user, product);
+    } catch (err: any) {
+      if (err instanceof ZodError) {
+        return { success: false, message: err.issues[0].message ?? "Dados inválidos" };
+      }
+      return { success: false, message: err?.message ?? "Erro ao criar produto" };
+    }
   }));
 
   ipcMain.handle("update-product", authenticated(async (user, payload) => {
@@ -220,9 +227,20 @@ app.whenReady().then(() => {
   // USERS
   ipcMain.handle("get-users", authenticated(async () => await getUsers()));
   ipcMain.handle("create-user", authenticated(async (_, data) => {
-    const parsed = CreateUserSchema.parse(data);
-    return await createUser(parsed);
+    try {
+      const parsed = CreateUserSchema.parse(data);
+
+      await createUser(parsed);
+
+      return { success: true };
+    } catch (err: any) {
+      if (err instanceof ZodError) {
+        return { success: false, message: err.issues[0].message ?? "Dados inválidos" };
+      }
+      return { success: false, message: err?.message ?? "Erro ao criar usuário" };
+    }
   }));
+
   ipcMain.handle("update-user", authenticated(async (_, { id, updates }) => await updateUser(IdSchema.parse(id), updates)));
   ipcMain.handle("delete-user", authenticated(async (_, id) => await deleteUser(IdSchema.parse(id))));
 

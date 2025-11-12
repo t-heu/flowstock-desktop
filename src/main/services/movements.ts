@@ -1,33 +1,45 @@
 import { v4 as uuidv4 } from "uuid";
 
 import { supabase } from "../supabaseClient";
-import { loadCache, getProductFromCache, getBranchFromCache } from "../cache";
+import { 
+  loadCache, 
+  getProductFromCache, 
+  getBranchFromCache, 
+  invalidateBranchStockCache,
+  invalidateMovementsCache,
+  getMovementsCache,
+  setMovementsCache
+} from "../cache";
 
-/**
- * 🔹 Buscar lista de movimentos (com produtos e filiais)
- */
 export const getMovements = async (user: any, typeFilter?: "entrada" | "saida") => {
   try {
     await loadCache();
 
-    let query = supabase
+    // ⚡ Usa getter em vez de referencia direta
+    const cached = getMovementsCache();
+    if (cached) {
+      let data = cached;
+
+      if (typeFilter) {
+        data = data.filter(m => m.type === typeFilter);
+      }
+
+      if (user.role !== "admin") {
+        data = data.filter(m => m.product_department === user.department);
+      }
+
+      return { success: true, data };
+    }
+
+    // 🔹 Busca do banco (apenas uma vez)
+    const { data: rows, error } = await supabase
       .from("movements")
       .select("*")
-      .order("created_at", { ascending: false })
-      .limit(50);
+      .order("created_at", { ascending: false });
 
-    if (typeFilter) {
-      query = query.eq("type", typeFilter);
-    }
-
-    if (user.role !== "admin") {
-      query = query.eq("product_department", user.department);
-    }
-
-    const { data: rows, error } = await query;
     if (error) throw error;
 
-    const movements = (rows || []).map((m) => ({
+    const mapped = (rows || []).map((m) => ({
       ...m,
       product: getProductFromCache(m.product_id),
       branch: getBranchFromCache(m.branch_id),
@@ -36,7 +48,15 @@ export const getMovements = async (user: any, typeFilter?: "entrada" | "saida") 
         : "-",
     }));
 
-    return { success: true, data: movements };
+    // salva no cache via setter
+    setMovementsCache(mapped);
+
+    // aplica filtros de retorno (se a chamada pediu)
+    let result = mapped;
+    if (typeFilter) result = result.filter(m => m.type === typeFilter);
+    if (user.role !== "admin") result = result.filter(m => m.product_department === user.department);
+
+    return { success: true, data: result };
   } catch (error) {
     console.error("Erro ao buscar movimentos:", error);
     throw new Error("Erro ao buscar movimentos");
@@ -136,6 +156,9 @@ export const createMovement = async (movement: {
 
     if (insertMovementErr) throw insertMovementErr;
 
+    invalidateMovementsCache();
+    invalidateBranchStockCache();
+
     return { success: true, data: inserted };
   } catch (error: any) {
     console.error("Erro ao criar movimento:", error);
@@ -146,130 +169,15 @@ export const createMovement = async (movement: {
 export const deleteMovement = async (id: string) => {
   try {
     const { error } = await supabase.from("movements").delete().eq("id", id);
+
     if (error) throw error;
+
+    invalidateMovementsCache();
+    invalidateBranchStockCache();
+
     return { success: true };
   } catch (error) {
     console.error("Erro ao deletar movimento:", error);
     throw new Error("Erro ao deletar movimento");
   }
 };
-
-/*import { adminDb } from "../firebase";
-import { loadCache, getProductFromCache, getBranchFromCache } from "../cache";
-import { Movement } from "../../shared/types";
-
-export const getMovements = async (user: any, typeFilter?: "entrada" | "saida") => {
-  try {
-    await loadCache(); // carrega produtos e branches
-
-    // Monta query
-    let query: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> = 
-      adminDb.collection("movements")
-        .orderBy("createdAt", "desc")
-        .limit(50);
-
-    if (typeFilter) query = query.where("type", "==", typeFilter);
-
-    // Filtra por departamento direto no Firestore se não for admin
-    if (user.role !== "admin") {
-      query = query.where("productDepartment", "==", user.department);
-    }
-
-    const snapshot = await query.get();
-
-    // Mapeia movimentos
-    const movements = snapshot.docs.map(d => ({ id: d.id, ...d.data() })) as Movement[];
-
-    // Faz o "join" com produto e branch via cache
-    const enriched = movements.map(m => ({
-      ...m,
-      product: getProductFromCache(m.productId),
-      branch: getBranchFromCache(m.branchId),
-    }));
-
-    return { success: true, data: enriched };
-  } catch (error) {
-    console.error("Erro ao buscar movimentos:", error);
-    throw new Error("Erro ao buscar movimentos");
-  }
-};
-
-export const createMovement = async (movement: Omit<Movement, "id" | "createdAt">): Promise<{
-  success: boolean;
-  data?: Movement;
-  error?: string;
-}> => {
-  try {
-    const product = getProductFromCache(movement.productId);
-    if (!product) throw new Error("Produto não encontrado");
-
-    const movementToAdd = {
-      ...movement,
-      createdAt: new Date().toISOString(),
-      productDepartment: product.department,
-    };
-
-    // Atualizar estoque da filial
-    if (movement.productId && movement.branchId) {
-      const stockRef = adminDb.collection("branchStock");
-      const stockSnap = await stockRef
-        .where("productId", "==", movement.productId)
-        .where("branchId", "==", movement.branchId)
-        .get();
-
-      let updatedQty = 0;
-
-      if (!stockSnap.empty) {
-        const stockDoc = stockSnap.docs[0];
-        const data = stockDoc.data();
-        const currentQty = data.quantity || 0;
-
-        // Impedir saída sem saldo
-        if (movement.type === "saida" && currentQty < Number(movement.quantity)) {
-          throw new Error(`Estoque insuficiente (disponível: ${currentQty})`);
-        }
-
-        // Atualiza quantidade
-        if (movement.type === "entrada") updatedQty = currentQty + Number(movement.quantity);
-        else if (movement.type === "saida") updatedQty = currentQty - Number(movement.quantity);
-
-        await stockDoc.ref.update({ quantity: Math.max(0, updatedQty) });
-      } else {
-        // Impedir saída sem registro
-        if (movement.type === "saida") {
-          throw new Error("Filial sem estoque desse produto");
-        }
-
-        // Criar novo registro
-        await stockRef.add({
-          productId: movement.productId,
-          branchId: movement.branchId,
-          quantity: Number(movement.quantity),
-          createdAt: new Date().toISOString(),
-        });
-      }
-    }
-
-    // Criar o movimento
-    const docRef = await adminDb.collection("movements").add(movementToAdd);
-    return { success: true, data: { id: docRef.id, ...movementToAdd } };
-  } catch (error) {
-    console.error("Erro ao criar movimento:", error);
-    throw new Error("Erro ao buscar filiais");
-  }
-};
-
-export const deleteMovement = async (id: string): Promise<{
-  success: boolean;
-  error?: string;
-}> => {
-  try {
-    if (!id) return { success: false, error: "ID é obrigatório" };
-    await adminDb.collection("movements").doc(id).delete();
-    return { success: true };;
-  } catch (error) {
-    console.error("Erro ao deletar movimento:", error);
-    throw new Error("Erro ao buscar filiais");
-  }
-};
-*/

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { UserPlus } from "lucide-react"
-import { Trash2 } from "lucide-react"
+import { Trash2, Pencil } from "lucide-react"
+import toast from "react-hot-toast"
 
 import departments from "../../../shared/config/departments.json";
 
@@ -20,12 +21,14 @@ interface User {
   }
   role: "admin" | "user" | "manager"
   department: string | null
+  password?: string
 }
 
 export default function UsersPage() {
   const [branches, setBranches] = useState<Branch[]>([])
   const [users, setUsers] = useState<User[]>([])
-  const [formData, setFormData] = useState<any>({ name: "", email: "", department: "", username: "", branchId: "", role: "user" })
+  const [formData, setFormData] = useState<any>({ name: "", email: "", department: "", username: "", branchId: "", role: "operator" })
+  const [editUser, setEditUser] = useState<User | null>(null);
 
   // 🔹 Carrega filiais e usuários
   useEffect(() => {
@@ -35,8 +38,7 @@ export default function UsersPage() {
         setBranches(branchesData);
         setUsers(usersData);
       } catch (err) {
-        console.error("Erro ao carregar usuários ou filiais:", err);
-        alert("Falha ao carregar dados. Tente novamente mais tarde.");
+        toast.error("Falha ao carregar dados. Tente novamente mais tarde.");
       }
     }
     load()
@@ -47,19 +49,52 @@ export default function UsersPage() {
     e.preventDefault();
 
     if (!formData.name || !formData.email || !formData.branchId) {
-      alert("Preencha todos os campos obrigatórios");
+      toast.error("Preencha todos os campos obrigatórios");
       return;
     }
 
     try {
-      await window.api.createUser(formData);
+      const result = await window.api.createUser(formData);
+
+      if (!result.success) {
+        toast.error(result.message);
+        return;
+      }
 
       // Reseta formulário
-      setFormData({ name: "", username: "", email: "", department: "", branchId: "", role: "user"});
+      setFormData({ name: "", username: "", email: "", department: "", branchId: "", role: "operator"});
 
-      alert("Usuário criado com sucesso!");
+      toast.success("Usuário criado com sucesso!");
     } catch (err: any) {
-      alert(err.message || "Erro ao criar usuário");
+      toast.error('Error: ' + err.message || "Erro ao criar usuário");
+    }
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editUser) return;
+
+    const payload: any = { ...editUser };
+
+    // 🔹 Se a senha estiver vazia, não enviar
+    if (!payload.password) {
+      delete payload.password;
+    }
+
+    try {
+      const result = await window.api.updateUser({ id: editUser.id, updates: payload });
+
+      if (!result.success) {
+        toast.error(result.message);
+        return;
+      }
+
+      // Atualiza lista local
+      setUsers(users.map(u => u.id === editUser.id ? { ...u, ...payload } : u));
+      setEditUser(null);
+      toast.success("Usuário atualizado com sucesso!");
+    } catch (err: any) {
+      toast.error("Erro ao atualizar usuário: " + err.message);
     }
   };
 
@@ -68,13 +103,66 @@ export default function UsersPage() {
     try {
       await window.api.deleteUser(id)
       setUsers(users.filter(u => u.id !== id))
+      toast.success("Usuário excluído com sucesso!")
     } catch(e) {
-      console.error("Falha ao salvar o movimento:", e)
+      toast.error("Falha ao salvar o movimento:" + e)
     }
   }
 
   return (
     <div className="space-y-6 p-6 max-w-6xl mx-auto">
+      {editUser && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-lg max-w-md w-full space-y-4">
+
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Editar Usuário</h2>
+
+            <form onSubmit={handleEditSubmit} className="space-y-3">
+              <input
+                type="text"
+                className="w-full px-3 py-2 rounded border dark:bg-slate-700 dark:text-white"
+                value={editUser.name}
+                onChange={(e) => setEditUser({ ...editUser, name: e.target.value })}
+              />
+
+              <input
+                type="email"
+                className="w-full px-3 py-2 rounded border dark:bg-slate-700 dark:text-white"
+                value={editUser.email}
+                onChange={(e) => setEditUser({ ...editUser, email: e.target.value })}
+              />
+
+              <input
+                type="password"
+                placeholder="Nova senha (opcional)"
+                className="w-full px-3 py-2 rounded border dark:bg-slate-700 dark:text-white"
+                value={editUser.password ?? ""}
+                onChange={(e) => setEditUser({ ...editUser, password: e.target.value })}
+              />
+
+              <select
+                className="w-full px-3 py-2 rounded border dark:bg-slate-700 dark:text-white"
+                value={editUser.role}
+                onChange={(e) => setEditUser({ ...editUser, role: e.target.value as User["role"] })}
+              >
+                <option value="operator">Operador</option>
+                <option value="admin">Administrador</option>
+                <option value="manager">Manager</option>
+              </select>
+
+              <div className="flex justify-end gap-2 pt-3">
+                <button type="button" onClick={() => setEditUser(null)} className="px-4 py-2 bg-gray-500 text-white rounded">
+                  Cancelar
+                </button>
+                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded">
+                  Salvar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       <div>
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Usuários</h1>
         <p className="text-gray-600 dark:text-gray-400 mt-2">Gerencie os usuários e atribua filiais</p>
@@ -132,7 +220,7 @@ export default function UsersPage() {
           <select
             value={formData.role}
             required
-            onChange={(e) => setFormData({ ...formData, role: e.target.value as "admin" | "user" | "manager" })}
+            onChange={(e) => setFormData({ ...formData, role: e.target.value as "admin" | "operator" | "manager" })}
             className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
           >
             <option value="operator">Operador</option>
@@ -151,6 +239,7 @@ export default function UsersPage() {
               <option key={d.id} value={d.id}>{d.label}</option>
             ))}
           </select>
+
           <button
             type="submit"
             className="w-full px-6 py-2.5 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
@@ -197,8 +286,20 @@ export default function UsersPage() {
                     </td>
                     <td className="p-4 text-sm text-gray-900 dark:text-white">{u.role}</td>
                     <td className="p-4 text-sm text-gray-900 dark:text-white">{u.department}</td>
-                    <td className="p-4 text-sm text-gray-900 dark:text-white">
-                      <button title="delete" onClick={() => handleDelete(u.id)} className="text-red-600 hover:text-red-800 transition-colors">
+                    <td className="p-4 text-sm text-gray-900 dark:text-white flex gap-3">
+                      <button
+                        title="Editar"
+                        onClick={() => setEditUser(u)}
+                        className="text-blue-600 hover:text-blue-800 transition-colors"
+                      >
+                        <Pencil className="w-5 h-5" />
+                      </button>
+
+                      <button
+                        title="Excluir"
+                        onClick={() => handleDelete(u.id)}
+                        className="text-red-600 hover:text-red-800 transition-colors"
+                      >
                         <Trash2 className="w-5 h-5" />
                       </button>
                     </td>

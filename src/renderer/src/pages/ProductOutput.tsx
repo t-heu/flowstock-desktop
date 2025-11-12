@@ -1,6 +1,7 @@
 import type React from "react"
 import { useEffect, useState } from "react"
 import { Package, AlertCircle, TrendingDown } from "lucide-react"
+import toast from "react-hot-toast"
 
 export interface Branch {
   id?: string;
@@ -58,24 +59,24 @@ export default function ProductOutputPage() {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    const quantity = Number.parseInt(formData.quantity)
-    if (quantity <= 0) {
-      alert("A quantidade deve ser maior que zero")
-      return
-    }
-
-    const selectedProduct = products.find(p => p.id === formData.productId)
-    const branchOrigem = branches.find(b => b.id === formData.branchId)
-    const branchDestino = branches.find(b => b.name === formData.destinationBranchName)
-
-    if (!selectedProduct || !branchOrigem || !branchDestino) {
-      alert("Selecione produto e filiais válidos")
-      return
-    }
-
     try {
+      e.preventDefault()
+
+      const quantity = Number.parseInt(formData.quantity)
+      if (quantity <= 0) {
+        toast.error("A quantidade deve ser maior que zero")
+        return
+      }
+
+      const selectedProduct = products.find(p => p.id === formData.productId)
+      const branchOrigem = branches.find(b => b.id === formData.branchId)
+      const branchDestino = branches.find(b => b.name === formData.destinationBranchName)
+
+      if (!selectedProduct || !branchOrigem || !branchDestino) {
+        toast.error("Selecione produto e filiais válidos")
+        return
+      }
+
       await window.api.createMovement({
         product_id: formData.productId,
         branch_id: formData.branchId,
@@ -92,9 +93,9 @@ export default function ProductOutputPage() {
       setSelectedProduct(null)
       setProducts(await window.api.getProducts())
       loadRecentExits()
-      alert("Saída registrada com sucesso!")
+      toast.success("Saída registrada com sucesso!")
     } catch (err: any) {
-      alert(err.message || "Erro ao registrar saída")
+      toast.error(err.message || "Erro ao registrar saída")
     }
   }
 

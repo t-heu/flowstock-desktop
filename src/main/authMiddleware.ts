@@ -33,6 +33,6 @@ export function authenticated(handler) {
       throw new Error("Sessão expirada, faça login novamente");
     }
 
-    return handler(decoded, ...args); // `decoded` contém { id, role, department, branchId }
+    return await handler(decoded, ...args); // `decoded` contém { id, role, department, branchId }
   };
 }

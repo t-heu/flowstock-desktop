@@ -1,6 +1,8 @@
 import type React from "react"
 import { useEffect, useState } from "react"
 import { Package, TrendingUp } from "lucide-react"
+import toast from "react-hot-toast"
+import { ca } from "zod/locales";
 
 export interface Branch {
   id?: string;
@@ -47,33 +49,38 @@ export default function ProductInputPage() {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    const quantity = Number.parseInt(formData.quantity)
-    if (quantity <= 0) {
-      alert("A quantidade deve ser maior que zero")
+    try {
+      e.preventDefault()
+  
+      const quantity = Number.parseInt(formData.quantity)
+      if (quantity <= 0) {
+        toast.error("A quantidade deve ser maior que zero")
+        return
+      }
+  
+      const selectedProduct = products.find(p => p.id === formData.productId)
+      const selectedBranch = branches.find(b => b.id === formData.branchId)
+  
+      await window.api.createMovement({
+        product_id: formData.productId,
+        branch_id: formData.branchId,
+        type: "entrada",
+        quantity,
+        notes: formData.notes,
+        invoice_number: formData.invoiceNumber,
+        product_name: selectedProduct?.name || "",
+        product_code: selectedProduct?.code || "",
+        branch_name: selectedBranch?.name || "",
+      })
+  
+      setFormData({ productId: "", branchId: "", quantity: "", notes: "", invoiceNumber: "" })
+      setProducts(await window.api.getProducts())
+      loadRecentEntries()
+      toast.success("Entrada registrada com sucesso!")
+    } catch (error) {
+      toast.error("Falha ao registrar entrada: " + error)
       return
     }
-
-    const selectedProduct = products.find(p => p.id === formData.productId)
-    const selectedBranch = branches.find(b => b.id === formData.branchId)
-
-    await window.api.createMovement({
-      product_id: formData.productId,
-      branch_id: formData.branchId,
-      type: "entrada",
-      quantity,
-      notes: formData.notes,
-      invoice_number: formData.invoiceNumber,
-      product_name: selectedProduct?.name || "",
-      product_code: selectedProduct?.code || "",
-      branch_name: selectedBranch?.name || "",
-    })
-
-    setFormData({ productId: "", branchId: "", quantity: "", notes: "", invoiceNumber: "" })
-    setProducts(await window.api.getProducts())
-    loadRecentEntries()
-    alert("Entrada registrada com sucesso!")
   }
 
   return (

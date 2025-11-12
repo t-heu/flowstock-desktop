@@ -36,7 +36,7 @@ declare global {
       // 👥 Usuários
       getUsers: () => Promise<any>
       createUser: (user: any) => Promise<any>
-      updateUser: (id: string, updates: any) => Promise<any>
+      updateUser: ({id, updates}: {id: string, updates: any}) => Promise<any>
       deleteUser: (id: string) => Promise<any>
 
       // 📄 Relatório

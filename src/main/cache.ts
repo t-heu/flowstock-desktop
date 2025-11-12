@@ -22,46 +22,11 @@ export const loadCache = async () => {
       if (d.id) branchesCache![d.id] = d;
     });
   }
-};
 
-export const getProductFromCache = (id: string): Product | null =>
-  productsCache?.[id] ?? null;
-
-export const getBranchFromCache = (id: string): Branch | null =>
-  branchesCache?.[id] ?? null;
-
-export const getAllProductsFromCache = (): Product[] =>
-  productsCache ? Object.values(productsCache) : [];
-
-export const getAllBranchesFromCache = (): Branch[] =>
-  branchesCache ? Object.values(branchesCache) : [];
-
-export const invalidateProductCache = () => { productsCache = null; };
-export const invalidateBranchCache = () => { branchesCache = null; };
-
-/*import { adminDb } from "./firebase";
-import { Product, Branch } from "../shared/types";
-
-let productsCache: Record<string, Product> | null = null;
-let branchesCache: Record<string, Branch> | null = null;
-
-export const loadCache = async () => {
-  if (!productsCache) {
-    const snap = await adminDb.collection("products").get();
-    productsCache = {};
-    snap.forEach(d => {
-      const data = d.data();
-      if (data.id) productsCache![data.id] = data as Product; // ✅ usa data.id
-    });
-  }
-
-  if (!branchesCache) {
-    const snap = await adminDb.collection("branches").get();
-    branchesCache = {};
-    snap.forEach(d => {
-      const data = d.data();
-      if (data.id) branchesCache![data.id] = data as Branch; // ✅ usa data.id
-    });
+  if (branchStockCache === null) {
+    const { data, error } = await supabase.from("branch_stock").select("*");
+    if (error) throw error;
+    branchStockCache = data || [];
   }
 };
 
@@ -79,4 +44,17 @@ export const getAllBranchesFromCache = (): Branch[] =>
 
 export const invalidateProductCache = () => { productsCache = null; };
 export const invalidateBranchCache = () => { branchesCache = null; };
-*/
+
+let branchStockCache: any[] | null = null;
+
+export const getBranchStockCache = () => branchStockCache;
+
+export const invalidateBranchStockCache = () => {
+  branchStockCache = null;
+};
+
+let movementsCache: any[] | null = null;
+
+export const getMovementsCache = () => movementsCache;
+export const setMovementsCache = (data: any[]) => { movementsCache = data; };
+export const invalidateMovementsCache = () => { movementsCache = null; };

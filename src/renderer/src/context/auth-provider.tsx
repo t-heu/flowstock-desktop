@@ -3,6 +3,7 @@ import React, { createContext, useContext, useEffect, useState } from "react"
 export interface User {
   id: string
   username: string
+  email: string
   name: string
   role: "admin" | "manager" | "operator"
   branchId: string

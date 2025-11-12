@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { Download, Filter } from "lucide-react"
+import toast from "react-hot-toast"
 
 interface DetailedExit {
   created_at: string
@@ -26,15 +27,19 @@ export default function ReportsPage() {
 
   useEffect(() => {
     async function loadData() {
-      setBranches(await window.api.getBranches())
+      setBranches(await window.api.getBranches() || [])
       generateReport()
     }
     loadData()
   }, [])
 
   const generateReport = async () => {
-    const report = await window.api.getDetailedReport(selectedBranch, startDate, endDate)
-    setReportData(report.data)
+    try {
+      const report = await window.api.getDetailedReport(selectedBranch, startDate, endDate)
+      setReportData(report.data)
+    } catch (err) {
+      toast.error("Erro ao gerar relatório:" + err)
+    }
   }
 
   const handleFilter = () => generateReport()

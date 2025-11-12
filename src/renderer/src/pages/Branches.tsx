@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { Building2, PlusCircle, Trash2 } from "lucide-react"
+import toast from "react-hot-toast"
 
 interface Branch {
   id: string
@@ -18,20 +19,23 @@ export default function BranchesPage() {
   const loadBranches = async () => {
     const result = await window.api.getBranches()
     if (result) setBranches(result)
-    else alert(result.error || "Erro ao carregar filiais 😢")
+    else toast.error(result.error || "Erro ao carregar filiais 😢")
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formData.name || !formData.code) return alert("Preencha todos os campos ⚠️")
+    if (!formData.name || !formData.code) {
+      toast.error("Preencha todos os campos ⚠️")
+      return
+    }
 
     const result = await window.api.addBranch(formData)
     if (result.success) {
       setFormData({ name: "", code: "" })
       await loadBranches()
-      alert("Filial criada com sucesso! 🎉")
+      toast.success("Filial criada com sucesso! 🎉")
     } else {
-      alert(result.error || "Erro ao criar filial ❌")
+      toast.error(result.error || "Erro ao criar filial ❌")
     }
   }
 
@@ -40,9 +44,9 @@ export default function BranchesPage() {
       const result = await window.api.deleteBranch(id)
       if (result.success) {
         await loadBranches()
-        alert("Filial removida 🗑️")
+        toast.success("Filial removida 🗑️")
       } else {
-        alert(result.error || "Erro ao excluir filial ❌")
+        toast.error(result.error || "Erro ao excluir filial ❌")
       }
     }
   }

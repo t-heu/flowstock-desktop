@@ -1,25 +1,24 @@
 import { supabase } from "../supabaseClient";
-import { loadCache, getProductFromCache, getBranchFromCache } from "../cache";
+import { 
+  loadCache, 
+  getProductFromCache, 
+  getBranchFromCache, 
+  getBranchStockCache
+} from "../cache";
 import { BranchStockItem } from "../../shared/types";
 
-/**
- * 🔹 Buscar branchStock detalhado
- */
 export const getBranchStock = async (): Promise<{
   success: boolean;
   data?: BranchStockItem[];
   error?: string;
 }> => {
   try {
-    await loadCache();
+    await loadCache(); // garante que produtos, branches e branch_stock estão carregados
 
-    const { data: rows, error } = await supabase
-      .from("branch_stock")
-      .select("*");
+    const rows = getBranchStockCache(); // ✅ agora pega da memória
+    if (!rows) return { success: true, data: [] };
 
-    if (error) throw error;
-
-    const branchStock = (rows || []).map((item: any) => {
+    const branchStock = rows.map((item: any) => {
       const branch = getBranchFromCache(item.branch_id);
       const product = getProductFromCache(item.product_id);
 
@@ -28,59 +27,21 @@ export const getBranchStock = async (): Promise<{
         : undefined;
 
       const br: BranchStockItem = {
-        branchId: item.branch_id, // ✅ corrigido
+        branchId: item.branch_id,
         branchName: branch?.name ?? "Desconhecida",
-        productId: item.product_id, // ✅ corrigido
+        productId: item.product_id,
         productName: product?.name ?? "Sem nome",
         quantity: Number(item.quantity ?? 0),
-        createdAt: createdAt ?? item.updated_at ?? null, // ✅ padronizado
+        createdAt: createdAt ?? item.updated_at ?? null,
       };
 
       return br;
     });
 
     return { success: true, data: branchStock };
+
   } catch (error) {
     console.error("Erro ao buscar branchStock detalhado:", error);
     throw new Error("Erro ao buscar branchStock");
   }
 };
-
-/*import { adminDb } from "../firebase";
-import { loadCache, getProductFromCache, getBranchFromCache } from "../cache";
-import { BranchStockItem } from "../../shared/types";
-
-export const getBranchStock = async (): Promise<{
-  success: boolean;
-  data?: BranchStockItem[];
-  error?: string;
-}> => {
-  try {
-    await loadCache();
-
-    const branchStockSnap = await adminDb.collection("branchStock").get();
-    const branchStock = branchStockSnap.docs.map(d => d.data()) as any[];
-
-    const detailedStock: BranchStockItem[] = branchStock.map(item => {
-      const branch = getBranchFromCache(item.branchId);
-      const product = getProductFromCache(item.productId);
-
-      return {
-        branchId: item.branchId,
-        branchName: branch?.name ?? "Desconhecida",
-        productId: item.productId,
-        productName: product?.name ?? "Sem nome",
-        quantity: item.quantity ?? 0,
-        createdAt: item.createdAt?.toDate
-          ? item.createdAt.toDate().toISOString()
-          : item.createdAt,
-      };
-    });
-
-    return { success: true, data: detailedStock };
-  } catch (error) {
-    console.error("Erro ao buscar branchStock detalhado:", error);
-    throw new Error("Erro ao buscar branchStock");
-  }
-};
-*/

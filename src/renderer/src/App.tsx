@@ -1,5 +1,7 @@
 import './index.css'
 import React, {useState} from 'react'
+import { Toaster } from "react-hot-toast"
+
 import { AuthProvider, useAuth } from './context/auth-provider'
 
 import Dashboard from './pages/Dashboard'
@@ -11,6 +13,7 @@ import ProductOutput from './pages/ProductOutput'
 import Filiais from './pages/BranchStock'
 import Users from './pages/Users'
 import Reports from './pages/Reports'
+import ProfilePage from './pages/ProfilePage'
 
 import { SidebarWrapper } from './components/SidebarWrapper';
 import LoadingSpinner from "./components/LoadingSpinner";
@@ -51,7 +54,10 @@ function AppContent() {
         {currentPage === 'filiais' && <Filiais />}
         {currentPage === 'users' && <Users />}
         {currentPage === 'relatorios' && <Reports />}
+        {currentPage === 'profile' && <ProfilePage />}
       </main>
+      
+      <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
     </div>
   )
 }

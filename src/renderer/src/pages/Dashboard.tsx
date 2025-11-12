@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Package, TrendingUp, TrendingDown } from "lucide-react";
+import toast from "react-hot-toast"
 
 import LoadingSpinner from "../components/LoadingSpinner";
 
@@ -22,7 +23,7 @@ export default function DashboardPage() {
 
         setStats(data);
       } catch (err) {
-        console.error("Erro ao carregar estatísticas:", err);
+        toast.error("Erro ao carregar estatísticas:" + err);
       }
     }
 
@@ -35,7 +36,7 @@ export default function DashboardPage() {
         const list = await window.api.getBranches();
         setBranches(list);
       } catch (err) {
-        console.error("Erro ao carregar filiais:", err);
+        toast.error("Erro ao carregar filiais:" + err);
       }
     }
     loadBranches();

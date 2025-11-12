@@ -1,6 +1,7 @@
 import type React from "react"
 import { useEffect, useState } from "react"
 import { Plus, Trash2, Package } from "lucide-react"
+import toast from "react-hot-toast"
 
 import { useAuth } from "../context/auth-provider";
 import departments from "../../../shared/config/departments.json";
@@ -24,31 +25,35 @@ export default function ProductsPage() {
   }, [])
 
   const loadProducts = async () => {
-    const result = await window.api.getProducts()
+    const result = await window.api.getProducts() || []
     if (result) {
       setProducts(result)
-    } else {
-      alert("Erro ao carregar produtos")
     }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
     const result = await window.api.createProduct(formData)
+
     if (result.success) {
+      toast.success("Produto criado com sucesso!")
       setFormData({ code: "", name: "", description: "", department: "", unit: "UN" })
       setIsFormOpen(false)
       loadProducts()
     } else {
-      alert(result.error || "Erro ao salvar produto")
+      toast.error(result.error || "Erro ao salvar produto")
     }
   }
 
   const handleDelete = async (id: string) => {
     if (confirm("Tem certeza que deseja excluir este produto?")) {
       const result = await window.api.deleteProduct(id)
-      if (result.success) loadProducts()
-      else alert(result.error || "Erro ao excluir produto")
+      if (result.success) {
+        toast.success("Produto excluído!") 
+        loadProducts()
+      }
+      else toast.error(result.error || "Erro ao excluir produto")
     }
   }
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { AlertCircle } from "lucide-react";
+import toast from "react-hot-toast"
 
 export interface BranchStock {
   branchId: string;
@@ -20,7 +21,7 @@ export default function BranchStockPage() {
         const res = await window.api.getBranchStock();
         setDados(res.data);
       } catch (err) {
-        console.error("Erro ao carregar branchStock:", err);
+        toast.error("Erro ao carregar branchStock:" + err);
       }
     }
     carregar();
