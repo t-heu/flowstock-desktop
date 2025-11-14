@@ -97,7 +97,7 @@ export default function ReportsPage() {
             <select
               value={selectedBranch}
               onChange={(e) => setSelectedBranch(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
             >
               <option value="all">Todas as Filiais</option>
               {branches.map((b) => (
@@ -113,7 +113,7 @@ export default function ReportsPage() {
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
             />
           </div>
 
@@ -124,7 +124,7 @@ export default function ReportsPage() {
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
             />
           </div>
 
@@ -133,7 +133,7 @@ export default function ReportsPage() {
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">&nbsp;</label>
             <button
               onClick={handleFilter}
-              className="w-full px-4 py-2 bg-black hover:bg-[#333] text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+              className="w-full px-4 py-2 bg-black hover:bg-[#333] text-white rounded-sm font-medium transition-colors flex items-center justify-center gap-2"
             >
               <Filter className="w-5 h-5" />
               Aplicar Filtros
@@ -147,7 +147,7 @@ export default function ReportsPage() {
         <div className="flex justify-end">
           <button
             onClick={handleExport}
-            className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-900 dark:text-white font-medium transition-colors"
+            className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-sm hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-900 dark:text-white font-medium transition-colors"
           >
             <Download className="w-5 h-5" />
             Exportar CSV

@@ -69,7 +69,7 @@ export default function LoginPage({onNavigate}: {onNavigate: (page: string) => v
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 rounded-lg bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white shadow-sm focus:ring-2 focus:ring-black focus:border-black"
+                  className="w-full pl-10 pr-4 py-3 rounded-sm bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white shadow-sm focus:ring-2 focus:ring-black focus:border-black"
                   placeholder="ex: admin"
                   required
                 />
@@ -87,7 +87,7 @@ export default function LoginPage({onNavigate}: {onNavigate: (page: string) => v
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 rounded-lg bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white shadow-sm focus:ring-2 focus:ring-black focus:border-black"
+                  className="w-full pl-10 pr-4 py-3 rounded-sm bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white shadow-sm focus:ring-2 focus:ring-black focus:border-black"
                   placeholder="********"
                   required
                 />
@@ -98,7 +98,7 @@ export default function LoginPage({onNavigate}: {onNavigate: (page: string) => v
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-black dark:bg-white text-white dark:text-black py-3 rounded-lg font-semibold tracking-wide shadow-md hover:opacity-90 active:scale-95 transition disabled:opacity-50"
+              className="w-full bg-black dark:bg-white text-white dark:text-black py-3 rounded-sm font-semibold tracking-wide shadow-md hover:opacity-90 active:scale-95 transition disabled:opacity-50"
             >
               {loading ? "Entrando..." : "Entrar"}
             </button>

@@ -116,7 +116,7 @@ export default function DashboardPage() {
         <select
           value={selectedBranch ?? ''}
           onChange={(e) => setSelectedBranch(e.target.value)}
-          className="px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white w-full md:w-64"
+          className="px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white w-full md:w-64"
         >
           <option value="ALL">Todas as Filiais</option>
           {branches.map((b) => (

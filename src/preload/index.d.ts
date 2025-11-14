@@ -1,5 +1,5 @@
 import { ElectronAPI } from "@electron-toolkit/preload"
-import { IProduct } from "../shared/types"
+import { IProduct, RomaneioItem, OpenFileResponse, GenerateRomaneioPayload, GenerateRomaneioResponse } from "../shared/types"
 
 declare global {
   interface Window {
@@ -44,6 +44,11 @@ declare global {
 
       // 🔔 Notificações
       fetchNotice: () => Promise<any>
+      generateRomaneio: (
+        data: GenerateRomaneioPayload
+      ) => Promise<GenerateRomaneioResponse>
+
+      openFile: (path: string) => Promise<OpenFileResponse>
     }
   }
 }

@@ -48,6 +48,8 @@ const api = {
     ipcRenderer.invoke("get-detailed-report", {branchId, startDate, endDate}),
 
   fetchNotice: () => ipcRenderer.invoke('fetch-notice'),
+  generateRomaneio: (data) => ipcRenderer.invoke("generate-romaneio", data),
+  openFile: (p) => ipcRenderer.invoke("open-file", p),
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

@@ -1,3 +1,28 @@
+export interface RomaneioItem {
+  fromBranch: string
+  toBranch: string
+  product: string
+  quantity: number
+  notes?: string
+  date: string
+}
+
+export interface GenerateRomaneioPayload {
+  romaneioNumber: number | string
+  items: RomaneioItem[]
+}
+
+export interface GenerateRomaneioResponse {
+  success: boolean
+  path?: string
+  error?: string
+}
+
+export interface OpenFileResponse {
+  success: boolean
+  error?: string
+}
+
 export interface BranchStockItem {
   branchId: string;
   branchName?: string;

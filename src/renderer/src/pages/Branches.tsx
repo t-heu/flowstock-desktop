@@ -71,7 +71,7 @@ export default function BranchesPage() {
             placeholder="Código"
             value={formData.code}
             onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-            className="px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+            className="px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:ring-2 focus:ring-blue-500 dark:text-white"
             required
           />
           <input
@@ -79,12 +79,12 @@ export default function BranchesPage() {
             placeholder="Nome da Filial"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+            className="px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:ring-2 focus:ring-blue-500 dark:text-white"
             required
           />
           <button
             type="submit"
-            className="col-span-2 px-6 py-2.5 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+            className="col-span-2 px-6 py-2.5 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-sm font-medium transition-colors"
           >
             <PlusCircle className="w-4 h-4" />
             Adicionar Filial

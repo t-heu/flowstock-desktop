@@ -145,7 +145,7 @@ export default function UsersPage() {
     <div className="space-y-6 p-6 max-w-6xl mx-auto">
       {editUser && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-lg max-w-md w-full space-y-4">
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-sm shadow-lg max-w-md w-full space-y-4">
 
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">Editar Usuário</h2>
 
@@ -213,7 +213,7 @@ export default function UsersPage() {
             placeholder="Nome completo"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:ring-2 focus:ring-blue-500 dark:text-white"
             required
           />
 
@@ -222,7 +222,7 @@ export default function UsersPage() {
             placeholder="Username"
             value={formData.username}
             onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:ring-2 focus:ring-blue-500 dark:text-white"
             required
           />
 
@@ -231,14 +231,14 @@ export default function UsersPage() {
             placeholder="E-mail"
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:ring-2 focus:ring-blue-500 dark:text-white"
             required
           />
 
           <select
             value={formData.branchId}
             onChange={(e) => setFormData({ ...formData, branchId: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:ring-2 focus:ring-blue-500 dark:text-white"
             required
           >
             <option value="">Selecione uma filial</option>
@@ -253,7 +253,7 @@ export default function UsersPage() {
             value={formData.role}
             required
             onChange={(e) => setFormData({ ...formData, role: e.target.value as "admin" | "operator" | "manager" })}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:ring-2 focus:ring-blue-500 dark:text-white"
           >
             <option value="operator">Operador</option>
             <option value="admin">Administrador</option>
@@ -264,7 +264,7 @@ export default function UsersPage() {
             value={formData.department}
             required
             onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:ring-2 focus:ring-blue-500 dark:text-white"
           >
             <option value="" disabled>Selecione...</option>
             {departments.allowed.map(d => (
@@ -274,7 +274,7 @@ export default function UsersPage() {
 
           <button
             type="submit"
-            className="w-full px-6 py-2.5 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+            className="w-full px-6 py-2.5 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-sm font-medium transition-colors"
           >
             <UserPlus className="w-4 h-4" />
             Adicionar Usuário

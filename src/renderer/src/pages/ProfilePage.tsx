@@ -62,7 +62,7 @@ export default function ProfilePage() {
             placeholder="Nome"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:ring-2 focus:ring-blue-500 dark:text-white"
             required
           />
 
@@ -72,7 +72,7 @@ export default function ProfilePage() {
             placeholder="E-mail"
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-[#eee] dark:bg-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-[#eee] dark:bg-slate-700 rounded-sm focus:ring-2 focus:ring-blue-500 dark:text-white"
             required
           />
 
@@ -81,13 +81,13 @@ export default function ProfilePage() {
             placeholder="Nova senha (opcional)"
             value={formData.password}
             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:ring-2 focus:ring-blue-500 dark:text-white"
           />
 
           <button
             type="submit"
             disabled={isSaving}
-            className="w-full px-6 py-2.5 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-60"
+            className="w-full px-6 py-2.5 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-sm font-medium transition-colors disabled:opacity-60"
           >
             <Save className="w-4 h-4" />
             {isSaving ? "Salvando..." : "Salvar Alterações"}

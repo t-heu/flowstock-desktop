@@ -32,7 +32,8 @@ export default function ProductOutputPage() {
     destinationBranchName: "",
     quantity: "",
     notes: "",
-  })
+  });
+  const [selectedExits, setSelectedExits] = useState<string[]>([]);
 
   useEffect(() => {
     async function loadData() {
@@ -143,6 +144,50 @@ export default function ProductOutputPage() {
 
   const isFormEmpty = Object.values(formData).every(value => !value);
 
+  async function handleGenerateRomaneio() {
+    const selectedItems = recentExits.filter((item) =>
+      selectedExits.includes(item.id)
+    );
+
+    if (selectedItems.length === 0) {
+      toast.error("Selecione pelo menos uma saída!");
+      return;
+    }
+
+    const payload = {
+      romaneioNumber: Date.now(),
+      items: selectedItems.map((x) => ({
+        fromBranch: x.branch_name,
+        toBranch: x.destination_branch_name,
+        product: `${x.product_code} - ${x.product_name}`,
+        quantity: x.quantity,
+        notes: x.notes || "-",
+        date: new Date(x.created_at).toLocaleDateString("pt-BR"),
+      })),
+    };
+
+    const res = await window.api.generateRomaneio(payload);
+    if (!res.success) {
+      toast.error("Erro ao gerar PDF");
+      return;
+    }
+
+    toast.success("PDF gerado!");
+    if (res.path) {
+      window.api.openFile(res.path);
+    } else {
+      toast.error("Erro: o arquivo não foi gerado.");
+    }
+  }
+
+  function toggleSelectExit(id: string) {
+    setSelectedExits((prev) =>
+      prev.includes(id)
+        ? prev.filter((x) => x !== id)
+        : [...prev, id]
+    );
+  }
+
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       <div>
@@ -167,7 +212,7 @@ export default function ProductOutputPage() {
               <select
                 value={formData.productId}
                 onChange={(e) => handleProductChange(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
                 required
               >
                 <option value="">Selecione um produto</option>
@@ -187,7 +232,7 @@ export default function ProductOutputPage() {
               <select
                 value={formData.branchId}
                 onChange={(e) => setFormData({ ...formData, branchId: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
                 required
               >
                 <option value="">Selecione a filial</option>
@@ -209,7 +254,7 @@ export default function ProductOutputPage() {
             <select
               value={formData.destinationBranchName} // agora guarda o nome
               onChange={(e) => setFormData({ ...formData, destinationBranchName: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
               required
             >
               <option value="">Selecione a filial destino</option>
@@ -223,7 +268,7 @@ export default function ProductOutputPage() {
 
           {/* Estoque disponível */}
           {selectedProduct && formData.branchId && (
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-sm p-4">
               <div className="flex items-start gap-3">
                 <AlertCircle className="w-5 h-5 text-black dark:text-blue-400 shrink-0 mt-0.5" />
                 <div>
@@ -249,7 +294,7 @@ export default function ProductOutputPage() {
               placeholder="Digite a quantidade"
               min="1"
               max={0 || undefined}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
               required
             />
           </div>
@@ -262,7 +307,7 @@ export default function ProductOutputPage() {
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               placeholder="Notas sobre a saída (opcional)"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
             />
           </div>
 
@@ -270,7 +315,7 @@ export default function ProductOutputPage() {
           <button
             type="submit"
             disabled={isFormEmpty}
-            className="px-6 py-2.5 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors"
+            className="rounded-sm px-6 py-2.5  flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium transition-colors"
           >
             <TrendingDown className="w-4 h-4" />
             Registrar Saída
@@ -280,13 +325,23 @@ export default function ProductOutputPage() {
 
       {/* Tabela de últimas saídas */}
       <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">
-        <div className="p-4 border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-700">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-700">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white">Últimas Saídas</h3>
+
+          {selectedExits.length > 0 && (
+            <button
+              onClick={handleGenerateRomaneio}
+              className="px-4 py-2 bg-blue-600 text-white rounded-sm hover:bg-blue-700 transition"
+            >
+              Gerar Romaneio ({selectedExits.length})
+            </button>
+          )}
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 dark:bg-slate-700 border-b border-gray-200 dark:border-slate-600">
               <tr>
+                <th className="text-left p-4 text-sm font-semibold text-gray-900 dark:text-white">Checkbox</th>
                 <th className="text-left p-4 text-sm font-semibold text-gray-900 dark:text-white">Data</th>
                 <th className="text-left p-4 text-sm font-semibold text-gray-900 dark:text-white">Produto</th>
                 <th className="text-left p-4 text-sm font-semibold text-gray-900 dark:text-white">Filial Origem</th>
@@ -298,7 +353,7 @@ export default function ProductOutputPage() {
             <tbody>
               {recentExits.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-8">
+                  <td colSpan={7} className="p-8">
                     <div className="flex flex-col items-center justify-center text-center gap-2 text-gray-500 dark:text-gray-400">
                       <Package className="w-6 h-6 opacity-70" />
                       <p>Nenhuma saída registrada</p>
@@ -311,6 +366,13 @@ export default function ProductOutputPage() {
                     key={exit.id}
                     className="border-b border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/50"
                   >
+                    <td className="p-4">
+                      <input
+                        type="checkbox"
+                        checked={selectedExits.includes(exit.id)}
+                        onChange={() => toggleSelectExit(exit.id)}
+                      />
+                    </td>
                     <td className="p-4 text-sm text-gray-900 dark:text-white">
                       {new Date(exit.created_at).toLocaleDateString("pt-BR")}
                     </td>

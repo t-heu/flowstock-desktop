@@ -86,7 +86,7 @@ export default function Sidebar({
                   onNavigate(item.key)
                   setIsOpen(false)
                 }}
-                className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-sm font-medium ${
+                className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-sm transition-colors text-sm font-medium ${
                   isActive
                     ? "bg-black text-white"
                     : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700"
@@ -104,7 +104,7 @@ export default function Sidebar({
                 onNavigate("branches")
                 setIsOpen(false)
               }}
-              className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-sm font-medium ${
+              className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-sm transition-colors text-sm font-medium ${
                 currentPage === "branches"
                   ? "bg-black text-white"
                   : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700"
@@ -121,7 +121,7 @@ export default function Sidebar({
                 onNavigate("users")
                 setIsOpen(false)
               }}
-              className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-sm font-medium ${
+              className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-sm transition-colors text-sm font-medium ${
                 currentPage === "users"
                   ? "bg-black text-white"
                   : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700"
@@ -137,7 +137,7 @@ export default function Sidebar({
               onNavigate("profile")
               setIsOpen(false)
             }}
-            className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-sm font-medium ${
+            className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-sm transition-colors text-sm font-medium ${
               currentPage === "profile"
                 ? "bg-black text-white"
                 : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700"
@@ -151,7 +151,7 @@ export default function Sidebar({
         {/* User Section */}
         {user && (
           <div className="p-4 border-t border-gray-200 dark:border-slate-700">
-            <div className="flex items-center gap-3 px-4 py-3 mb-2 rounded-lg bg-gray-100 dark:bg-slate-700">
+            <div className="flex items-center gap-3 px-4 py-3 mb-2 rounded-sm bg-gray-100 dark:bg-slate-700">
               <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center text-white text-sm font-bold">
                 {user.name.charAt(0).toUpperCase()}
               </div>
@@ -164,7 +164,7 @@ export default function Sidebar({
             </div>
             <button
               onClick={logout}
-              className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+              className="text-red-700 w-full flex items-center gap-3 px-4 py-2 rounded-sm text-sm font-medium dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
             >
               <LogOut className="w-5 h-5" />
               Sair

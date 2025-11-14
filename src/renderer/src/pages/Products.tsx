@@ -98,7 +98,7 @@ export default function ProductsPage() {
         {["admin", "manager"].includes(user?.role ?? "") && (
           <button
             onClick={() => setIsFormOpen(!isFormOpen)}
-            className="pointer flex items-center gap-2 px-4 py-2.5 bg-black hover:bg-[#333] text-white rounded-lg font-medium transition-colors"
+            className="pointer flex items-center gap-2 px-4 py-2.5 bg-black hover:bg-[#333] text-white rounded-sm font-medium transition-colors"
           >
             <Plus className="w-5 h-5" />
             Novo Produto
@@ -123,7 +123,7 @@ export default function ProductsPage() {
                   value={formData.code}
                   onChange={(e) => setFormData({ ...formData, code: e.target.value })}
                   placeholder="Ex: PROD-001"
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
                   required
                 />
               </div>
@@ -135,7 +135,7 @@ export default function ProductsPage() {
                 <select
                   value={formData.unit}
                   onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
                   required
                 >
                   <option value="UN">Unidade</option>
@@ -157,7 +157,7 @@ export default function ProductsPage() {
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Ex: Caneta Azul"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
                 required
               />
             </div>
@@ -169,7 +169,7 @@ export default function ProductsPage() {
               <select
                 value={formData.department}
                 onChange={(e) => setFormData({ ...formData, department: e.target.value as IProduct["department"] })}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
                 required
               >
                 <option value="" disabled>Selecione...</option>
@@ -185,20 +185,20 @@ export default function ProductsPage() {
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Descrição detalhada do produto"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
               />
             </div>
             <div className="flex gap-3">
               <button
                 type="submit"
-                className="px-4 py-2 bg-black hover:bg-[#333] text-white rounded-lg font-medium transition-colors"
+                className="px-4 py-2 bg-black hover:bg-[#333] text-white rounded-sm font-medium transition-colors"
               >
                 {editingProduct ? "Atualizar Produto" : "Salvar Produto"}
               </button>
               <button
                 type="button"
                 onClick={() => setIsFormOpen(false)}
-                className="px-4 py-2 bg-gray-200 dark:bg-slate-700 hover:bg-gray-300 dark:hover:bg-slate-600 text-gray-900 dark:text-white rounded-lg font-medium transition-colors"
+                className="px-4 py-2 bg-gray-200 dark:bg-slate-700 hover:bg-gray-300 dark:hover:bg-slate-600 text-gray-900 dark:text-white rounded-sm font-medium transition-colors"
               >
                 Cancelar
               </button>
