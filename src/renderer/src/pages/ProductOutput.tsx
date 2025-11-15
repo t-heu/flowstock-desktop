@@ -104,9 +104,6 @@ export default function ProductOutputPage() {
       type: "saida",
       quantity,
       notes: formData.notes,
-      product_name: selectedProduct.name,
-      product_code: selectedProduct.code,
-      branch_name: branchOrigem.name,
     });
 
     if (!res.success) {

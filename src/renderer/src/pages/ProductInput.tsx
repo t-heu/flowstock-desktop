@@ -72,9 +72,6 @@ export default function ProductInputPage() {
       return;
     }
 
-    const selectedProduct = products.find(p => p.id === formData.productId);
-    const selectedBranch = branches.find(b => b.id === formData.branchId);
-
     const res = await window.api.createMovement({
       product_id: formData.productId,
       branch_id: formData.branchId,
@@ -82,9 +79,6 @@ export default function ProductInputPage() {
       quantity,
       notes: formData.notes,
       invoice_number: formData.invoiceNumber,
-      product_name: selectedProduct?.name || "",
-      product_code: selectedProduct?.code || "",
-      branch_name: selectedBranch?.name || "",
     });
 
     if (!res.success) {
