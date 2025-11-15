@@ -4,17 +4,20 @@ import { supabase } from "../supabaseClient";
 import { loadCache, getAllBranchesFromCache, invalidateBranchCache } from "../cache";
 import { Branch } from "../../shared/types";
 
-export const getBranches = async (): Promise<Branch[]> => {
+export const getBranches = async (): Promise<any> => {
   try {
     await loadCache();
     return getAllBranchesFromCache();
-  } catch (error) {
-    console.error("Erro ao buscar filiais:", error);
-    throw new Error("Erro ao buscar filiais");
+  } catch (err: any) {
+    console.error("Erro ao buscar filiais:", err);
+    return {
+      success: false,
+      error: err?.message || "Erro ao buscar filiais"
+    };
   }
 };
 
-export const addBranch = async (newBranch: Omit<Branch, "id" | "createdAt">): Promise<{ success: boolean }> => {
+export const addBranch = async (newBranch: Omit<Branch, "id" | "createdAt">): Promise<{ success: boolean, error?: any }> => {
   try {
     const branchToAdd = {
       id: uuidv4(),
@@ -27,13 +30,16 @@ export const addBranch = async (newBranch: Omit<Branch, "id" | "createdAt">): Pr
 
     invalidateBranchCache();
     return { success: true };
-  } catch (error) {
-    console.error("Erro ao adicionar filial:", error);
-    throw new Error("Erro ao adicionar filial");
+  } catch (err: any) {
+    console.error("Erro ao adicionar filial:", err);
+    return {
+      success: false,
+      error: err?.message || "Erro ao adicionar filial"
+    };
   }
 };
 
-export const deleteBranch = async (docId: string): Promise<{ success: boolean }> => {
+export const deleteBranch = async (docId: string): Promise<{ success: boolean, error?: any }> => {
   try {
     if (!docId) throw new Error("ID é obrigatório");
 
@@ -42,8 +48,11 @@ export const deleteBranch = async (docId: string): Promise<{ success: boolean }>
 
     invalidateBranchCache();
     return { success: true };
-  } catch (error) {
-    console.error("Erro ao deletar filial:", error);
-    throw new Error("Erro ao deletar filial");
+  } catch (err: any) {
+    console.error("Erro ao deletar filial:", err);
+    return {
+      success: false,
+      error: err?.message || "Erro ao deletar filial"
+    };
   }
 };

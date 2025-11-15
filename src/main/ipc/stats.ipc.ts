@@ -6,6 +6,10 @@ import { getStats } from "../services/stats";
 export function registerStatsIPC() {
   ipcMain.handle(
     "get-stats",
-    authenticated(safeIpc(getStats, "Erro ao obter estatísticas"))
+    authenticated(
+      safeIpc(async (event, data) => {
+        return await getStats(event, data); // { success, data?, error? }
+      }, "Erro ao obter estatísticas")
+    )
   );
 }

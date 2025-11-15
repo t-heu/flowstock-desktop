@@ -9,10 +9,10 @@ declare global {
       getStats: (branch?: string) => Promise<any>
 
       // 🔐 Auth
-      loginUser: (username: string, password: string) => Promise<{ success: boolean; token: string; user: any }>
+      loginUser: (username: string, password: string) => Promise<{ success: boolean; data: {token: string; user: any}, error: any }>
       //saveToken: (token: string) => Promise<void>
       logout: () => Promise<void>
-      getCurrentUser: () => Promise<{ success: boolean; user?: any }>
+      getCurrentUser: () => Promise<{ success: boolean; user?: any; error: any; }>
 
       // 📦 Produtos
       getProducts: () => Promise<any>
@@ -40,7 +40,12 @@ declare global {
       deleteUser: (id: string) => Promise<any>
 
       // 📄 Relatório
-      getDetailedReport: (branchId: string, startDate?: string, endDate?: string) => Promise<any>
+      getDetailedReport: (params: DetailedReportParams) => Promise<{
+        success: boolean;
+        data: DetailedExit[];
+        total: number;
+        error?: string;
+      }>
 
       // 🔔 Notificações
       fetchNotice: () => Promise<any>
@@ -48,7 +53,7 @@ declare global {
         data: GenerateRomaneioPayload
       ) => Promise<GenerateRomaneioResponse>
 
-      openFile: (path: string) => Promise<OpenFileResponse>
+      confirmDialog: (options: { message: string }) => Promise<boolean>
     }
   }
 }

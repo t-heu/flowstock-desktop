@@ -11,6 +11,11 @@ An Electron application with React and TypeScript
 ## 🖼️ Preview
 ![Screen 1](docs/image.png "Screen 1")
 ![Screen 2](docs/image1.png "Screen 2")
+![Screen 2](docs/image%20copy.png "Screen 2")
+![Screen 2](docs/image%20copy%202.png "Screen 2")
+![Screen 2](docs/image%20copy%203.png "Screen 2")
+![Screen 2](docs/image%20copy%204.png "Screen 2")
+![Screen 2](docs/image%20copy%205.png "Screen 2")
 
 ## Project Setup
 

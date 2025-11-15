@@ -11,55 +11,80 @@ import {
   setMovementsCache
 } from "../cache";
 
-export const getMovements = async (user: any, typeFilter?: "entrada" | "saida") => {
+export const getMovements = async (
+  user: { role: string; department: string },
+  typeFilter?: "entrada" | "saida"
+) => {
   try {
     await loadCache();
 
-    // ⚡ Usa getter em vez de referencia direta
+    // Filtros dinâmicos (por request)
+    const applyFilters = (data: any[]) => {
+      if (!typeFilter) return data;
+      return data.filter(m => m.type === typeFilter);
+    };
+
+    // 🔥 CACHE GLOBAL → usado imediatamente
     const cached = getMovementsCache();
     if (cached) {
-      let data = cached;
-
-      if (typeFilter) {
-        data = data.filter(m => m.type === typeFilter);
-      }
-
-      if (user.role !== "admin") {
-        data = data.filter(m => m.product_department === user.department);
-      }
-
-      return { success: true, data };
+      return { success: true, data: applyFilters(cached) };
     }
 
-    // 🔹 Busca do banco (apenas uma vez)
-    const { data: rows, error } = await supabase
+    // 🔥 JOIN COMPLETO — sem getProductFromCache
+    let query = supabase
       .from("movements")
-      .select("*")
-      .order("created_at", { ascending: false });
+      .select(`
+        id,
+        product_id,
+        branch_id,
+        destination_branch_id,
+        quantity,
+        type,
+        invoice_number,
+        product_department,
+        notes,
+        created_at,
 
+        product:product_id (
+          id, code, name, description, department, unit, created_at
+        ),
+
+        branch:branch_id (
+          id, code, name, created_at
+        ),
+
+        destination_branch:destination_branch_id (
+          id, code, name, created_at
+        )
+      `)
+      .order("created_at", { ascending: false })
+      .limit(30);;
+
+    // 🔵 APLICAR department *DIRETO NA QUERY*
+    // (só é aplicado se o usuário NÃO for admin)
+    if (user.role !== "admin") {
+      query = query.eq("product_department", user.department);
+    }
+
+    const { data: rows, error } = await query;
     if (error) throw error;
 
-    const mapped = (rows || []).map((m) => ({
+    // 🔧 Ajustar template final (igual ao seu retorno)
+    const mapped = (rows || []).map((m: any) => ({
       ...m,
-      product: getProductFromCache(m.product_id),
-      branch: getBranchFromCache(m.branch_id),
-      destination_branch_name: m.destination_branch_id
-        ? (getBranchFromCache(m.destination_branch_id)?.name ?? "-")
-        : "-",
+      branch_name: m.branch?.name ?? "-",
+      product_name: m.product?.name ?? "-",
+      product_code: m.product?.code ?? "-",
+      destination_branch_name: m.destination_branch?.name ?? "-",
     }));
 
-    // salva no cache via setter
+    // 🗄️ Salva no cache
     setMovementsCache(mapped);
 
-    // aplica filtros de retorno (se a chamada pediu)
-    let result = mapped;
-    if (typeFilter) result = result.filter(m => m.type === typeFilter);
-    if (user.role !== "admin") result = result.filter(m => m.product_department === user.department);
-
-    return { success: true, data: result };
-  } catch (error) {
-    console.error("Erro ao buscar movimentos:", error);
-    throw new Error("Erro ao buscar movimentos");
+    return { success: true, data: applyFilters(mapped) };
+  } catch (err: any) {
+    console.error("Erro ao buscar movimentos:", err);
+    return { success: false, error: err.message || "Erro ao buscar movimentos"};
   }
 };
 
@@ -68,7 +93,7 @@ export const createMovement = async (movement: {
   destination_branch_id?: string; // ✅ opcional
   product_id: string;
   quantity: number;
-  type: "entrada" | "saida";
+  type: "entrada" | "saida" | "all";
   notes?: string;
   invoice_number?: string;
 }) => {
@@ -162,7 +187,7 @@ export const createMovement = async (movement: {
     return { success: true, data: inserted };
   } catch (error: any) {
     console.error("Erro ao criar movimento:", error);
-    return { success: false, error: error.message };
+    return { success: false, error: error.message || "Erro ao criar movimento"};
   }
 };
 
@@ -176,8 +201,8 @@ export const deleteMovement = async (id: string) => {
     invalidateBranchStockCache();
 
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Erro ao deletar movimento:", error);
-    throw new Error("Erro ao deletar movimento");
+    return { success: false, error: error.message || "Erro ao deletar movimento"};
   }
 };

@@ -1,4 +1,4 @@
-import { ipcMain } from "electron";
+import { ipcMain, dialog } from "electron";
 
 import { Notice } from "../../shared/types";
 
@@ -24,4 +24,15 @@ export function registerNoticeIPC() {
       return null;
     }
   });
+
+  ipcMain.handle("confirmDialog", async (_, { message }) => {
+    const { response } = await dialog.showMessageBox({
+      type: "question",
+      buttons: ["Sim", "Não"],
+      defaultId: 0,
+      cancelId: 1,
+      message
+    })
+    return response === 0; // true se clicou "Sim"
+  })
 }

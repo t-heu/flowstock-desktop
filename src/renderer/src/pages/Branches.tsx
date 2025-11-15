@@ -17,10 +17,15 @@ export default function BranchesPage() {
   }, [])
 
   const loadBranches = async () => {
-    const {data, error} = await window.api.getBranches()
-    if (data) setBranches(data)
-    else toast.error(error || "Erro ao carregar filiais 😢")
-  }
+    const response = await window.api.getBranches();
+
+    if (response?.success && Array.isArray(response.data)) {
+      setBranches(response.data);
+    } else {
+      toast.error(response?.error || "Erro ao carregar filiais 😢");
+      setBranches([]); // garante que a UI não quebre
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -29,7 +34,8 @@ export default function BranchesPage() {
       return
     }
 
-    const {error, success} = await window.api.addBranch(formData)
+    const {error, success} = await window.api.addBranch(formData);
+    
     if (success) {
       setFormData({ name: "", code: "" })
       await loadBranches()
@@ -40,8 +46,13 @@ export default function BranchesPage() {
   }
 
   const handleDelete = async (id: string) => {
-    if (confirm("Tem certeza que deseja excluir esta filial? 🏢")) {
-      const result = await window.api.deleteBranch(id)
+    const response = await window.api.confirmDialog({
+      message: "Tem certeza que deseja excluir esta filial? 🏢"
+    })
+
+    if (response) {
+      const result = await window.api.deleteBranch(id);
+
       if (result.success) {
         await loadBranches()
         toast.success("Filial removida 🗑️")

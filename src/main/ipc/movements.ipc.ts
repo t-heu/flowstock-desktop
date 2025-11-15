@@ -10,17 +10,45 @@ import {
 import { IdSchema, MovementSchema } from "../schemas";
 
 export function registerMovementsIPC() {
-  ipcMain.handle("get-movements", authenticated(safeIpc(getMovements, "Erro ao obter movimentos")));
-  
-  ipcMain.handle("create-movement", authenticated(safeIpc(async (_, movement) => {
-    const valid = MovementSchema.parse(movement);
-    return await createMovement(valid);
-  }, "Erro ao criar movimento")));
+  // 🔹 Obter movimentos
+  ipcMain.handle(
+    "get-movements",
+    authenticated(
+      safeIpc(async (user, typeFilter) => {
+        return await getMovements(user, typeFilter);
+      }, "Erro ao obter movimentos")
+    )
+  );
 
-  ipcMain.handle("delete-movement", authenticated(safeIpc(async (_, id) => {
-    const validId = IdSchema.parse(id);
-    return await deleteMovement(validId);
-  }, "Erro ao excluir movimento")));
+  // 🔹 Criar movimento
+  ipcMain.handle(
+    "create-movement",
+    authenticated(
+      safeIpc(async (_, movement) => {
+        const valid = MovementSchema.parse(movement); // ZodError será capturado
+        return await createMovement(valid); // { success, data?, error? }
+      }, "Erro ao criar movimento")
+    )
+  );
 
-  ipcMain.handle("get-branch-stock", authenticated(safeIpc(getBranchStock, "Erro ao obter estoque")));
+  // 🔹 Excluir movimento
+  ipcMain.handle(
+    "delete-movement",
+    authenticated(
+      safeIpc(async (_, id) => {
+        const validId = IdSchema.parse(id); // ZodError será capturado
+        return await deleteMovement(validId); // { success, data?, error? }
+      }, "Erro ao excluir movimento")
+    )
+  );
+
+  // 🔹 Obter estoque da filial
+  ipcMain.handle(
+    "get-branch-stock",
+    authenticated(
+      safeIpc(async () => {
+        return await getBranchStock(); // { success, data?, error? }
+      }, "Erro ao obter estoque")
+    )
+  );
 }

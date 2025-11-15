@@ -7,8 +7,8 @@ import { NoticeModal } from '../components/NoticeModal';
 
 import logo from "../assets/icon.png";
 
-export default function LoginPage({onNavigate}: {onNavigate: (page: string) => void}) {
-  const { login } = useAuth()
+export default function LoginPage() {
+  const { setUser } = useAuth()
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false);
@@ -18,11 +18,16 @@ export default function LoginPage({onNavigate}: {onNavigate: (page: string) => v
     setLoading(true)
 
     try {
-      const success = await login(username, password)
-      if (!success) {
-        toast.error("Usuário ou senha inválidos")
+      const result = await window.api.loginUser(username, password)
+      
+      if (!result.success) {
+        toast.error(result.error || "Usuário ou senha inválidos")
+        return
       }
-      onNavigate('dashboard');
+      
+      setUser(result.data.user)
+      toast.success("Login realizado com sucesso!")
+      //onNavigate('dashboard');
     } catch (err: any) {
       console.error("Erro ao fazer login:", err)
       toast.error("Falha ao tentar logar: " + (err?.message || "Erro desconhecido"))

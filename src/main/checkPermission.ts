@@ -3,7 +3,7 @@ import { User } from "../shared/types";
 type UserSession = {
   uid: string;
   role: "admin" | "manager" | "operator"; 
-  department: string; // ex: "RH", "Transporte", "Logística", etc
+  department: string;
 }
 
 export function checkPermission(

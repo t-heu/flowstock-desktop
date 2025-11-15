@@ -21,6 +21,8 @@ export default function DashboardPage() {
         const result = await window.api.getBranches()
         const data = Array.isArray(result) ? result : result?.data || []
 
+        if (!result.success) toast.error(result.error);
+
         setBranches(data)
 
         // Seleciona a primeira filial automaticamente se não tiver

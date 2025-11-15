@@ -3,7 +3,6 @@ import fs from "fs";
 import { join } from "path";
 
 export function registerRomaneioIPC() {
-
   ipcMain.handle("generate-romaneio", async (_event, { romaneioNumber, items }) => {
     try {
       const win = new BrowserWindow({
@@ -48,10 +47,5 @@ export function registerRomaneioIPC() {
     } catch (err: any) {
       return { success: false, error: err.message };
     }
-  });
-
-  ipcMain.handle("open-file", async (_ev, filePath) => {
-    const { shell } = require("electron");
-    return shell.openPath(filePath);
   });
 }

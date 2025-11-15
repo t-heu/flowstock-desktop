@@ -1,3 +1,7 @@
+import departments from "../../shared/config/departments.json";
+
+export type DepartmentId = (typeof departments.allowed)[number]["id"];
+
 export interface RomaneioItem {
   fromBranch: string
   toBranch: string
@@ -38,7 +42,7 @@ export interface Product {
   code: string;
   description?: string;
   unit: string;
-  department: "rh" | "transferencia";
+  department: DepartmentId;
   created_at?: string;
 }
 
@@ -47,7 +51,7 @@ export interface IProduct {
   code: string;
   description?: string;
   unit: string;
-  department: "rh" | "transferencia" | "";
+  department: DepartmentId;
 }
 
 export interface Branch {
@@ -94,7 +98,7 @@ export interface AuthUser {
   email: string;
   role: "admin" | "manager" | "operator";
   branchId: string;
-  department: "rh" | "transferencia";
+  department: DepartmentId;
 }
 
 export interface DetailedReportItem {

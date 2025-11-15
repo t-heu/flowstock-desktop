@@ -22,7 +22,8 @@ export default function ProfilePage() {
 
     try {
       if (!user) {
-        throw new Error("Usuário não autenticado.")
+        toast.error("Usuário não autenticado.")
+        return
       }
 
       const payload = { ...formData }

@@ -80,7 +80,7 @@ export default function UsersPage() {
 
       // Atualiza lista local sem recarregar toda a página
       const updatedUsers = await window.api.getUsers()
-      setUsers(updatedUsers || [])
+      setUsers(updatedUsers.data || [])
 
       toast.success("Usuário criado com sucesso!")
     } catch (error: any) {
@@ -110,7 +110,8 @@ export default function UsersPage() {
       }
 
       // Atualiza lista local
-      setUsers(users.map(u => (u.id === editUser.id ? { ...u, ...payload } : u)))
+      const data = users.map(u => (u.id === editUser.id ? { ...u, ...payload } : u)) || [];
+      setUsers(data)
       setEditUser(null)
 
       toast.success("Usuário atualizado com sucesso!")
@@ -122,7 +123,11 @@ export default function UsersPage() {
 
   // 🔹 Remover usuário
   const handleDelete = async (id: string) => {
-    if (!confirm("Tem certeza que deseja excluir este usuário?")) return
+    const response = await window.api.confirmDialog({
+      message: "Tem certeza que deseja excluir este usuário?"
+    })
+
+    if (!response) return
 
     try {
       const result = await window.api.deleteUser(id)
@@ -301,7 +306,7 @@ export default function UsersPage() {
               </tr>
             </thead>
             <tbody>
-              {users.length === 0 ? (
+              {!Array.isArray(users) || users.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="p-8 text-center text-gray-500 dark:text-gray-400">
                     Nenhum usuário cadastrado.

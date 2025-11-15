@@ -44,12 +44,11 @@ const api = {
   deleteUser: (id) => ipcRenderer.invoke("delete-user", id),
 
   // 📄 Relatório detalhado (novo)
-  getDetailedReport: (branchId, startDate, endDate) =>
-    ipcRenderer.invoke("get-detailed-report", {branchId, startDate, endDate}),
+  getDetailedReport: (params) => ipcRenderer.invoke("get-detailed-report", params),
 
   fetchNotice: () => ipcRenderer.invoke('fetch-notice'),
   generateRomaneio: (data) => ipcRenderer.invoke("generate-romaneio", data),
-  openFile: (p) => ipcRenderer.invoke("open-file", p),
+  confirmDialog: (options: { message: string }) => ipcRenderer.invoke("confirmDialog", options),
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

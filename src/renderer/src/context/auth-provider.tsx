@@ -1,6 +1,10 @@
 import React, { createContext, useContext, useEffect, useState } from "react"
 import toast from "react-hot-toast"
 
+import departments from "../../../shared/config/departments.json";
+
+export type DepartmentId = (typeof departments.allowed)[number]["id"];
+
 export interface User {
   id: string
   username: string
@@ -8,21 +12,21 @@ export interface User {
   name: string
   role: "admin" | "manager" | "operator"
   branchId: string
-  department: "rh" | "transferencia"
+  department: DepartmentId
 }
 
 interface AuthContextType {
   user: User | null
   loading: boolean
-  login: (username: string, password: string) => Promise<boolean>
   logout: () => Promise<void>
+  setUser: React.Dispatch<React.SetStateAction<User | null>>
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
-  login: async () => false,
   logout: async () => {},
+  setUser: async () => {}
 })
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -31,41 +35,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const loadUser = async () => {
-      try {
-        const response = await window.api.getCurrentUser()
-        if (response?.success) setUser(response.user)
-      } catch {
-        setUser(null)
-      } finally {
-        setLoading(false)
-      }
-    }
+      const response = await window.api.getCurrentUser();
 
-    loadUser()
-  }, [])
-  
-  async function login(username: string, password: string) {
-    try {
-      const res = await window.api.loginUser(username, password)
-
-      if (res?.success) {
-        setUser(res.user)
-        toast.success("Login realizado com sucesso!")
-        return true
+      if (response?.success) {
+        setUser(response.user);
+      } else {
+        if (user !== null) {
+          toast.error(response?.error || "Falha ao obter usuário atual");
+        }
+        setUser(null);
       }
 
-      return false
-    } catch (err: any) {
-      console.error("Erro no login:", err)
-      toast.error("Falha ao tentar logar: " + (err?.message || "Erro desconhecido"))
-      return false
-    }
-  }
+      setLoading(false);
+    };
+
+    loadUser();
+  }, []);
 
   async function logout() {
     try {
       setUser(null)
-      await window.api.logout() // ✅ remove token do store
+      await window.api.logout()
       toast.success("Logout realizado com sucesso!")
     } catch (err: any) {
       console.error("Erro ao deslogar:", err)
@@ -74,7 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, setUser, logout }}>
       {children}
     </AuthContext.Provider>
   )

@@ -173,11 +173,6 @@ export default function ProductOutputPage() {
     }
 
     toast.success("PDF gerado!");
-    if (res.path) {
-      window.api.openFile(res.path);
-    } else {
-      toast.error("Erro: o arquivo não foi gerado.");
-    }
   }
 
   function toggleSelectExit(id: string) {

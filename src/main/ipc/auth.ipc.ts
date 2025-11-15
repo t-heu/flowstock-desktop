@@ -1,4 +1,5 @@
 import { ipcMain } from "electron";
+
 import { safeIpc } from "../ipc-utils";
 import { LoginSchema } from "../schemas";
 import { loginUser } from "../services/auth/login";
@@ -9,29 +10,62 @@ import {
   clearTokenForWindow,
   getTokenForWindow 
 } from "../authSession";
+import { 
+  invalidateBranchCache,
+  invalidateBranchStockCache,
+  invalidateMovementsCache,
+  invalidateProductCache
+} from "../cache";
 
 export function registerAuthIPC() {
-  ipcMain.handle("auth:login", safeIpc(async (event, data) => {
-    const { username, password } = LoginSchema.parse(data);
+  // 🔹 Login
+  ipcMain.handle(
+    "auth:login",
+    safeIpc(async (event, data) => {
+      const { username, password } = LoginSchema.parse(data); // ZodError será capturado
+      const result = await loginUser(username, password);
 
-    const result = await loginUser(username, password);
+      if (!result?.success || !result.token) {
+        return { success: false, error: result?.error || "Credenciais inválidas" };
+      }
 
-    if (!result?.success) throw new Error("Credenciais inválidas");
+      setTokenForWindow(event.sender.id, result.token);
 
-    setTokenForWindow(event.sender.id, result.token);
-    return result;
-  }, "Erro ao fazer login"));
+      return { success: true, data: { user: result.user, token: result.token } };
+    }, "Erro ao fazer login")
+  );
 
-  ipcMain.handle("auth:logout", safeIpc(async (event) => {
-    clearTokenForWindow(event.sender.id);
-    return { success: true };
-  }, "Erro ao fazer logout"));
+  // 🔹 Logout
+  ipcMain.handle(
+    "auth:logout",
+    safeIpc(async (event) => {
+      clearTokenForWindow(event.sender.id);
 
-  ipcMain.handle("auth:get-token", safeIpc(async (event) => {
-    return getTokenForWindow(event.sender.id) ?? null;
-  }, "Erro ao obter token"));
+      invalidateProductCache();
+      invalidateBranchCache();
+      invalidateBranchStockCache();
+      invalidateMovementsCache();
 
-  ipcMain.handle("get-current-user",
-    authenticated(safeIpc(getCurrentUser, "Erro ao obter usuário atual"))
+      return { success: true };
+    }, "Erro ao fazer logout")
+  );
+
+  // 🔹 Obter token
+  ipcMain.handle(
+    "auth:get-token",
+    safeIpc(async (event) => {
+      const token = getTokenForWindow(event.sender.id) ?? null;
+      return { success: true, data: token };
+    }, "Erro ao obter token")
+  );
+
+  // 🔹 Obter usuário atual
+  ipcMain.handle(
+    "get-current-user",
+    authenticated(
+      safeIpc(async (userId) => {
+        return await getCurrentUser(userId); // já retorna { success, user?, error? }
+      }, "Erro ao obter usuário atual")
+    )
   );
 }

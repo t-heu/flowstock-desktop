@@ -18,21 +18,19 @@ export function requireAuth(token: string) {
  */
 export function authenticated(handler) {
   return async (event, ...args) => {
-    //const token = store.get("auth.token") as string | null;;
     const senderId = event.sender.id;
     const token = getTokenForWindow(senderId);
 
-    if (!token) throw new Error("Não autenticado");
+    if (!token) return { success: false, error: "Não autenticado" };
 
     let decoded;
     try {
       decoded = jwt.verify(token, JWT_SECRET);
     } catch {
-      //store.delete("auth.token");
       clearTokenForWindow(senderId);
-      throw new Error("Sessão expirada, faça login novamente");
+      return { success: false, error: "Sessão expirada, faça login novamente" };
     }
 
-    return await handler(decoded, ...args); // `decoded` contém { id, role, department, branchId }
+    return await handler(decoded, ...args);
   };
 }

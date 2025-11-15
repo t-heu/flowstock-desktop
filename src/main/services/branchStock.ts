@@ -39,8 +39,11 @@ export const getBranchStock = async (): Promise<{
 
     return { success: true, data: branchStock };
 
-  } catch (error) {
-    console.error("Erro ao buscar branchStock detalhado:", error);
-    throw new Error("Erro ao buscar branchStock");
+  } catch (err: any) {
+    console.error("Erro ao buscar branchStock detalhado:", err);
+    return {
+      success: false,
+      error: err?.message || "Erro ao carregar estoque por filial"
+    };
   }
 };

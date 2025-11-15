@@ -21,6 +21,7 @@ import LoadingSpinner from "./components/LoadingSpinner";
 function App(): React.JSX.Element {
   return (
     <AuthProvider>
+      <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
       <AppContent />
     </AuthProvider>
   )
@@ -37,7 +38,7 @@ function AppContent() {
       </div>
     );
   }
-  if (!user) return <Login onNavigate={setCurrentPage} />
+  if (!user) return <Login />
 
   return (
     <div className="flex h-screen overflow-hidden bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-50">
@@ -56,8 +57,6 @@ function AppContent() {
         {currentPage === 'relatorios' && <Reports />}
         {currentPage === 'profile' && <ProfilePage />}
       </main>
-      
-      <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
     </div>
   )
 }

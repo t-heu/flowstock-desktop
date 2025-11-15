@@ -4,10 +4,10 @@ import { loadCache, getAllProductsFromCache, getAllBranchesFromCache } from "../
 
 let statsCache: Record<string, Stats> = {};
 
-export const getStats = async (user: any, branchFilter?: string): Promise<Stats> => {
+export const getStats = async (user: any, branchFilter?: string): Promise<{success: boolean, data?: Stats, error?: any}> => {
   try {
     const cacheKey = `${user.role}-${user.department}-${branchFilter ?? "ALL"}`;
-    if (statsCache[cacheKey]) return statsCache[cacheKey];
+    if (statsCache[cacheKey]) return {success: true, data: statsCache[cacheKey]};
 
     // 🔹 Usa cache existente
     await loadCache();
@@ -58,10 +58,10 @@ export const getStats = async (user: any, branchFilter?: string): Promise<Stats>
     };
 
     statsCache[cacheKey] = stats;
-    return stats;
-  } catch (error) {
-    console.error("Erro ao buscar estatísticas:", error);
-    throw new Error("Erro ao buscar estatísticas");
+    return {success: true, data: stats};
+  } catch (err: any) {
+    console.error("Erro ao buscar estatísticas:", err);
+    return { success: false, error: err?.message || "Erro ao buscar estatísticas" };
   }
 };
 

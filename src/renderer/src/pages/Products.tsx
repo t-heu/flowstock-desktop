@@ -1,5 +1,5 @@
 import type React from "react"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { Plus, Trash2, Package, Pencil, Ban } from "lucide-react"
 import toast from "react-hot-toast"
 
@@ -18,12 +18,20 @@ export default function ProductsPage() {
     department: ""
   })
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const formRef = useRef<HTMLDivElement>(null);
 
   const { user } = useAuth();
 
   useEffect(() => {
     loadProducts()
-  }, [])
+  }, []);
+
+  // Scroll para o formulário quando ele abrir
+  useEffect(() => {
+    if (isFormOpen && formRef.current) {
+      formRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [isFormOpen]);
 
   const loadProducts = async () => {
     try {
@@ -73,9 +81,14 @@ export default function ProductsPage() {
 
   const handleDelete = async (id: string) => {
     try {
-      if (!confirm("Tem certeza que deseja excluir este produto?")) return
+      const response = await window.api.confirmDialog({
+        message: "Tem certeza que deseja excluir este produto?"
+      })
+
+      if (!response) return;
 
       const result = await window.api.deleteProduct(id)
+
       if (result?.success) {
         toast.success("Produto excluído!")
         loadProducts()
@@ -107,7 +120,7 @@ export default function ProductsPage() {
       </div>
 
       {isFormOpen && (
-        <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
+        <div ref={formRef} className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
             {editingProduct ? "Editar Produto" : "Adicionar Produto"}
           </h2>
