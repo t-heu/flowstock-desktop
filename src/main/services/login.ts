@@ -1,9 +1,9 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-import { supabase } from "../../supabaseClient";
-import { AuthUser } from "../../../shared/types";
-import { JWT_SECRET, TOKEN_EXPIRES } from "../../config/jwt";
+import { supabase } from "../supabaseClient";
+import { AuthUser } from "../../shared/types";
+import { JWT_SECRET, TOKEN_EXPIRES } from "../config/jwt";
 
 /** 🔹 Login */
 export const loginUser = async (username: string, password: string) => {

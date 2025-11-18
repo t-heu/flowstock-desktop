@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
 
-import { loadCache, getBranchFromCache } from "../cache";
+import { getBranchFromCache } from "../cache";
 import { User, IUser } from "../../shared/types";
 
 import { supabase } from "../supabaseClient";
@@ -9,8 +9,6 @@ import { supabase } from "../supabaseClient";
 /** 🔹 Lista usuários */
 export const getUsers = async (): Promise<{ success: boolean; data?: User[]; error?: string }> => {
   try {
-    await loadCache();
-
     const { data, error } = await supabase.from("users").select("*");
     if (error) {
       console.error("Erro Supabase getUsers:", error);

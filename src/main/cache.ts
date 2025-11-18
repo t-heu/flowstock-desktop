@@ -1,95 +1,69 @@
-import { supabase } from "./supabaseClient";
-import { Product, Branch } from "../shared/types";
+// ================= CACHE OTIMIZADO =================
+import { Product, Branch, BranchStockItem, Stats, Movement } from "../shared/types";
 
-let productsCache: Record<string, Product> | null = null;
-let branchesCache: Record<string, Branch> | null = null;
+let productsCache: Map<string, Product> | null = null;
+let branchesCache: Map<string, Branch> | null = null;
+let branchStockCache: Map<string, Map<string, BranchStockItem>> | null = null;
+let movementsCache: Movement[] | null = null; // sempre os 30 movimentos mais recentes
+let statsCacheInternal: Record<string, Stats> = {}
 
-const PAGE_SIZE = 2000;
-
-// Função genérica para fazer paginação
-async function fetchAll(table: string) {
-  let from = 0;
-  let all: any[] = [];
-  let finished = false;
-
-  while (!finished) {
-    const { data, error } = await supabase
-      .from(table)
-      .select("*")
-      .range(from, from + PAGE_SIZE - 1);
-
-    if (error) throw error;
-
-    all = all.concat(data);
-
-    if (data.length < PAGE_SIZE) {
-      finished = true;
-    } else {
-      from += PAGE_SIZE;
-    }
-  }
-
-  return all;
-}
-
-export const loadCache = async () => {
-  // PRODUCTS CACHE
-  if (!productsCache) {
-    const data = await fetchAll("products");
-
-    const cache: Record<string, Product> = {}; // <-- variável local derivada
-
-    data.forEach(d => {
-      if (d.id) cache[d.id] = d;
-    });
-
-    productsCache = cache; // <-- agora atribui de uma vez só
-  }
-
-  // BRANCHES CACHE
-  if (!branchesCache) {
-    const data = await fetchAll("branches");
-
-    const cache: Record<string, Branch> = {};
-
-    data.forEach(d => {
-      if (d.id) cache[d.id] = d;
-    });
-
-    branchesCache = cache;
-  }
-
-  // BRANCH STOCK CACHE
-  if (branchStockCache === null) {
-    branchStockCache = await fetchAll("branch_stock");
-  }
+// ======= PRODUCTS =======
+export const getAllProductsFromCache = (): Product[] | null => productsCache ? Array.from(productsCache.values()) : null;
+export const getProductFromCache = (id: string): Product | null => productsCache?.get(id) ?? null;
+export const setProductsCache = (data: Product[]) => {
+  productsCache = new Map(data.map(p => [p.id, p]));
 };
-
-export const getProductFromCache = (id: string): Product | null =>
-  productsCache?.[id] ?? null;
-
-export const getBranchFromCache = (id: string): Branch | null =>
-  branchesCache?.[id] ?? null;
-
-export const getAllProductsFromCache = (): Product[] =>
-  productsCache ? Object.values(productsCache) : [];
-
-export const getAllBranchesFromCache = (): Branch[] =>
-  branchesCache ? Object.values(branchesCache) : [];
-
 export const invalidateProductCache = () => { productsCache = null; };
+
+// ======= BRANCHES =======
+export const getAllBranchesFromCache = (): Branch[] | null => branchesCache ? Array.from(branchesCache.values()) : null;
+export const getBranchFromCache = (id: string): Branch | null => branchesCache?.get(id) ?? null;
+export const setBranchesCache = (data: Branch[]) => {
+  branchesCache = new Map(
+    data
+      .filter(b => b.id) // remove itens sem id
+      .map(b => [b.id as string, b]) // garante string
+  );
+};
 export const invalidateBranchCache = () => { branchesCache = null; };
 
-let branchStockCache: any[] | null = null;
+// ======= BRANCH STOCK =======
+export const getBranchStockCache = (): BranchStockItem[] | null => {
+  if (!branchStockCache) return null;
+  const result: BranchStockItem[] = [];
+  branchStockCache.forEach(branchMap => branchMap.forEach(item => result.push(item)));
+  return result;
+};
+export const setBranchStockCache = (items: BranchStockItem[] | any[]) => {
+  branchStockCache = new Map();
+  items.forEach(item => {
+    if (!branchStockCache!.has(item.branchId)) branchStockCache!.set(item.branchId, new Map());
+    branchStockCache!.get(item.branchId)!.set(item.productId, item);
+  });
+};
+export const invalidateBranchStockCache = () => { branchStockCache = null; };
 
-export const getBranchStockCache = () => branchStockCache;
+// ======= MOVEMENTS (30 RECENTES) =======
+export const getMovementsCache = (): Movement[] | null => movementsCache;
+export const setMovementsCache = (data: Movement[]) => {
+  // Mantém apenas os 30 mais recentes
+  movementsCache = data
+  .filter(m => m.created_at) // remove itens sem created_at
+  .sort(
+    (a, b) => new Date(b.created_at!).getTime() - new Date(a.created_at!).getTime()
+  )
+  .slice(0, 30);
+};
+export const invalidateMovementsCache = () => { movementsCache = null; };
 
-export const invalidateBranchStockCache = () => {
-  branchStockCache = null;
+// ================= STATS =================
+export const getStatsCache = (key: string): Stats | undefined => statsCacheInternal[key];
+
+export const setStatsCache = (key: string, stats: Stats) => {
+  statsCacheInternal[key] = stats;
 };
 
-let movementsCache: any[] | null = null;
-
-export const getMovementsCache = () => movementsCache;
-export const setMovementsCache = (data: any[]) => { movementsCache = data; };
-export const invalidateMovementsCache = () => { movementsCache = null; };
+export const invalidateStatsCache = (key?: string) => {
+  if (key) delete statsCacheInternal[key];
+  else statsCacheInternal = {};
+};

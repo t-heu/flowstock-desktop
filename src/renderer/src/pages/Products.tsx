@@ -45,60 +45,53 @@ export default function ProductsPage() {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
-      e.preventDefault();
-
       let result;
       if (editingProduct) {
-        // Atualiza produto
-        result = await window.api.updateProduct({id: editingProduct.id, updates: formData });
+        result = await window.api.updateProduct({ id: editingProduct.id, updates: formData });
+        if (result?.success) {
+          setProducts(prev => prev.map(p => (p.id === editingProduct.id ? { ...p, ...formData } : p)));
+          toast.success("Produto atualizado com sucesso!");
+        }
       } else {
-        // Cria novo produto
         result = await window.api.createProduct(formData);
+        if (result?.success) {
+          setProducts(prev => [...prev, { ...formData, id: result.id }]);
+          toast.success("Produto criado com sucesso!");
+        }
       }
 
-      if (result?.success) {
-        toast.success(editingProduct ? "Produto atualizado com sucesso!" : "Produto criado com sucesso!");
-        setFormData({ code: "", name: "", description: "", department: "", unit: "UN" });
-        setEditingProduct(null);
-        setIsFormOpen(false);
-        loadProducts();
-      } else {
-        toast.error(result?.error || "Erro ao salvar produto");
-      }
+      setFormData({ code: "", name: "", description: "", department: "", unit: "UN" });
+      setEditingProduct(null);
+      setIsFormOpen(false);
     } catch (error) {
-      console.error("Erro ao salvar produto:", error);
+      console.error(error);
       toast.error("Falha ao salvar produto");
     }
-  }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      const confirm = await window.api.confirmDialog({ message: "Deseja excluir este produto?" });
+      if (!confirm) return;
+
+      const result = await window.api.deleteProduct(id);
+      if (result?.success) {
+        setProducts(prev => prev.filter(p => p.id !== id));
+        toast.success("Produto excluído!");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Falha ao excluir produto");
+    }
+  };
 
   // 🔹 Função para abrir formulário de edição
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
     setFormData(product);
     setIsFormOpen(true);
-  }
-
-  const handleDelete = async (id: string) => {
-    try {
-      const response = await window.api.confirmDialog({
-        message: "Tem certeza que deseja excluir este produto?"
-      })
-
-      if (!response) return;
-
-      const result = await window.api.deleteProduct(id)
-
-      if (result?.success) {
-        toast.success("Produto excluído!")
-        loadProducts()
-      } else {
-        toast.error(result?.error || "Erro ao excluir produto")
-      }
-    } catch (error) {
-      console.error("Erro ao excluir produto:", error)
-      toast.error("Falha ao excluir produto")
-    }
   }
 
   return (

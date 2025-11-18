@@ -4,6 +4,8 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 
 import icon from '../../resources/icon.png?asset'
 
+import { initRealtimeCache } from "./realtime-cache";
+
 import { registerProductIPC } from "./ipc/products.ipc";
 import { registerBranchesIPC } from "./ipc/branches.ipc";
 import { registerMovementsIPC } from "./ipc/movements.ipc";
@@ -84,6 +86,9 @@ app.whenReady().then(() => {
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
+
+  // Inicializa Realtime para produtos
+  initRealtimeCache();
 
   // IPC HANDLERS
   registerAuthIPC();

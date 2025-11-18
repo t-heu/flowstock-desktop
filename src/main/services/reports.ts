@@ -1,8 +1,5 @@
 import { supabase } from "../supabaseClient";
 import { DetailedReportItem } from "../../shared/types";
-import { 
-  loadCache, 
-} from "../cache";
 
 export const getDetailedReport = async (
   branchId: string = "all",
@@ -19,8 +16,6 @@ export const getDetailedReport = async (
   error?: string;
 }> => {
   try {
-    await loadCache();
-
     let query = supabase
       .from("movements")
       .select(`

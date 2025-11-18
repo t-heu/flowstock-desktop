@@ -1,102 +1,92 @@
-import type React from "react"
-import { useEffect, useState } from "react"
-import { Package, TrendingUp } from "lucide-react"
-import toast from "react-hot-toast"
+import { useEffect, useState, useCallback } from "react";
+import { Package, TrendingUp } from "lucide-react";
+import toast from "react-hot-toast";
 
-export interface Branch {
-  id?: string;
-  name: string;
-  code: string;
-  location?: string;
-  createdAt?: string;
-}
-
-export interface Product {
-  id: string;
-  name: string;
-  code: string;
-  description?: string;
-  unit: string;
-  createdAt?: string;
-}
+import {Product, Branch} from "../../../shared/types"
 
 export default function ProductInputPage() {
-  const [products, setProducts] = useState<Product[]>([])
-  const [branches, setBranches] = useState<Branch[]>([])
-  const [recentEntries, setRecentEntries] = useState<any[]>([])
+  const [products, setProducts] = useState<Product[]>([]);
+  const [branches, setBranches] = useState<Branch[]>([]);
+  const [recentEntries, setRecentEntries] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     productId: "",
     branchId: "",
     quantity: "",
     notes: "",
-    invoiceNumber: "", // novo campo
-  })
+    invoiceNumber: "",
+  });
 
+  // -------- Load produtos, filiais e entradas em paralelo --------
   useEffect(() => {
-    async function loadData() {
-      const productsRes = await window.api.getProducts();
-      if (productsRes.success) {
-        setProducts(productsRes.data || []);
-      } else {
-        toast.error(productsRes.error || "Erro ao carregar produtos");
-      }
+    const loadData = async () => {
+      try {
+        const [productsRes, branchesRes, movementsRes] = await Promise.all([
+          window.api.getProducts(),
+          window.api.getBranches(),
+          window.api.getMovements("entrada"),
+        ]);
 
-      const branchesRes = await window.api.getBranches();
-      if (branchesRes.success) {
-        setBranches(branchesRes.data || []);
-      } else {
-        toast.error(branchesRes.error || "Erro ao carregar filiais");
-      }
+        if (productsRes.success) setProducts(productsRes.data || []);
+        else toast.error(productsRes.error || "Erro ao carregar produtos");
 
-      loadRecentEntries();
-    }
+        if (branchesRes.success) setBranches(branchesRes.data || []);
+        else toast.error(branchesRes.error || "Erro ao carregar filiais");
+
+        if (movementsRes.success) setRecentEntries(movementsRes.data || []);
+        else toast.error(movementsRes.error || "Erro ao carregar entradas recentes");
+      } catch (error: any) {
+        console.error("Erro ao carregar dados:", error);
+        toast.error(error?.message || "Falha ao carregar dados");
+      }
+    };
 
     loadData();
   }, []);
 
-  async function loadRecentEntries() {
-    const movementsRes = await window.api.getMovements("entrada");
-    if (movementsRes.success) {
-      setRecentEntries(movementsRes.data || []);
-    } else {
-      toast.error(movementsRes.error || "Erro ao carregar entradas recentes");
+  const loadRecentEntries = useCallback(async () => {
+    try {
+      const res = await window.api.getMovements("entrada");
+      if (res.success) setRecentEntries(res.data || []);
+      else toast.error(res.error || "Erro ao carregar entradas recentes");
+    } catch (error: any) {
+      console.error("Erro ao carregar entradas recentes:", error);
+      toast.error(error?.message || "Erro desconhecido");
     }
-  }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     const quantity = Number.parseInt(formData.quantity);
     if (quantity <= 0) {
       toast.error("A quantidade deve ser maior que zero");
       return;
     }
 
-    const res = await window.api.createMovement({
-      product_id: formData.productId,
-      branch_id: formData.branchId,
-      type: "entrada",
-      quantity,
-      notes: formData.notes,
-      invoice_number: formData.invoiceNumber,
-    });
+    try {
+      const res = await window.api.createMovement({
+        product_id: formData.productId,
+        branch_id: formData.branchId,
+        type: "entrada",
+        quantity,
+        notes: formData.notes,
+        invoice_number: formData.invoiceNumber,
+      });
 
-    if (!res.success) {
-      toast.error(res.error || "Falha ao registrar entrada");
-      return;
+      if (!res.success) {
+        toast.error(res.error || "Falha ao registrar entrada");
+        return;
+      }
+
+      setFormData({ productId: "", branchId: "", quantity: "", notes: "", invoiceNumber: "" });
+      await loadRecentEntries();
+      toast.success("Entrada registrada com sucesso!");
+    } catch (error: any) {
+      console.error("Erro ao registrar entrada:", error);
+      toast.error(error?.message || "Erro desconhecido");
     }
-
-    // Atualiza dados
-    setFormData({ productId: "", branchId: "", quantity: "", notes: "", invoiceNumber: "" });
-
-    const productsRes = await window.api.getProducts();
-    if (productsRes.success) setProducts(productsRes.data || []);
-
-    loadRecentEntries();
-    toast.success("Entrada registrada com sucesso!");
   };
 
-  const isFormEmpty = Object.values(formData).every(value => !value);
+  const isFormEmpty = !formData.productId || !formData.branchId || !formData.quantity || !formData.invoiceNumber;
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">

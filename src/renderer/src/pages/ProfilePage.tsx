@@ -1,33 +1,29 @@
 import { useState } from "react"
 import toast from "react-hot-toast"
-import { User, Save } from "lucide-react"
+import { User as UserIcon, Save } from "lucide-react"
 
 import { useAuth } from "../context/auth-provider"
 
 export default function ProfilePage() {
-  const { user } = useAuth()
-  const [formData, setFormData] = useState<{
-  name: string
-    email: string
-    password?: string
-  }>({
+  const { user, setUser } = useAuth()
+  const [formData, setFormData] = useState({
     name: user?.name || "",
-    email: user?.email || "",
+    password: "",
   })
   const [isSaving, setIsSaving] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!user) {
+      toast.error("Usuário não autenticado.")
+      return
+    }
+
     setIsSaving(true)
 
     try {
-      if (!user) {
-        toast.error("Usuário não autenticado.")
-        return
-      }
-
-      const payload = { ...formData }
-      if (!payload.password) delete payload.password
+      const payload: Record<string, string> = { name: formData.name }
+      if (formData.password.trim()) payload.password = formData.password
 
       const result = await window.api.updateUser({
         id: user.id,
@@ -36,14 +32,19 @@ export default function ProfilePage() {
 
       if (result?.success) {
         toast.success("Perfil atualizado com sucesso!")
+
+        // 🔹 Atualiza state global do usuário
+        setUser({ ...user, ...payload })
+        localStorage.setItem("auth_user", JSON.stringify(result.data.user));
+
+        // 🔹 Limpa senha do form
+        setFormData(prev => ({ ...prev, password: "" }))
       } else {
-        const errorMsg = result?.error || "Erro ao atualizar perfil."
-        toast.error(errorMsg)
+        toast.error(result?.error || "Erro ao atualizar perfil.")
       }
-    } catch (error: any) {
-      console.error("Erro ao atualizar perfil:", error)
-      const errMsg = error?.message || "Falha ao atualizar perfil."
-      toast.error(errMsg)
+    } catch (err: any) {
+      console.error("Erro ao atualizar perfil:", err)
+      toast.error(err?.message || "Falha ao atualizar perfil.")
     } finally {
       setIsSaving(false)
     }
@@ -52,7 +53,7 @@ export default function ProfilePage() {
   return (
     <div className="space-y-6 p-6 max-w-3xl mx-auto">
       <div className="flex items-center gap-3 mb-6">
-        <User className="w-8 h-8 text-[#111]" />
+        <UserIcon className="w-8 h-8 text-[#111]" />
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Meu Perfil</h1>
       </div>
 
@@ -71,10 +72,8 @@ export default function ProfilePage() {
             type="email"
             disabled
             placeholder="E-mail"
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            value={user?.email || ""}
             className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-[#eee] dark:bg-slate-700 rounded-sm focus:ring-2 focus:ring-blue-500 dark:text-white"
-            required
           />
 
           <input

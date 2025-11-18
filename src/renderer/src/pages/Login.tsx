@@ -26,6 +26,8 @@ export default function LoginPage() {
         toast.error(result.error || "Usuário ou senha inválidos")
         return
       }
+
+      localStorage.setItem("auth_user", JSON.stringify(result.data.user));
       
       setUser(result.data.user)
       toast.success("Login realizado com sucesso!")

@@ -2,8 +2,9 @@ import { v4 as uuidv4 } from "uuid";
 
 import { supabase } from "../supabaseClient";
 import { 
-  loadCache, 
   getProductFromCache, 
+  getAllProductsFromCache,
+  setProductsCache,
   invalidateBranchStockCache,
   invalidateMovementsCache,
   getMovementsCache,
@@ -15,21 +16,18 @@ export const getMovements = async (
   typeFilter?: "entrada" | "saida"
 ) => {
   try {
-    await loadCache();
-
-    // Filtros dinâmicos (por request)
     const applyFilters = (data: any[]) => {
       if (!typeFilter) return data;
       return data.filter(m => m.type === typeFilter);
     };
 
-    // 🔥 CACHE GLOBAL → usado imediatamente
+    // 🔥 Tenta cache primeiro
     const cached = getMovementsCache();
     if (cached) {
       return { success: true, data: applyFilters(cached) };
     }
 
-    // 🔥 JOIN COMPLETO — sem getProductFromCache
+    // 🔥 Join completo direto no DB
     let query = supabase
       .from("movements")
       .select(`
@@ -57,10 +55,8 @@ export const getMovements = async (
         )
       `)
       .order("created_at", { ascending: false })
-      .limit(30);;
+      .limit(30);
 
-    // 🔵 APLICAR department *DIRETO NA QUERY*
-    // (só é aplicado se o usuário NÃO for admin)
     if (user.role !== "admin") {
       query = query.eq("product_department", user.department);
     }
@@ -68,7 +64,6 @@ export const getMovements = async (
     const { data: rows, error } = await query;
     if (error) throw error;
 
-    // 🔧 Ajustar template final (igual ao seu retorno)
     const mapped = (rows || []).map((m: any) => ({
       ...m,
       branch_name: m.branch?.name ?? "-",
@@ -77,19 +72,19 @@ export const getMovements = async (
       destination_branch_name: m.destination_branch?.name ?? "-",
     }));
 
-    // 🗄️ Salva no cache
+    // Salva no cache
     setMovementsCache(mapped);
 
     return { success: true, data: applyFilters(mapped) };
   } catch (err: any) {
     console.error("Erro ao buscar movimentos:", err);
-    return { success: false, error: err.message || "Erro ao buscar movimentos"};
+    return { success: false, error: err.message || "Erro ao buscar movimentos" };
   }
 };
 
 export const createMovement = async (movement: {
   branch_id: string;
-  destination_branch_id?: string; // ✅ opcional
+  destination_branch_id?: string;
   product_id: string;
   quantity: number;
   type: "entrada" | "saida" | "all";
@@ -97,10 +92,20 @@ export const createMovement = async (movement: {
   invoice_number?: string;
 }) => {
   try {
-    await loadCache();
+    // 🔹 Produto via cache
+    let product: any = getProductFromCache(movement.product_id);
+    if (!product) {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("id", movement.product_id)
+        .single();
+      if (error || !data) return { success: false, error: "Produto não encontrado" };
 
-    const product = getProductFromCache(movement.product_id);
-    if (!product) return { success: false, error: "Produto não encontrado" };
+      const currentCache = getAllProductsFromCache() ?? [];
+      setProductsCache([...currentCache, data]);
+      product = data;
+    }
 
     const movementToAdd = {
       ...movement,
@@ -109,7 +114,7 @@ export const createMovement = async (movement: {
       product_department: product.department,
     };
 
-    // --- ESTOQUE ---
+    // 🔹 Estoque da filial
     const { data: stockRows, error: stockErr } = await supabase
       .from("branch_stock")
       .select("*")
@@ -128,10 +133,9 @@ export const createMovement = async (movement: {
 
     // Atualiza estoque origem
     if (currentQty !== null) {
-      const newQty =
-        movement.type === "entrada"
-          ? currentQty + movement.quantity
-          : currentQty - movement.quantity;
+      const newQty = movement.type === "entrada"
+        ? currentQty + movement.quantity
+        : currentQty - movement.quantity;
 
       const { error: updateErr } = await supabase
         .from("branch_stock")
@@ -147,18 +151,16 @@ export const createMovement = async (movement: {
         return { success: false, error: "Filial sem estoque desse produto" };
       }
 
-      const { error: insertErr } = await supabase.from("branch_stock").insert([
-        {
-          product_id: movement.product_id,
-          branch_id: movement.branch_id,
-          quantity: movement.quantity,
-          updated_at: new Date().toISOString(),
-        },
-      ]);
+      const { error: insertErr } = await supabase.from("branch_stock").insert([{
+        product_id: movement.product_id,
+        branch_id: movement.branch_id,
+        quantity: movement.quantity,
+        updated_at: new Date().toISOString(),
+      }]);
       if (insertErr) throw insertErr;
     }
 
-    // ✅ Se for transferência (saida + destino existe), adiciona na filial destino
+    // Transferência para filial destino
     if (movement.type === "saida" && movement.destination_branch_id) {
       await supabase.rpc("adjust_stock_transfer", {
         p_product_id: movement.product_id,
@@ -174,31 +176,31 @@ export const createMovement = async (movement: {
       .insert([movementToAdd])
       .select()
       .single();
-
     if (insertMovementErr) throw insertMovementErr;
 
+    // 🔹 Invalida caches
     invalidateMovementsCache();
     invalidateBranchStockCache();
 
     return { success: true, data: inserted };
-  } catch (error: any) {
-    console.error("Erro ao criar movimento:", error);
-    return { success: false, error: error.message || "Erro ao criar movimento"};
+  } catch (err: any) {
+    console.error("Erro ao criar movimento:", err);
+    return { success: false, error: err.message || "Erro ao criar movimento" };
   }
 };
 
 export const deleteMovement = async (id: string) => {
   try {
     const { error } = await supabase.from("movements").delete().eq("id", id);
-
     if (error) throw error;
 
+    // 🔹 Invalida caches
     invalidateMovementsCache();
     invalidateBranchStockCache();
 
     return { success: true };
-  } catch (error: any) {
-    console.error("Erro ao deletar movimento:", error);
-    return { success: false, error: error.message || "Erro ao deletar movimento"};
+  } catch (err: any) {
+    console.error("Erro ao deletar movimento:", err);
+    return { success: false, error: err.message || "Erro ao deletar movimento" };
   }
 };

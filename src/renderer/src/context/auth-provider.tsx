@@ -1,75 +1,67 @@
-import React, { createContext, useContext, useEffect, useState } from "react"
-import toast from "react-hot-toast"
+import React, { createContext, useContext, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 import departments from "../../../shared/config/departments.json";
 
 export type DepartmentId = (typeof departments.allowed)[number]["id"];
 
 export interface User {
-  id: string
-  username: string
-  email: string
-  name: string
-  role: "admin" | "manager" | "operator"
-  branchId: string
-  department: DepartmentId
+  id: string;
+  username: string;
+  email: string;
+  name: string;
+  role: "admin" | "manager" | "operator";
+  branchId: string;
+  department: DepartmentId;
 }
 
 interface AuthContextType {
-  user: User | null
-  loading: boolean
-  logout: () => Promise<void>
-  setUser: React.Dispatch<React.SetStateAction<User | null>>
+  user: User | null;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
-  loading: true,
+  setUser: async () => {},
   logout: async () => {},
-  setUser: async () => {}
-})
+});
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadUser = async () => {
-      const response = await window.api.getCurrentUser();
+    async function restore() {
+      const session = await window.api.loadSession();
 
-      if (response?.success) {
-        setUser(response.user);
-      } else {
-        if (user !== null) {
-          toast.error(response?.error || "Falha ao obter usuário atual");
-        }
-        setUser(null);
+      const savedUser = localStorage.getItem("auth_user");
+      if (session.success && savedUser) {
+        setUser(JSON.parse(savedUser));
       }
 
       setLoading(false);
-    };
+    }
 
-    loadUser();
+    restore();
   }, []);
 
   async function logout() {
-    try {
-      setUser(null)
-      await window.api.logout()
-      toast.success("Logout realizado com sucesso!")
-    } catch (err: any) {
-      console.error("Erro ao deslogar:", err)
-      toast.error("Falha ao deslogar: " + (err?.message || "Erro desconhecido"))
-    }
+    await window.api.logout();
+    localStorage.removeItem("auth_user");
+    setUser(null);
+    toast.success("Logout realizado!");
   }
 
+  if (loading) return <div>Carregando...</div>;
+
   return (
-    <AuthContext.Provider value={{ user, loading, setUser, logout }}>
+    <AuthContext.Provider value={{ user, setUser, logout }}>
       {children}
     </AuthContext.Provider>
-  )
+  );
 }
 
 export function useAuth() {
-  return useContext(AuthContext)
+  return useContext(AuthContext);
 }

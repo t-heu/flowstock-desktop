@@ -1,16 +1,18 @@
 import { ipcMain } from "electron";
-
 import { safeIpc } from "../ipc-utils";
 import { LoginSchema } from "../schemas";
-import { loginUser } from "../services/auth/login";
-import { getCurrentUser } from "../services/auth/profile";
-import { authenticated } from "../authMiddleware";
-import { 
-  setTokenForWindow,
-  clearTokenForWindow,
-  getTokenForWindow 
+import { loginUser } from "../services/login";
+
+import {
+  savePersistedToken,
+  readPersistedToken,
+  clearPersistedToken,
+  savePersistedUser,
+  readPersistedUser,
+  clearPersistedUser
 } from "../authSession";
-import { 
+
+import {
   invalidateBranchCache,
   invalidateBranchStockCache,
   invalidateMovementsCache,
@@ -18,28 +20,63 @@ import {
 } from "../cache";
 
 export function registerAuthIPC() {
-  // 🔹 Login
+
+  // ============================================================
+  // LOGIN
+  // ============================================================
   ipcMain.handle(
     "auth:login",
     safeIpc(async (event, data) => {
-      const { username, password } = LoginSchema.parse(data); // ZodError será capturado
+      const { username, password } = LoginSchema.parse(data);
       const result = await loginUser(username, password);
 
       if (!result?.success || !result.token) {
         return { success: false, error: result?.error || "Credenciais inválidas" };
       }
 
-      setTokenForWindow(event.sender.id, result.token);
+      // Salva token e user
+      savePersistedToken(result.token);
+      savePersistedUser(result.user);
 
-      return { success: true, data: { user: result.user, token: result.token } };
+      return {
+        success: true,
+        data: {
+          user: result.user,
+          token: result.token
+        }
+      };
     }, "Erro ao fazer login")
   );
 
-  // 🔹 Logout
+  // ============================================================
+  // RESTAURAR SESSÃO (startup)
+  // ============================================================
+  ipcMain.handle(
+    "auth:load-session",
+    safeIpc(async () => {
+      const token = readPersistedToken();
+      const user = readPersistedUser();
+
+      if (!token || !user) {
+        return { success: false, error: "session_missing" };
+      }
+
+      return {
+        success: true,
+        data: { token, user }
+      };
+    }, "Erro ao restaurar sessão")
+  );
+
+  // ============================================================
+  // LOGOUT
+  // ============================================================
   ipcMain.handle(
     "auth:logout",
-    safeIpc(async (event) => {
-      clearTokenForWindow(event.sender.id);
+    safeIpc(async () => {
+
+      clearPersistedToken();
+      clearPersistedUser();
 
       invalidateProductCache();
       invalidateBranchCache();
@@ -50,22 +87,16 @@ export function registerAuthIPC() {
     }, "Erro ao fazer logout")
   );
 
-  // 🔹 Obter token
+  // ============================================================
+  // GET TOKEN
+  // ============================================================
   ipcMain.handle(
     "auth:get-token",
-    safeIpc(async (event) => {
-      const token = getTokenForWindow(event.sender.id) ?? null;
-      return { success: true, data: token };
+    safeIpc(async () => {
+      return {
+        success: true,
+        data: readPersistedToken() ?? null
+      };
     }, "Erro ao obter token")
-  );
-
-  // 🔹 Obter usuário atual
-  ipcMain.handle(
-    "get-current-user",
-    authenticated(
-      safeIpc(async (userId) => {
-        return await getCurrentUser(userId); // já retorna { success, user?, error? }
-      }, "Erro ao obter usuário atual")
-    )
   );
 }

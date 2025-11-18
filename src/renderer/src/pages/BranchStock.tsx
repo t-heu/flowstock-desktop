@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { AlertCircle } from "lucide-react";
-import toast from "react-hot-toast"
+import toast from "react-hot-toast";
 
 export interface BranchStock {
   branchId: string;
@@ -11,40 +11,60 @@ export interface BranchStock {
   createdAt?: string;
 }
 
+const BranchStockRow = ({ item }: { item: BranchStock }) => (
+  <tr
+    className="border-b border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/50"
+  >
+    <td className="p-4 text-gray-900 dark:text-white">{item.branchName}</td>
+    <td className="p-4 text-gray-900 dark:text-white">{item.productName}</td>
+    <td className="p-4 text-gray-600 dark:text-gray-400">{item.productName}</td>
+    <td className="p-4 text-right font-semibold text-black dark:text-blue-400">{item.quantity}</td>
+  </tr>
+);
+
 export default function BranchStockPage() {
   const [dados, setDados] = useState<BranchStock[]>([]);
   const [filialSelecionada, setFilialSelecionada] = useState<string>("");
 
+  // -------- Carregamento --------
   useEffect(() => {
-    async function load() {
+    const load = async () => {
       try {
-        const result = await window.api.getBranchStock()
-
+        const result = await window.api.getBranchStock();
         if (!result?.success) {
-          const msg = result?.error || "Erro ao carregar branch stock."
-          toast.error(msg)
-          return
+          toast.error(result?.error || "Erro ao carregar branch stock.");
+          return;
         }
-
-        setDados(result.data || [])
+        setDados(result.data || []);
       } catch (error: any) {
-        console.error("Erro ao carregar branchStock:", error)
-        toast.error("Falha ao carregar branchStock: " + (error?.message || "Erro desconhecido"))
+        console.error("Erro ao carregar branchStock:", error);
+        toast.error("Falha ao carregar branchStock: " + (error?.message || "Erro desconhecido"));
       }
-    }
+    };
+    load();
+  }, []);
 
-    load()
-  }, [])
+  // -------- Memoizações --------
+  const filiais = useMemo(
+    () => Array.from(new Set(dados.map((d) => d.branchName))),
+    [dados]
+  );
 
-  const dadosFiltrados = filialSelecionada
-    ? dados.filter((d) => d.branchName === filialSelecionada)
-    : dados;
+  const dadosFiltrados = useMemo(
+    () => (filialSelecionada ? dados.filter((d) => d.branchName === filialSelecionada) : dados),
+    [dados, filialSelecionada]
+  );
+
+  const limparFiltro = useCallback(() => setFilialSelecionada(""), []);
 
   return (
     <div className="space-y-6 p-6 max-w-6xl mx-auto">
+      {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">📦 Estoque por Filial</h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">Visualize o estoque disponível em cada filial</p>
+        <p className="text-gray-600 dark:text-gray-400 mt-2">
+          Visualize o estoque disponível em cada filial
+        </p>
       </div>
 
       {/* Filtros */}
@@ -61,7 +81,7 @@ export default function BranchStockPage() {
             className="px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
           >
             <option value="">Todas as filiais</option>
-            {Array.from(new Set(dados.map((d) => d.branchName))).map((filial, i) => (
+            {filiais.map((filial, i) => (
               <option key={`${filial}-${i}`} value={filial}>
                 {filial}
               </option>
@@ -69,7 +89,7 @@ export default function BranchStockPage() {
           </select>
 
           <button
-            onClick={() => setFilialSelecionada("")}
+            onClick={limparFiltro}
             className="px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-sm hover:bg-gray-50 dark:hover:bg-slate-700 dark:text-white"
           >
             Limpar filtro
@@ -100,17 +120,7 @@ export default function BranchStockPage() {
                   </td>
                 </tr>
               ) : (
-                dadosFiltrados.map((item) => (
-                  <tr
-                    key={`${item.branchId}-${item.productId}`}
-                    className="border-b border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/50"
-                  >
-                    <td className="p-4 text-gray-900 dark:text-white">{item.branchName}</td>
-                    <td className="p-4 text-gray-900 dark:text-white">{item.productName}</td>
-                    <td className="p-4 text-gray-600 dark:text-gray-400">{item.productName}</td>
-                    <td className="p-4 text-right font-semibold text-black dark:text-blue-400">{item.quantity}</td>
-                  </tr>
-                ))
+                dadosFiltrados.map((item) => <BranchStockRow key={`${item.branchId}-${item.productId}`} item={item} />)
               )}
             </tbody>
           </table>

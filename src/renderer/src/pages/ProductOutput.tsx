@@ -1,5 +1,5 @@
 import type React from "react"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef, useMemo } from "react"
 import { Package, AlertCircle, TrendingDown } from "lucide-react"
 import toast from "react-hot-toast"
 
@@ -21,11 +21,10 @@ export interface Product {
 }
 
 export default function ProductOutputPage() {
-  const [products, setProducts] = useState<Product[]>([])
-  const [branches, setBranches] = useState<Branch[]>([])
-  const [recentExits, setRecentExits] = useState<any[]>([])
-  const [branchStock, setBranchStock] = useState<any[]>([])
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
+  const [recentExits, setRecentExits] = useState<any[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedExits, setSelectedExits] = useState<string[]>([]);
+
   const [formData, setFormData] = useState({
     productId: "",
     branchId: "",
@@ -33,64 +32,96 @@ export default function ProductOutputPage() {
     quantity: "",
     notes: "",
   });
-  const [selectedExits, setSelectedExits] = useState<string[]>([]);
 
+  // 🔥 Pesados ficam fora do state para evitar renders
+  const productsRef = useRef<Product[]>([]);
+  const branchesRef = useRef<Branch[]>([]);
+  const branchStockRef = useRef<any[]>([]);
+
+  // =====================================================
+  // 🔥 LOAD INITIAL DATA — 100% otimizado
+  // =====================================================
   useEffect(() => {
-    async function loadData() {
-      const productsRes = await window.api.getProducts();
-      if (productsRes.success) {
-        setProducts(productsRes.data || []);
-      } else {
-        toast.error(productsRes.error || "Erro ao carregar produtos");
-      }
+    async function load() {
+      const [productsRes, branchesRes, stockRes] = await Promise.all([
+        window.api.getProducts(),
+        window.api.getBranches(),
+        window.api.getBranchStock(),
+      ]);
 
-      const branchesRes = await window.api.getBranches();
-      if (branchesRes.success) {
-        setBranches(branchesRes.data || []);
-      } else {
-        toast.error(branchesRes.error || "Erro ao carregar filiais");
-      }
+      if (productsRes.success) productsRef.current = productsRes.data || [];
+      else toast.error(productsRes.error || "Erro ao carregar produtos");
 
-      const stockRes = await window.api.getBranchStock();
-      if (stockRes.success) {
-        setBranchStock(stockRes.data || []);
-      } else {
-        toast.error(stockRes.error || "Erro ao carregar estoque das filiais");
-      }
+      if (branchesRes.success) branchesRef.current = branchesRes.data || [];
+      else toast.error(branchesRes.error || "Erro ao carregar filiais");
+
+      if (stockRes.success) branchStockRef.current = stockRes.data || [];
+      else toast.error(stockRes.error || "Erro ao carregar estoque");
 
       loadRecentExits();
     }
 
-    loadData();
+    load();
   }, []);
 
+  // =====================================================
+  // 🔥 LOAD RECENT EXITS (leve — pode ficar no state)
+  // =====================================================
   async function loadRecentExits() {
     const movementsRes = await window.api.getMovements("saida");
-    if (movementsRes.success) {
-      setRecentExits(movementsRes.data || []);
-    } else {
-      toast.error(movementsRes.error || "Erro ao carregar saídas recentes");
-    }
+    if (movementsRes.success) setRecentExits(movementsRes.data || []);
+    else toast.error(movementsRes.error || "Erro ao carregar saídas");
   }
 
+  // =====================================================
+  // 🔥 PRODUCT SELECT
+  // =====================================================
   const handleProductChange = (productId: string) => {
-    setFormData({ ...formData, productId });
-    const product = products.find((p) => p.id === productId);
+    setFormData((prev) => ({ ...prev, productId }));
+    const product = productsRef.current.find((p) => p.id === productId);
     setSelectedProduct(product || null);
   };
 
+  // =====================================================
+  // 🔥 AVAILABLE STOCK — MEMOIZED (não trava UI)
+  // =====================================================
+  const availableStock = useMemo(() => {
+    if (!selectedProduct || !formData.branchId) return 0;
+
+    return branchStockRef.current
+      .filter(
+        (item) =>
+          String(item.productId) === String(selectedProduct.id) &&
+          String(item.branchId) === String(formData.branchId)
+      )
+      .reduce((sum, item) => sum + Number(item.quantity), 0);
+  }, [selectedProduct, formData.branchId]);
+
+  const isFormEmpty = Object.values(formData).every((v) => !v);
+
+  // =====================================================
+  // 🔥 SUBMIT
+  // =====================================================
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const quantity = Number.parseInt(formData.quantity);
+    const quantity = Number(formData.quantity);
     if (quantity <= 0) {
       toast.error("A quantidade deve ser maior que zero");
       return;
     }
 
-    const selectedProduct = products.find((p) => p.id === formData.productId);
-    const branchOrigem = branches.find((b) => b.id === formData.branchId);
-    const branchDestino = branches.find((b) => b.name === formData.destinationBranchName);
+    const selectedProduct = productsRef.current.find(
+      (p) => p.id === formData.productId
+    );
+
+    const branchOrigem = branchesRef.current.find(
+      (b) => b.id === formData.branchId
+    );
+
+    const branchDestino = branchesRef.current.find(
+      (b) => b.name === formData.destinationBranchName
+    );
 
     if (!selectedProduct || !branchOrigem || !branchDestino) {
       toast.error("Selecione produto e filiais válidos");
@@ -111,7 +142,7 @@ export default function ProductOutputPage() {
       return;
     }
 
-    // Atualiza dados
+    // limpa form
     setFormData({
       productId: "",
       branchId: "",
@@ -119,28 +150,18 @@ export default function ProductOutputPage() {
       quantity: "",
       notes: "",
     });
+
     setSelectedProduct(null);
 
-    const productsRes = await window.api.getProducts();
-    if (productsRes.success) setProducts(productsRes.data || []);
+    // recarrega somente o necessário
+    await loadRecentExits();
 
-    loadRecentExits();
     toast.success("Saída registrada com sucesso!");
   };
 
-  // Dentro do componente, baseado no produto e filial selecionados
-  const availableStock = selectedProduct && formData.branchId
-  ? branchStock
-      .filter(
-        (item) =>
-          String(item.productId) === String(selectedProduct.id) &&
-          String(item.branchId) === String(formData.branchId)
-      )
-      .reduce((sum, item) => sum + Number(item.quantity), 0)
-  : 0;
-
-  const isFormEmpty = Object.values(formData).every(value => !value);
-
+  // =====================================================
+  // 🔥 GERAR ROMANEIO
+  // =====================================================
   async function handleGenerateRomaneio() {
     const selectedItems = recentExits.filter((item) =>
       selectedExits.includes(item.id)
@@ -172,11 +193,12 @@ export default function ProductOutputPage() {
     toast.success("PDF gerado!");
   }
 
+  // =====================================================
+  // 🔥 TOGGLE SELECT EXIT
+  // =====================================================
   function toggleSelectExit(id: string) {
     setSelectedExits((prev) =>
-      prev.includes(id)
-        ? prev.filter((x) => x !== id)
-        : [...prev, id]
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
   }
 
@@ -208,7 +230,7 @@ export default function ProductOutputPage() {
                 required
               >
                 <option value="">Selecione um produto</option>
-                {products.map((product) => (
+                {productsRef.current.map((product) => (
                   <option key={product.id} value={product.id}>
                     {product.code} - {product.name}
                   </option>
@@ -228,7 +250,7 @@ export default function ProductOutputPage() {
                 required
               >
                 <option value="">Selecione a filial</option>
-                {branches.map((branch) => (
+                {branchesRef.current.map((branch) => (
                   <option key={branch.id} value={branch.id}>
                     {branch.code} - {branch.name}
                   </option>
@@ -250,7 +272,7 @@ export default function ProductOutputPage() {
               required
             >
               <option value="">Selecione a filial destino</option>
-              {branches.map((branch) => (
+              {branchesRef.current.map((branch) => (
                 <option key={branch.id} value={branch.name}> {/* valor agora é o nome */}
                   {branch.code} - {branch.name}
                 </option>

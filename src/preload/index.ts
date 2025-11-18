@@ -7,16 +7,11 @@ const api = {
   loginUser: (username, password) =>
     ipcRenderer.invoke('auth:login', {username, password}),
 
-  //saveToken: (token) => ipcRenderer.invoke("auth:set-token", token),
-
-  getToken: () =>
-    ipcRenderer.invoke("auth:get-token"),
-
-  logout: () =>
-    ipcRenderer.invoke("auth:logout"),
+  loadSession: () => ipcRenderer.invoke("auth:load-session"),
+  logout: () => ipcRenderer.invoke("auth:logout"),
+  getCurrentUser: () => ipcRenderer.invoke("auth:get-current-user"),
 
   getStats: (branch?: string) => ipcRenderer.invoke('get-stats', branch),
-  getCurrentUser: (token?: string) => ipcRenderer.invoke('get-current-user', token),
 
   // 📦 Produtos
   getProducts: () => ipcRenderer.invoke("get-products"),

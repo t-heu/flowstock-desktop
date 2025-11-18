@@ -10,9 +10,9 @@ declare global {
 
       // 🔐 Auth
       loginUser: (username: string, password: string) => Promise<{ success: boolean; data: {token: string; user: any}, error: any }>
-      //saveToken: (token: string) => Promise<void>
       logout: () => Promise<void>
-      getCurrentUser: () => Promise<{ success: boolean; user?: any; error: any; }>
+      getCurrentUser(): Promise<User | null>;
+      loadSession(): Promise<AuthSession | null>;
 
       // 📦 Produtos
       getProducts: () => Promise<any>

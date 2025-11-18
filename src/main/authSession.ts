@@ -1,14 +1,39 @@
-// authSession.ts
-const sessionTokens = new Map<number, string>();
+import ElectronStore from "electron-store";
 
-export function setTokenForWindow(senderId: number, token: string) {
-  sessionTokens.set(senderId, token);
+const Store = (ElectronStore as any).default || ElectronStore;
+
+interface AuthStore {
+  token?: string;
+  user?: any;
 }
 
-export function getTokenForWindow(senderId: number) {
-  return sessionTokens.get(senderId);
+const store: import("electron-store").Store<AuthStore> = new Store({
+  name: "auth"
+});
+
+export function savePersistedToken(token: string) {
+  store.set("token", token);
 }
 
-export function clearTokenForWindow(senderId: number) {
-  sessionTokens.delete(senderId);
+export function readPersistedToken(): string | null {
+  return store.get("token") ?? null;
+}
+
+export function clearPersistedToken() {
+  store.delete("token");
+}
+
+// ================================
+// USER
+// ================================
+export function savePersistedUser(user: any) {
+  store.set("user", JSON.parse(JSON.stringify(user)));
+}
+
+export function readPersistedUser(): any | null {
+  return store.get("user") ?? null;
+}
+
+export function clearPersistedUser() {
+  store.delete("user");
 }
