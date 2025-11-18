@@ -1,17 +1,19 @@
 import { useState, type FormEvent } from "react"
-import { Lock, User } from "lucide-react"
+import { Lock, User, Eye, EyeOff } from "lucide-react"
 import toast from "react-hot-toast"
 
 import { useAuth } from "../context/auth-provider"
 import { NoticeModal } from '../components/NoticeModal';
 
 import logo from "../assets/icon.png";
+import theu from "../assets/theu.png";
 
 export default function LoginPage() {
   const { setUser } = useAuth()
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false)
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -27,7 +29,6 @@ export default function LoginPage() {
       
       setUser(result.data.user)
       toast.success("Login realizado com sucesso!")
-      //onNavigate('dashboard');
     } catch (err: any) {
       console.error("Erro ao fazer login:", err)
       toast.error("Falha ao tentar logar: " + (err?.message || "Erro desconhecido"))
@@ -41,22 +42,27 @@ export default function LoginPage() {
       <NoticeModal />
 
       <div className="min-h-screen flex items-center justify-center p-6 from-gray-100 via-white to-gray-200 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 transition-all">
-        <div className="w-full max-w-md backdrop-blur-xl bg-white/90 dark:bg-slate-800/70 border border-gray-200/50 dark:border-slate-700/50 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] p-10 animate-fadeIn">
+        <div className="w-full max-w-md ">
 
           {/* Logo + Título */}
           <div className="text-center mb-8">
-            <img
-              src={logo}
-              alt="Logo"
-              className="w-16 h-16 mx-auto opacity-90 rounded-xl mb-4 shadow-sm"
-            />
+            <div className="flex items-center justify-center gap-3 mb-4 opacity-90">
+              <img src={logo} className="w-14 h-14 rounded-lg shadow-sm" />
+              
+              <span className="text-gray-500 dark:text-gray-400 text-sm">•</span>
+
+              <img src={theu} title="by theu" className="w-10 h-10 rounded-lg opacity-80" />
+            </div>
+            <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">
+              desenvolvido por theu
+            </p>
 
             <h1 className="text-2xl font-semibold text-gray-900 dark:text-white tracking-tight">
-              Sistema de Estoque
+              Gestão de Materiais
             </h1>
 
             <p className="text-gray-600 dark:text-gray-400 mt-1 text-sm">
-              Acesse sua conta para continuar
+              Plataforma corporativa para controle de estoque e movimentações internas. Faça login para acessar.
             </p>
           </div>
 
@@ -74,7 +80,7 @@ export default function LoginPage() {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 rounded-sm bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white shadow-sm focus:ring-2 focus:ring-black focus:border-black"
+                  className="w-full pl-10 pr-12 py-3 rounded-sm bg-white focus:outline-none dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white shadow-sm focus:ring-2 focus:ring-[#2c5396] focus:border-[#2c5396]"
                   placeholder="ex: admin"
                   required
                 />
@@ -88,22 +94,36 @@ export default function LoginPage() {
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 rounded-sm bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white shadow-sm focus:ring-2 focus:ring-black focus:border-black"
+                  className="w-full pl-10 pr-12 py-3 rounded-sm bg-white focus:outline-none dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white shadow-sm focus:ring-2 focus:ring-[#2c5396] focus:border-[#2c5396]"
                   placeholder="********"
                   required
                 />
+
+                {/* Ícone de mostrar/ocultar senha */}
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
               </div>
             </div>
+
+            <p className="text-gray-400 dark:text-gray-500 text-xs">
+              Entre em contato com admin para criar uma conta
+            </p>
 
             {/* Botão */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-black dark:bg-white text-white dark:text-black py-3 rounded-sm font-semibold tracking-wide shadow-md hover:opacity-90 active:scale-95 transition disabled:opacity-50"
+              className="w-full bg-[#2c5396] dark:bg-white text-white dark:text-black py-3 rounded-sm font-semibold tracking-wide shadow-md hover:opacity-90 active:scale-95 transition disabled:opacity-50"
             >
               {loading ? "Entrando..." : "Entrar"}
             </button>

@@ -88,7 +88,7 @@ export default function Sidebar({
                 }}
                 className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-sm transition-colors text-sm font-medium ${
                   isActive
-                    ? "bg-black text-white"
+                    ? "bg-[#2c5396] text-white"
                     : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700"
                 }`}
               >
@@ -106,7 +106,7 @@ export default function Sidebar({
               }}
               className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-sm transition-colors text-sm font-medium ${
                 currentPage === "branches"
-                  ? "bg-black text-white"
+                  ? "bg-[#2c5396] text-white"
                   : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700"
               }`}
             >
@@ -123,7 +123,7 @@ export default function Sidebar({
               }}
               className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-sm transition-colors text-sm font-medium ${
                 currentPage === "users"
-                  ? "bg-black text-white"
+                  ? "bg-[#2c5396] text-white"
                   : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700"
               }`}
             >
@@ -139,7 +139,7 @@ export default function Sidebar({
             }}
             className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-sm transition-colors text-sm font-medium ${
               currentPage === "profile"
-                ? "bg-black text-white"
+                ? "bg-[#2c5396] text-white"
                 : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700"
             }`}
           >
@@ -152,7 +152,7 @@ export default function Sidebar({
         {user && (
           <div className="p-4 border-t border-gray-200 dark:border-slate-700">
             <div className="flex items-center gap-3 px-4 py-3 mb-2 rounded-sm bg-gray-100 dark:bg-slate-700">
-              <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center text-white text-sm font-bold">
+              <div className="w-8 h-8 rounded-full bg-[#2c5396] flex items-center justify-center text-white text-sm font-bold">
                 {user.name.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">

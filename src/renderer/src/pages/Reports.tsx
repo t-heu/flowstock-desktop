@@ -178,7 +178,7 @@ export default function ReportsPage() {
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">&nbsp;</label>
             <button
               onClick={handleFilter}
-              className="w-full px-4 py-2 bg-black hover:bg-[#333] text-white rounded-sm font-medium transition-colors flex items-center justify-center gap-2"
+              className="w-full px-4 py-2 bg-[#2c5396] hover:bg-[#333] text-white rounded-sm font-medium transition-colors flex items-center justify-center gap-2"
             >
               <Filter className="w-5 h-5" />
               Aplicar Filtros

@@ -4,7 +4,6 @@ import { supabase } from "../supabaseClient";
 import { 
   loadCache, 
   getProductFromCache, 
-  getBranchFromCache, 
   invalidateBranchStockCache,
   invalidateMovementsCache,
   getMovementsCache,

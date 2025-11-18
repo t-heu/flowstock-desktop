@@ -52,7 +52,7 @@ export default function ProfilePage() {
   return (
     <div className="space-y-6 p-6 max-w-3xl mx-auto">
       <div className="flex items-center gap-3 mb-6">
-        <User className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+        <User className="w-8 h-8 text-[#111]" />
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Meu Perfil</h1>
       </div>
 
@@ -88,7 +88,7 @@ export default function ProfilePage() {
           <button
             type="submit"
             disabled={isSaving}
-            className="w-full px-6 py-2.5 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-sm font-medium transition-colors disabled:opacity-60"
+            className="w-full px-6 py-2.5 flex items-center justify-center gap-2 bg-[#2c5396] hover:bg-[#666] text-white rounded-sm font-medium transition-colors disabled:opacity-60"
           >
             <Save className="w-4 h-4" />
             {isSaving ? "Salvando..." : "Salvar Alterações"}
