@@ -26,7 +26,7 @@ export function registerAuthIPC() {
   // ============================================================
   ipcMain.handle(
     "auth:login",
-    safeIpc(async (event, data) => {
+    safeIpc(async (_, data) => {
       const { username, password } = LoginSchema.parse(data);
       const result = await loginUser(username, password);
 

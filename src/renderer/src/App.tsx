@@ -16,7 +16,6 @@ import Reports from './pages/Reports'
 import ProfilePage from './pages/ProfilePage'
 
 import { SidebarWrapper } from './components/SidebarWrapper';
-import LoadingSpinner from "./components/LoadingSpinner";
 
 function App(): React.JSX.Element {
   return (
@@ -28,16 +27,9 @@ function App(): React.JSX.Element {
 }
 
 function AppContent() {
-  const { user, loading } = useAuth()
+  const { user } = useAuth()
   const [currentPage, setCurrentPage] = useState('dashboard');
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <LoadingSpinner size={60} />
-      </div>
-    );
-  }
   if (!user) return <Login />
 
   return (

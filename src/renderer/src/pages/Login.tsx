@@ -26,8 +26,6 @@ export default function LoginPage() {
         toast.error(result.error || "Usuário ou senha inválidos")
         return
       }
-
-      localStorage.setItem("auth_user", JSON.stringify(result.data.user));
       
       setUser(result.data.user)
       toast.success("Login realizado com sucesso!")
@@ -60,7 +58,7 @@ export default function LoginPage() {
             </p>
 
             <h1 className="text-2xl font-semibold text-gray-900 dark:text-white tracking-tight">
-              Gestão de Materiais
+              Gestão de estoque de materiais interno
             </h1>
 
             <p className="text-gray-600 dark:text-gray-400 mt-1 text-sm">

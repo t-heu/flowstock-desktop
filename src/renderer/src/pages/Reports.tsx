@@ -258,21 +258,20 @@ export default function ReportsPage() {
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="px-4 py-2 rounded-full bg-[#111] dark:bg-slate-700 text-white dark:text-gray-200 
-                          hover:bg-[#333] disabled:opacity-40 transition"
+                className="px-4 py-2 rounded-sm bg-[#2c5396] hover:bg-[#666] dark:bg-slate-700 text-white dark:text-gray-200 disabled:opacity-40 transition"
               >
                 ← Anterior
               </button>
 
-              <div className="px-4 py-2 rounded-full bg-black text-white font-medium shadow">
+              <div className="px-4 py-2 rounded-sm bg-[#2c5396] text-white font-medium shadow">
                 {page} / {Math.ceil(total / pageSize)}
               </div>
 
               <button
                 onClick={() => setPage((p) => p + 1)}
                 disabled={page * pageSize >= total}
-                className="px-4 py-2 rounded-full bg-[#111] dark:bg-slate-700 text-white dark:text-gray-200 
-                          hover:bg-[#333] disabled:opacity-40 transition"
+                className="px-4 py-2 rounded-sm bg-[#2c5396] hover:bg-[#666] dark:bg-slate-700 text-white dark:text-gray-200 
+                           disabled:opacity-40 transition"
               >
                 Próximo →
               </button>

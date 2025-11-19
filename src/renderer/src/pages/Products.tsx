@@ -104,7 +104,7 @@ export default function ProductsPage() {
         {["admin", "manager"].includes(user?.role ?? "") && (
           <button
             onClick={() => setIsFormOpen(!isFormOpen)}
-            className="pointer flex items-center gap-2 px-4 py-2.5 bg-black hover:bg-[#333] text-white rounded-sm font-medium transition-colors"
+            className="pointer flex items-center gap-2 px-4 py-2.5 bg-[#2c5396] hover:bg-[#333] text-white rounded-sm font-medium transition-colors"
           >
             <Plus className="w-5 h-5" />
             Novo Produto
@@ -197,7 +197,7 @@ export default function ProductsPage() {
             <div className="flex gap-3">
               <button
                 type="submit"
-                className="px-4 py-2 bg-black hover:bg-[#333] text-white rounded-sm font-medium transition-colors"
+                className="px-4 py-2 bg-[#2c5396] hover:bg-[#333] text-white rounded-sm font-medium transition-colors"
               >
                 {editingProduct ? "Atualizar Produto" : "Salvar Produto"}
               </button>
@@ -253,7 +253,7 @@ export default function ProductsPage() {
                           <button
                             title="editar"
                             onClick={() => handleEdit(product)}
-                            className="text-blue-600 hover:text-blue-800 transition-colors"
+                            className="text-[#2c5396] hover:text-blue-800 transition-colors"
                           >
                             <Pencil className="w-5 h-5" />
                           </button>

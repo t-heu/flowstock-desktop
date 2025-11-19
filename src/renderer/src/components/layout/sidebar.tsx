@@ -1,4 +1,3 @@
-import { useState } from "react"
 import {
   LayoutDashboard,
   Package,
@@ -33,46 +32,14 @@ export default function Sidebar({
   onNavigate: (page: string) => void
 }) {
   const { user, logout } = useAuth()
-  const [isOpen, setIsOpen] = useState(false)
 
   return (
     <>
-      {/* Botão hambúrguer para mobile */}
-      <div className="flex items-center justify-between p-4 md:hidden border-b border-gray-200 dark:border-slate-700">
-        <h1 className="text-xl font-bold text-black">FlowStock</h1>
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="text-gray-700 dark:text-gray-300 focus:outline-none"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-          </svg>
-        </button>
-      </div>
-
-      {/* Overlay */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-opacity-25 z-40 md:hidden"
-          onClick={() => setIsOpen(false)}
-        ></div>
-      )}
-
       {/* Sidebar */}
       <aside
         className={`fixed top-0 left-0 z-50 w-64 h-full bg-white dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700 transform transition-transform duration-300
-          ${isOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 md:static md:h-screen flex flex-col`}
+          -translate-x-full md:translate-x-0 md:static md:h-screen flex flex-col`}
       >
-        {/* Header Desktop */}
-        <div className="p-6 border-b border-gray-200 dark:border-slate-700 hidden md:block">
-          <h1 className="text-xl font-bold text-black">FlowStock</h1>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Gestão de estoque interno</p>
-        </div>
 
         {/* Navigation */}
         <nav className="p-4 space-y-2 flex-1 overflow-y-auto">
@@ -84,7 +51,6 @@ export default function Sidebar({
                 key={item.key}
                 onClick={() => {
                   onNavigate(item.key)
-                  setIsOpen(false)
                 }}
                 className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-sm transition-colors text-sm font-medium ${
                   isActive
@@ -102,7 +68,6 @@ export default function Sidebar({
             <button
               onClick={() => {
                 onNavigate("branches")
-                setIsOpen(false)
               }}
               className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-sm transition-colors text-sm font-medium ${
                 currentPage === "branches"
@@ -119,7 +84,6 @@ export default function Sidebar({
             <button
               onClick={() => {
                 onNavigate("users")
-                setIsOpen(false)
               }}
               className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-sm transition-colors text-sm font-medium ${
                 currentPage === "users"
@@ -135,7 +99,6 @@ export default function Sidebar({
           <button
             onClick={() => {
               onNavigate("profile")
-              setIsOpen(false)
             }}
             className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-sm transition-colors text-sm font-medium ${
               currentPage === "profile"

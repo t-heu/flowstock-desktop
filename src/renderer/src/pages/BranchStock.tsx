@@ -61,7 +61,7 @@ export default function BranchStockPage() {
     <div className="space-y-6 p-6 max-w-6xl mx-auto">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">📦 Estoque por Filial</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Estoque por Filial</h1>
         <p className="text-gray-600 dark:text-gray-400 mt-2">
           Visualize o estoque disponível em cada filial
         </p>

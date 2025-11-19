@@ -35,7 +35,6 @@ export default function ProfilePage() {
 
         // 🔹 Atualiza state global do usuário
         setUser({ ...user, ...payload })
-        localStorage.setItem("auth_user", JSON.stringify(result.data.user));
 
         // 🔹 Limpa senha do form
         setFormData(prev => ({ ...prev, password: "" }))

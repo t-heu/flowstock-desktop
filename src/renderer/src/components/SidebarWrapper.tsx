@@ -7,9 +7,9 @@ interface SidebarWrapperProps {
 }
 
 export function SidebarWrapper({ currentPage, onNavigate }: SidebarWrapperProps) {
-  const { user, loading } = useAuth()
+  const { user } = useAuth()
 
-  if (loading || !user) return null
+  if (!user) return null
 
   return <Sidebar currentPage={currentPage} onNavigate={onNavigate} />
 }

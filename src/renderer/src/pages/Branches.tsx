@@ -35,9 +35,12 @@ export default function BranchesPage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
-    if (!formData.name || !formData.code) return toast.error("Preencha todos os campos ⚠️");
+    if (!formData.name || !formData.code) {
+      toast.error("Preencha todos os campos ⚠️") 
+      return
+    };
 
     const { error, success } = await window.api.addBranch(formData);
     if (success) {
@@ -103,7 +106,7 @@ export default function BranchesPage() {
           />
           <button
             type="submit"
-            className="col-span-2 px-6 py-2.5 flex items-center justify-center gap-2 bg-[#111] hover:bg-[#333] text-white rounded-sm font-medium transition-colors"
+            className="col-span-2 px-6 py-2.5 flex items-center justify-center gap-2 bg-[#2c5396] hover:bg-[#666] text-white rounded-sm font-medium transition-colors"
           >
             <PlusCircle className="w-4 h-4" />
             Adicionar Filial

@@ -208,7 +208,7 @@ export default function UsersPage() {
       {/* Formulário */}
       <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
         <div className="flex items-center gap-3 mb-6">
-          <UserPlus className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+          <UserPlus className="w-6 h-6 text-[#2c5396] dark:text-blue-400" />
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">Novo Usuário</h2>
         </div>
 
@@ -279,7 +279,7 @@ export default function UsersPage() {
 
           <button
             type="submit"
-            className="w-full px-6 py-2.5 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-sm font-medium transition-colors"
+            className="w-full px-6 py-2.5 flex items-center justify-center gap-2 bg-[#2c5396] hover:bg-[#666] text-white rounded-sm font-medium transition-colors"
           >
             <UserPlus className="w-4 h-4" />
             Adicionar Usuário
@@ -327,7 +327,7 @@ export default function UsersPage() {
                       <button
                         title="Editar"
                         onClick={() => setEditUser(u)}
-                        className="text-blue-600 hover:text-blue-800 transition-colors"
+                        className="text-[#2c5396] hover:text-blue-800 transition-colors"
                       >
                         <Pencil className="w-5 h-5" />
                       </button>

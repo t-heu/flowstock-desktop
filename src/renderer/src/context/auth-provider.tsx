@@ -35,9 +35,8 @@ export function AuthProvider({ children }) {
     async function restore() {
       const session = await window.api.loadSession();
 
-      const savedUser = localStorage.getItem("auth_user");
-      if (session.success && savedUser) {
-        setUser(JSON.parse(savedUser));
+      if (session.success) {
+        setUser(session.data.user);
       }
 
       setLoading(false);
@@ -48,7 +47,6 @@ export function AuthProvider({ children }) {
 
   async function logout() {
     await window.api.logout();
-    localStorage.removeItem("auth_user");
     setUser(null);
     toast.success("Logout realizado!");
   }

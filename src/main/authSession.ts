@@ -1,15 +1,13 @@
-import ElectronStore from "electron-store";
+import __Store from 'electron-store'
 
-const Store = (ElectronStore as any).default || ElectronStore;
+const Store = (__Store as any).default || __Store;
 
 interface AuthStore {
   token?: string;
   user?: any;
 }
 
-const store: import("electron-store").Store<AuthStore> = new Store({
-  name: "auth"
-});
+const store = new Store({ name: "auth" }) as __Store<AuthStore>;;
 
 export function savePersistedToken(token: string) {
   store.set("token", token);

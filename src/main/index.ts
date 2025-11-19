@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, dialog } from 'electron'
+import { app, shell, BrowserWindow, dialog, screen } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 
@@ -19,10 +19,15 @@ import { registerStatsIPC } from "./ipc/stats.ipc";
 app.disableHardwareAcceleration();
 
 function createWindow(): void {
+  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+  // Define tamanho máximo, mas ajusta para telas pequenas
+  const windowWidth = Math.min(1200, width);
+  const windowHeight = Math.min(680, height);
+  
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 1200,
-    height: 680,
+    width: windowWidth,
+    height: windowHeight,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),

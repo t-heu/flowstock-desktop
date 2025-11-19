@@ -1,6 +1,6 @@
 // realtime-cache.ts
 import { supabase } from "./supabaseClient";
-import { Product, Branch, BranchStockItem } from "../shared/types";
+
 import {
   getAllProductsFromCache,
   setProductsCache,
