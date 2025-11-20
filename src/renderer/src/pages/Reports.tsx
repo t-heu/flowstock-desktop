@@ -4,10 +4,10 @@ import toast from "react-hot-toast"
 
 interface DetailedExit {
   created_at: string
-  branchName: string
-  destinationBranchName: string
-  productCode: string
-  productName: string
+  branch_name: string
+  destination_branch_name: string
+  product_code: string
+  product_name: string
   quantity: number
   notes: string
   type: "entrada" | "saida",
@@ -91,7 +91,7 @@ export default function ReportsPage() {
       "Data;Filial Origem;Filial Destino;Código Produto;Nome Produto;Quantidade;Entrada/Saída;NF Entrada;Observações\n";
 
     reportData.forEach((item) => {
-      csv += `${new Date(item.created_at).toLocaleDateString("pt-BR")};${item.branchName};${item.destinationBranchName};${item.productCode};${item.productName};${item.quantity};${item.type};${item.invoice_number || "-"};${item.notes}\n`;
+      csv += `${new Date(item.created_at).toLocaleDateString("pt-BR")};${item.branch_name};${item.destination_branch_name};${item.product_code};${item.product_name};${item.quantity};${item.type};${item.invoice_number || "-"};${item.notes}\n`;
     });
 
     const blob = new Blob([csv], { type: "text/csv" });
@@ -231,10 +231,10 @@ export default function ReportsPage() {
                 reportData.map((item, idx) => (
                   <tr key={idx} className="border-b border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/50">
                     <td className="p-4 text-sm text-gray-900 dark:text-white">{new Date(item.created_at).toLocaleDateString("pt-BR")}</td>
-                    <td className="p-4 text-sm text-gray-900 dark:text-white">{item.branchName}</td>
-                    <td className="p-4 text-sm text-gray-900 dark:text-white">{item.destinationBranchName}</td>
-                    <td className="p-4 text-sm text-gray-900 dark:text-white">{item.productCode}</td>
-                    <td className="p-4 text-sm text-gray-900 dark:text-white">{item.productName}</td>
+                    <td className="p-4 text-sm text-gray-900 dark:text-white">{item.branch_name}</td>
+                    <td className="p-4 text-sm text-gray-900 dark:text-white">{item.destination_branch_name}</td>
+                    <td className="p-4 text-sm text-gray-900 dark:text-white">{item.product_code}</td>
+                    <td className="p-4 text-sm text-gray-900 dark:text-white">{item.product_name}</td>
                     <td
                       className={`p-4 text-sm font-semibold ${
                         item.type === "saida"

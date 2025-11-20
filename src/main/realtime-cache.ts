@@ -10,6 +10,7 @@ import {
   setBranchStockCache,
   getMovementsCache,
   setMovementsCache,
+  movementsPageCache
 } from "./cache";
 
 export const initRealtimeCache = () => {
@@ -72,12 +73,15 @@ export const initRealtimeCache = () => {
         switch (payload.eventType) {
           case "INSERT":
             cache = [...cache, payload.new];
+            movementsPageCache.clear();
             break;
           case "UPDATE":
             cache = cache.map((b: any)=> (b.id === payload.new.id ? payload.new : b));
+            movementsPageCache.clear();
             break;
           case "DELETE":
             cache = cache.filter((b: any) => b.id !== payload.old.id);
+            movementsPageCache.clear();
             break;
         }
         setBranchStockCache(cache);

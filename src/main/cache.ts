@@ -6,6 +6,8 @@ let branchesCache: Map<string, Branch> | null = null;
 let branchStockCache: Map<string, Map<string, BranchStockItem>> | null = null;
 let movementsCache: Movement[] | null = null; // sempre os 30 movimentos mais recentes
 let statsCacheInternal: Record<string, Stats> = {}
+// chave: `${type}_${branchId}_${department}_${page}`
+export let movementsPageCache: Map<string, Movement[]> = new Map();
 
 // ======= PRODUCTS =======
 export const getAllProductsFromCache = (): Product[] | null => productsCache ? Array.from(productsCache.values()) : null;
@@ -67,3 +69,15 @@ export const invalidateStatsCache = (key?: string) => {
   if (key) delete statsCacheInternal[key];
   else statsCacheInternal = {};
 };
+
+export const getMovementsCacheKey = ({
+  type,
+  branchId,
+  department,
+  page,
+}: {
+  type?: string;
+  branchId?: string;
+  department?: string;
+  page: number;
+}) => `${type ?? "all"}_${branchId ?? "all"}_${department ?? "all"}_${page}`;

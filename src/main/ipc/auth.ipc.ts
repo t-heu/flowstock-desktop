@@ -17,6 +17,8 @@ import {
   invalidateBranchStockCache,
   invalidateMovementsCache,
   invalidateProductCache
+  ,movementsPageCache,
+  invalidateStatsCache
 } from "../cache";
 
 export function registerAuthIPC() {
@@ -74,14 +76,17 @@ export function registerAuthIPC() {
   ipcMain.handle(
     "auth:logout",
     safeIpc(async () => {
-
       clearPersistedToken();
       clearPersistedUser();
 
+      // limpa todos os caches
       invalidateProductCache();
       invalidateBranchCache();
       invalidateBranchStockCache();
       invalidateMovementsCache();
+      movementsPageCache.clear(); // limpa cache de páginas
+
+      invalidateStatsCache(); // opcional, limpa todos os stats
 
       return { success: true };
     }, "Erro ao fazer logout")

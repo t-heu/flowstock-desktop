@@ -228,9 +228,9 @@ export default function ProductInputPage() {
                   </td>
                 </tr>
               ) : (
-                recentEntries.map((entry) => (
+                recentEntries.map((entry, index) => (
                   <tr
-                    key={entry.id}
+                    key={index}
                     className="border-b border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/50"
                   >
                     <td className="p-4 text-sm text-gray-900 dark:text-white">

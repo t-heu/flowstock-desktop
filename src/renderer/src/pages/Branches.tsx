@@ -21,8 +21,8 @@ export default function BranchesPage() {
         toast.error(response?.error || "Erro ao carregar filiais 😢");
         setBranches([]);
       }
-    } catch (e) {
-      console.log(e)
+    } catch (e: any) {
+      toast.error(e.message || "Erro ao carregar filiais 😢");
     }
   }, []);
 

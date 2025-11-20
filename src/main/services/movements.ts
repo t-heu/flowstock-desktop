@@ -7,78 +7,20 @@ import {
   setProductsCache,
   invalidateBranchStockCache,
   invalidateMovementsCache,
-  getMovementsCache,
-  setMovementsCache
 } from "../cache";
 
-export const getMovements = async (
-  user: { role: string; department: string },
-  typeFilter?: "entrada" | "saida"
-) => {
+import {fetchMovementsBase} from "./movementBase"
+
+export const getMovements = async (user, typeFilter?) => {
   try {
-    const applyFilters = (data: any[]) => {
-      if (!typeFilter) return data;
-      return data.filter(m => m.type === typeFilter);
-    };
+    const movements = await fetchMovementsBase({
+      type: typeFilter,
+      department: user.role !== "admin" ? user.department : undefined
+    });
 
-    // 🔥 Tenta cache primeiro
-    const cached = getMovementsCache();
-    if (cached) {
-      return { success: true, data: applyFilters(cached) };
-    }
-
-    // 🔥 Join completo direto no DB
-    let query = supabase
-      .from("movements")
-      .select(`
-        id,
-        product_id,
-        branch_id,
-        destination_branch_id,
-        quantity,
-        type,
-        invoice_number,
-        product_department,
-        notes,
-        created_at,
-
-        product:product_id (
-          id, code, name, description, department, unit, created_at
-        ),
-
-        branch:branch_id (
-          id, code, name, created_at
-        ),
-
-        destination_branch:destination_branch_id (
-          id, code, name, created_at
-        )
-      `)
-      .order("created_at", { ascending: false })
-      .limit(30);
-
-    if (user.role !== "admin") {
-      query = query.eq("product_department", user.department);
-    }
-
-    const { data: rows, error } = await query;
-    if (error) throw error;
-
-    const mapped = (rows || []).map((m: any) => ({
-      ...m,
-      branch_name: m.branch?.name ?? "-",
-      product_name: m.product?.name ?? "-",
-      product_code: m.product?.code ?? "-",
-      destination_branch_name: m.destination_branch?.name ?? "-",
-    }));
-
-    // Salva no cache
-    setMovementsCache(mapped);
-
-    return { success: true, data: applyFilters(mapped) };
+    return { success: true, data: movements };
   } catch (err: any) {
-    console.error("Erro ao buscar movimentos:", err);
-    return { success: false, error: err.message || "Erro ao buscar movimentos" };
+    return { success: false, error: err.message };
   }
 };
 
