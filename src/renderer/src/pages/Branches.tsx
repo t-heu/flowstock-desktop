@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Building2, PlusCircle, Trash2 } from "lucide-react";
-import toast from "react-hot-toast";
+
+import { useToast } from "../context/ToastProvider"
 
 interface Branch {
   id: string;
@@ -11,6 +12,7 @@ interface Branch {
 export default function BranchesPage() {
   const [branches, setBranches] = useState<Branch[]>([]);
   const [formData, setFormData] = useState({ name: "", code: "" });
+  const { showToast } = useToast();
 
   const loadBranches = useCallback(async () => {
     try {
@@ -18,11 +20,12 @@ export default function BranchesPage() {
       if (response?.success && Array.isArray(response.data)) {
         setBranches(response.data);
       } else {
-        toast.error(response?.error || "Erro ao carregar filiais 😢");
+        showToast(response?.error || "Erro ao carregar filiais 😢", "error");
+        
         setBranches([]);
       }
     } catch (e: any) {
-      toast.error(e.message || "Erro ao carregar filiais 😢");
+      showToast(e.message || "Erro ao carregar filiais 😢", "error");
     }
   }, []);
 
@@ -38,7 +41,7 @@ export default function BranchesPage() {
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     if (!formData.name || !formData.code) {
-      toast.error("Preencha todos os campos ⚠️") 
+      showToast("Preencha todos os campos!", "error");
       return
     };
 
@@ -46,9 +49,9 @@ export default function BranchesPage() {
     if (success) {
       setFormData({ name: "", code: "" });
       await loadBranches();
-      toast.success("Filial criada com sucesso! 🎉");
+      showToast("Filial criada com sucesso!", "success");
     } else {
-      toast.error(error || "Erro ao criar filial ❌");
+      showToast(error || "Erro ao criar filial!", "error");
     }
   };
 
@@ -62,9 +65,9 @@ export default function BranchesPage() {
       const result = await window.api.deleteBranch(id);
       if (result.success) {
         await loadBranches();
-        toast.success("Filial removida 🗑️");
+        showToast("Filial removida", "error");
       } else {
-        toast.error(result.error || "Erro ao excluir filial ❌");
+        showToast(result.error || "Erro ao excluir filial", "error");
       }
     },
     [loadBranches]

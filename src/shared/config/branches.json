@@ -1,0 +1,112 @@
+{
+  "branches_rows": [
+    {
+      "id":0,
+      "code":"MT",
+      "name":"MATRIZ",
+      "created_at":"2025-11-01 20:42:49.024+00"
+    },
+    {
+      "id":1,
+      "code":"CAM",
+      "name":"Camaçari",
+      "created_at":"2025-11-10 00:10:32.818+00"
+    },
+    {
+      "id":2,
+      "code":"ALG",
+      "name":"Alagoinhas",
+      "created_at":"2025-11-02 17:36:28.164+00"
+    },
+    {
+      "idx":3,
+      "code":"VA",
+      "name":"Vasco da Gama",
+      "created_at":"2025-11-02 10:55:22.968+00"
+    },
+    {
+      "idx":4,
+      "code":"SS",
+      "name":"Sussuarana",
+      "created_at":"2025-11-02 17:34:50.973+00"
+    },
+    {
+      "idx":5,
+      "code":"FS4",
+      "name":"Feira de Santana 4",
+      "created_at":"2025-11-02 17:34:33.915+00"
+    },
+    {
+      "idx":6,
+      "code":"PI",
+      "name":"Piraja",
+      "created_at":"2025-11-02 17:33:21.936+00"
+    },
+    {
+      "idx":7,
+      "code":"BR",
+      "name":"Boca do Rio",
+      "created_at":"2025-11-02 17:35:46.95+00"
+    },
+    {
+      "idx":8,
+      "code":"CJ",
+      "name":"Cajazeiras",
+      "created_at":"2025-11-02 17:35:28.28+00"
+    },
+    {
+      "idx":9,
+      "code":"FS2",
+      "name":"Feira de Santana 2",
+      "created_at":"2025-11-02 17:34:25.215+00"
+    },
+    {
+      "idx":10,
+      "code":"SF",
+      "name":"Simões Filho",
+      "created_at":"2025-11-02 17:33:39.934+00"
+    },
+    {
+      "idx":11,
+      "code":"LF",
+      "name":"Lauro de Freitas",
+      "created_at":"2025-11-02 17:35:05.714+00"
+    },
+    {
+      "idx":12,
+      "code":"FS3",
+      "name":"FEIRA DE SANTANA 3",
+      "created_at":"2025-11-01 21:19:15.54+00"
+    },
+    {
+      "idx":13,
+      "code":"FS1",
+      "name":"Feira de Santana 1",
+      "created_at":"2025-11-02 17:34:13.927+00"
+    },
+    {
+      "idx":14,
+      "code":"SC",
+      "name":"São Cristóvão",
+      "created_at":"2025-11-02 17:33:06.208+00"
+    },
+    {
+      "idx":15,
+      "code":"SR",
+      "name":"Serrinha",
+      "created_at":"2025-11-02 17:35:59.263+00"
+    },
+    {
+      "idx":16,
+      "code":"PA",
+      "name":"Paripe",
+      "created_at":"2025-11-02 17:36:13.326+00"
+    },
+    {
+      "idx":17,
+      "code":"SM",
+      "name":"São Marcos",
+      "created_at":"2025-11-02 17:33:58.052+00"
+    }
+  ]
+}

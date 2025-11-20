@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import toast from "react-hot-toast";
+
+import { useToast } from "./ToastProvider"
 
 import departments from "../../../shared/config/departments.json";
 
@@ -28,18 +29,28 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export function AuthProvider({ children }) {
+  const { showToast } = useToast();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function restore() {
-      const session = await window.api.loadSession();
+      try {
+        const session = await window.api.loadSession();
+        
+        if (session.success) {
+          setUser(session.data.user);
+        } else {
+          // sessão inválida (token expirado, etc)
+          await logout();
+        }
 
-      if (session.success) {
-        setUser(session.data.user);
+      } catch (err) {
+        await logout();
+        showToast("Conexão expirada!", "error");
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     }
 
     restore();
@@ -48,7 +59,6 @@ export function AuthProvider({ children }) {
   async function logout() {
     await window.api.logout();
     setUser(null);
-    toast.success("Logout realizado!");
   }
 
   if (loading) return <div>Carregando...</div>;

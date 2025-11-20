@@ -1,4 +1,4 @@
-import { useAuth } from "../context/auth-provider"
+import { useAuth } from "../context/AuthProvider"
 import Sidebar from "./layout/sidebar"
 
 interface SidebarWrapperProps {

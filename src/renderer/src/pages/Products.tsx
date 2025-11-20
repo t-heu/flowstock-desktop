@@ -1,13 +1,16 @@
 import type React from "react"
 import { useEffect, useState, useRef } from "react"
 import { Plus, Trash2, Package, Pencil, Ban } from "lucide-react"
-import toast from "react-hot-toast"
 
-import { useAuth } from "../context/auth-provider";
+import { useToast } from "../context/ToastProvider"
+
+import { useAuth } from "../context/AuthProvider";
 import departments from "../../../shared/config/departments.json";
 import {IProduct, Product} from "../../../shared/types";
 
 export default function ProductsPage() {
+  const { showToast } = useToast();
+
   const [products, setProducts] = useState<Product[]>([])
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [formData, setFormData] = useState<IProduct>({
@@ -39,7 +42,7 @@ export default function ProductsPage() {
       setProducts(data || [])
     } catch (error) {
       console.error("Erro ao carregar produtos:", error)
-      toast.error("Falha ao carregar produtos")
+      showToast("Falha ao carregar produtos", "error")
       setProducts([])
     }
   }
@@ -52,13 +55,13 @@ export default function ProductsPage() {
         result = await window.api.updateProduct({ id: editingProduct.id, updates: formData });
         if (result?.success) {
           setProducts(prev => prev.map(p => (p.id === editingProduct.id ? { ...p, ...formData } : p)));
-          toast.success("Produto atualizado com sucesso!");
+          showToast("Produto atualizado com sucesso!", "success");
         }
       } else {
         result = await window.api.createProduct(formData);
         if (result?.success) {
           setProducts(prev => [...prev, { ...formData, id: result.id }]);
-          toast.success("Produto criado com sucesso!");
+          showToast("Produto criado com sucesso!", "success");
         }
       }
 
@@ -67,7 +70,7 @@ export default function ProductsPage() {
       setIsFormOpen(false);
     } catch (error) {
       console.error(error);
-      toast.error("Falha ao salvar produto");
+      showToast("Falha ao salvar produto", "error");
     }
   };
 
@@ -79,11 +82,11 @@ export default function ProductsPage() {
       const result = await window.api.deleteProduct(id);
       if (result?.success) {
         setProducts(prev => prev.filter(p => p.id !== id));
-        toast.success("Produto excluído!");
+        showToast("Produto excluído!", "success");
       }
     } catch (error) {
       console.error(error);
-      toast.error("Falha ao excluir produto");
+      showToast("Falha ao excluir produto", "error");
     }
   };
 

@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "./config/jwt";
 
-import { readPersistedToken, clearPersistedToken } from "./authSession";
+import { readPersistedToken, clearPersistedToken, clearPersistedUser } from "./authSession";
 
 export function authenticated(handler) {
   return async (_event, ...args) => {
@@ -16,6 +16,7 @@ export function authenticated(handler) {
       decoded = jwt.verify(token, JWT_SECRET);
     } catch {
       clearPersistedToken();
+      clearPersistedUser();
       return { success: false, error: "Sessão expirada, faça login novamente" };
     }
 

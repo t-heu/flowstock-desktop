@@ -1,10 +1,13 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Package, TrendingUp, TrendingDown } from "lucide-react";
-import toast from "react-hot-toast";
+
+import { useToast } from "../context/ToastProvider"
+//import branchesJson from "../../../shared/config/branches.json";
 
 import LoadingSpinner from "../components/LoadingSpinner";
 
 export default function DashboardPage() {
+  const { showToast } = useToast();
   const [stats, setStats] = useState({
     totalProducts: 0,
     totalStock: 0,
@@ -22,11 +25,11 @@ export default function DashboardPage() {
       try {
         const result = await window.api.getBranches();
         const data = Array.isArray(result) ? result : result?.data || [];
-        if (!result.success) toast.error(result.error);
+        if (!result.success) showToast(result.error, "error");
         setBranches(data);
       } catch (error: any) {
         console.error("Erro ao carregar filiais:", error);
-        toast.error("Falha ao carregar filiais: " + (error?.message || "Erro desconhecido"));
+        showToast("Falha ao carregar filiais: " + (error?.message || "Erro desconhecido"), "error");
         setBranches([]);
       }
     };
@@ -49,7 +52,7 @@ export default function DashboardPage() {
       });
     } catch (error: any) {
       console.error("Erro ao carregar estatísticas:", error);
-      toast.error("Falha ao carregar estatísticas: " + (error?.message || "Erro desconhecido"));
+      showToast("Falha ao carregar estatísticas: " + (error?.message || "Erro desconhecido"), "error");
       setStats({ totalProducts: 0, totalStock: 0, totalEntries: 0, totalExits: 0, totalBranches: 0 });
     } finally {
       setLoading(false);

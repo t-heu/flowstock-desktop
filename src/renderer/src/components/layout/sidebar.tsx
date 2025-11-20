@@ -11,7 +11,8 @@ import {
   User
 } from "lucide-react"
 
-import { useAuth } from '../../context/auth-provider'
+import { useAuth } from '../../context/AuthProvider'
+import { useToast } from '../../context/ToastProvider'
 
 import {can} from "../../lib/permissions"
 
@@ -31,7 +32,13 @@ export default function Sidebar({
   currentPage: string
   onNavigate: (page: string) => void
 }) {
-  const { user, logout } = useAuth()
+  const { user, logout } = useAuth();
+  const { showToast } = useToast();
+
+  const handleLogout = () => {
+    logout()
+    showToast("Logout realizado!", "success");
+  }
 
   return (
     <>
@@ -126,7 +133,7 @@ export default function Sidebar({
               </div>
             </div>
             <button
-              onClick={logout}
+              onClick={handleLogout}
               className="text-red-700 w-full flex items-center gap-3 px-4 py-2 rounded-sm text-sm font-medium dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
             >
               <LogOut className="w-5 h-5" />

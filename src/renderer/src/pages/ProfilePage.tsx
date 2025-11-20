@@ -1,11 +1,13 @@
 import { useState } from "react"
-import toast from "react-hot-toast"
 import { User as UserIcon, Save } from "lucide-react"
 
-import { useAuth } from "../context/auth-provider"
+import { useToast } from "../context/ToastProvider"
+import { useAuth } from "../context/AuthProvider"
 
 export default function ProfilePage() {
-  const { user, setUser } = useAuth()
+  const { user, setUser } = useAuth();
+  const { showToast } = useToast();
+
   const [formData, setFormData] = useState({
     name: user?.name || "",
     password: "",
@@ -15,7 +17,7 @@ export default function ProfilePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!user) {
-      toast.error("Usuário não autenticado.")
+      showToast("Usuário não autenticado.", "error")
       return
     }
 
@@ -31,7 +33,7 @@ export default function ProfilePage() {
       })
 
       if (result?.success) {
-        toast.success("Perfil atualizado com sucesso!")
+        showToast("Perfil atualizado com sucesso!", "success")
 
         // 🔹 Atualiza state global do usuário
         setUser({ ...user, ...payload })
@@ -39,11 +41,11 @@ export default function ProfilePage() {
         // 🔹 Limpa senha do form
         setFormData(prev => ({ ...prev, password: "" }))
       } else {
-        toast.error(result?.error || "Erro ao atualizar perfil.")
+        showToast(result?.error || "Erro ao atualizar perfil.", "error")
       }
     } catch (err: any) {
       console.error("Erro ao atualizar perfil:", err)
-      toast.error(err?.message || "Falha ao atualizar perfil.")
+      showToast(err?.message || "Falha ao atualizar perfil.", "error")
     } finally {
       setIsSaving(false)
     }

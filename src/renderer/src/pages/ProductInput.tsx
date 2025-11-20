@@ -1,10 +1,13 @@
 import { useEffect, useState, useCallback } from "react";
 import { Package, TrendingUp } from "lucide-react";
-import toast from "react-hot-toast";
+
+import { useToast } from "../context/ToastProvider"
 
 import {Product, Branch} from "../../../shared/types"
 
 export default function ProductInputPage() {
+  const { showToast } = useToast();
+
   const [products, setProducts] = useState<Product[]>([]);
   const [branches, setBranches] = useState<Branch[]>([]);
   const [recentEntries, setRecentEntries] = useState<any[]>([]);
@@ -27,16 +30,16 @@ export default function ProductInputPage() {
         ]);
 
         if (productsRes.success) setProducts(productsRes.data || []);
-        else toast.error(productsRes.error || "Erro ao carregar produtos");
+        else showToast(productsRes.error || "Erro ao carregar produtos", "error");
 
         if (branchesRes.success) setBranches(branchesRes.data || []);
-        else toast.error(branchesRes.error || "Erro ao carregar filiais");
+        else showToast(branchesRes.error || "Erro ao carregar filiais", "error");
 
         if (movementsRes.success) setRecentEntries(movementsRes.data || []);
-        else toast.error(movementsRes.error || "Erro ao carregar entradas recentes");
+        else showToast(movementsRes.error || "Erro ao carregar entradas recentes", "error");
       } catch (error: any) {
         console.error("Erro ao carregar dados:", error);
-        toast.error(error?.message || "Falha ao carregar dados");
+        showToast(error?.message || "Falha ao carregar dados", "error");
       }
     };
 
@@ -47,18 +50,19 @@ export default function ProductInputPage() {
     try {
       const res = await window.api.getMovements("entrada");
       if (res.success) setRecentEntries(res.data || []);
-      else toast.error(res.error || "Erro ao carregar entradas recentes");
+      else showToast(res.error || "Erro ao carregar entradas recentes", "error");
     } catch (error: any) {
       console.error("Erro ao carregar entradas recentes:", error);
-      toast.error(error?.message || "Erro desconhecido");
+      showToast(error?.message || "Erro desconhecido", "error");
     }
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const quantity = Number.parseInt(formData.quantity);
+
     if (quantity <= 0) {
-      toast.error("A quantidade deve ser maior que zero");
+      showToast("A quantidade deve ser maior que zero", "error");
       return;
     }
 
@@ -73,16 +77,16 @@ export default function ProductInputPage() {
       });
 
       if (!res.success) {
-        toast.error(res.error || "Falha ao registrar entrada");
+        showToast(res.error || "Falha ao registrar entrada", "error");
         return;
       }
 
       setFormData({ productId: "", branchId: "", quantity: "", notes: "", invoiceNumber: "" });
       await loadRecentEntries();
-      toast.success("Entrada registrada com sucesso!");
+      showToast("Entrada registrada com sucesso!", "success");
     } catch (error: any) {
       console.error("Erro ao registrar entrada:", error);
-      toast.error(error?.message || "Erro desconhecido");
+      showToast(error?.message || "Erro desconhecido", "error");
     }
   };
 

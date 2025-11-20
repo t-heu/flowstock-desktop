@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { Download, Filter } from "lucide-react"
-import toast from "react-hot-toast"
+
+import { useToast } from "../context/ToastProvider"
 
 interface DetailedExit {
   created_at: string
@@ -21,6 +22,8 @@ interface Branch {
 }
 
 export default function ReportsPage() {
+  const { showToast } = useToast();
+
   const [branches, setBranches] = useState<Branch[]>([])
   const [reportData, setReportData] = useState<DetailedExit[]>([])
   const [selectedBranch, setSelectedBranch] = useState<string>("all")
@@ -44,13 +47,13 @@ export default function ReportsPage() {
       try {
         const response = await window.api.getBranches();
         
-        if (!response.success) toast.error(response.error);
+        if (!response.success) showToast(response.error, "error");
 
         setBranches(response.data || []);
         setLoaded(true); // só libera o outro useEffect após carregar
       } catch (error: any) {
         console.error("Erro ao carregar filiais:", error);
-        toast.error("Falha ao carregar filiais.");
+        showToast("Falha ao carregar filiais.", "error");
       }
     }
 
@@ -69,7 +72,7 @@ export default function ReportsPage() {
       });
 
       if (!result?.success) {
-        toast.error(result.error || "Erro ao gerar relatório.");
+        showToast(result.error || "Erro ao gerar relatório.", "error");
         setReportData([]);
         return;
       }
@@ -79,7 +82,7 @@ export default function ReportsPage() {
 
     } catch (error: any) {
       console.error("Erro ao gerar relatório:", error);
-      toast.error("Erro ao gerar relatório: " + (error?.message || "Falha desconhecida"));
+      showToast("Erro ao gerar relatório: " + (error?.message || "Falha desconhecida", "error"));
       setReportData([]);
     }
   };

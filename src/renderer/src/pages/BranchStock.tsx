@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { AlertCircle } from "lucide-react";
-import toast from "react-hot-toast";
+
+import { useToast } from "../context/ToastProvider"
 
 export interface BranchStock {
   branchId: string;
@@ -23,6 +24,7 @@ const BranchStockRow = ({ item }: { item: BranchStock }) => (
 );
 
 export default function BranchStockPage() {
+  const { showToast } = useToast();
   const [dados, setDados] = useState<BranchStock[]>([]);
   const [filialSelecionada, setFilialSelecionada] = useState<string>("");
 
@@ -32,13 +34,14 @@ export default function BranchStockPage() {
       try {
         const result = await window.api.getBranchStock();
         if (!result?.success) {
-          toast.error(result?.error || "Erro ao carregar branch stock.");
+          showToast(result?.error || "Erro ao carregar branch stock.", "error");
+          
           return;
         }
         setDados(result.data || []);
       } catch (error: any) {
         console.error("Erro ao carregar branchStock:", error);
-        toast.error("Falha ao carregar branchStock: " + (error?.message || "Erro desconhecido"));
+        showToast("Falha ao carregar branchStock: " + (error?.message || "Erro desconhecido"), "error");
       }
     };
     load();

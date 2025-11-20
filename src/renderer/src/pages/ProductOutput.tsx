@@ -1,7 +1,8 @@
 import type React from "react"
 import { useEffect, useState, useRef, useMemo } from "react"
 import { Package, AlertCircle, TrendingDown } from "lucide-react"
-import toast from "react-hot-toast"
+
+import { useToast } from "../context/ToastProvider"
 
 export interface Branch {
   id?: string;
@@ -21,6 +22,8 @@ export interface Product {
 }
 
 export default function ProductOutputPage() {
+  const { showToast } = useToast();
+
   const [recentExits, setRecentExits] = useState<any[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedExits, setSelectedExits] = useState<string[]>([]);
@@ -50,13 +53,13 @@ export default function ProductOutputPage() {
       ]);
 
       if (productsRes.success) productsRef.current = productsRes.data || [];
-      else toast.error(productsRes.error || "Erro ao carregar produtos");
+      else showToast(productsRes.error || "Erro ao carregar produtos", "error");
 
       if (branchesRes.success) branchesRef.current = branchesRes.data || [];
-      else toast.error(branchesRes.error || "Erro ao carregar filiais");
+      else showToast(branchesRes.error || "Erro ao carregar filiais", "error");
 
       if (stockRes.success) branchStockRef.current = stockRes.data || [];
-      else toast.error(stockRes.error || "Erro ao carregar estoque");
+      else showToast(stockRes.error || "Erro ao carregar estoque", "error");
 
       loadRecentExits();
     }
@@ -70,7 +73,7 @@ export default function ProductOutputPage() {
   async function loadRecentExits() {
     const movementsRes = await window.api.getMovements("saida");
     if (movementsRes.success) setRecentExits(movementsRes.data || []);
-    else toast.error(movementsRes.error || "Erro ao carregar saídas");
+    else showToast(movementsRes.error || "Erro ao carregar saídas", "error");
   }
 
   // =====================================================
@@ -107,7 +110,7 @@ export default function ProductOutputPage() {
 
     const quantity = Number(formData.quantity);
     if (quantity <= 0) {
-      toast.error("A quantidade deve ser maior que zero");
+      showToast("A quantidade deve ser maior que zero", "error");
       return;
     }
 
@@ -124,7 +127,7 @@ export default function ProductOutputPage() {
     );
 
     if (!selectedProduct || !branchOrigem || !branchDestino) {
-      toast.error("Selecione produto e filiais válidos");
+      showToast("Selecione produto e filiais válidos", "error");
       return;
     }
 
@@ -138,7 +141,7 @@ export default function ProductOutputPage() {
     });
 
     if (!res.success) {
-      toast.error(res.error || "Erro ao registrar saída");
+      showToast(res.error || "Erro ao registrar saída", "error");
       return;
     }
 
@@ -156,7 +159,7 @@ export default function ProductOutputPage() {
     // recarrega somente o necessário
     await loadRecentExits();
 
-    toast.success("Saída registrada com sucesso!");
+    showToast("Saída registrada com sucesso!", "success");
   };
 
   // =====================================================
@@ -168,7 +171,7 @@ export default function ProductOutputPage() {
     );
 
     if (selectedItems.length === 0) {
-      toast.error("Selecione pelo menos uma saída!");
+      showToast("Selecione pelo menos uma saída!", "error");
       return;
     }
 
@@ -186,11 +189,11 @@ export default function ProductOutputPage() {
 
     const res = await window.api.generateRomaneio(payload);
     if (!res.success) {
-      toast.error("Erro ao gerar PDF");
+      showToast("Erro ao gerar PDF", "error");
       return;
     }
 
-    toast.success("PDF gerado!");
+    showToast("PDF gerado!", "success");
   }
 
   // =====================================================

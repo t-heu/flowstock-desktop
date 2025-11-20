@@ -1,8 +1,8 @@
 import './index.css'
 import React, {useState} from 'react'
-import { Toaster } from "react-hot-toast"
 
-import { AuthProvider, useAuth } from './context/auth-provider'
+import { AuthProvider, useAuth } from './context/AuthProvider'
+import { ToastProvider } from "./context/ToastProvider";
 
 import Dashboard from './pages/Dashboard'
 import Login from './pages/Login'
@@ -15,13 +15,16 @@ import Users from './pages/Users'
 import Reports from './pages/Reports'
 import ProfilePage from './pages/ProfilePage'
 
+import { NoticeModal } from './components/NoticeModal';
 import { SidebarWrapper } from './components/SidebarWrapper';
 
 function App(): React.JSX.Element {
   return (
     <AuthProvider>
-      <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
-      <AppContent />
+      <ToastProvider>
+        <NoticeModal />
+        <AppContent />
+      </ToastProvider>
     </AuthProvider>
   )
 }

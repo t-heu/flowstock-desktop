@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react"
 import { UserPlus } from "lucide-react"
 import { Trash2, Pencil } from "lucide-react"
-import toast from "react-hot-toast"
+
+import { useToast } from "../context/ToastProvider"
 
 import departments from "../../../shared/config/departments.json";
 
@@ -25,6 +26,8 @@ interface User {
 }
 
 export default function UsersPage() {
+  const { showToast } = useToast();
+
   const [branches, setBranches] = useState<Branch[]>([])
   const [users, setUsers] = useState<User[]>([])
   const [formData, setFormData] = useState<any>({ name: "", email: "", department: "", username: "", branchId: "", role: "operator" })
@@ -43,7 +46,7 @@ export default function UsersPage() {
         setUsers(usersData.data || [])
       } catch (error: any) {
         console.error("Erro ao carregar dados iniciais:", error)
-        toast.error("Falha ao carregar dados. Tente novamente mais tarde.")
+        showToast("Falha ao carregar dados. Tente novamente mais tarde.", "error")
       }
     }
 
@@ -55,7 +58,7 @@ export default function UsersPage() {
     e.preventDefault()
 
     if (!formData.name || !formData.email || !formData.branchId) {
-      toast.error("Preencha todos os campos obrigatórios.")
+      showToast("Preencha todos os campos obrigatórios.", "error")
       return
     }
 
@@ -64,7 +67,7 @@ export default function UsersPage() {
       
       if (!result?.success) {
         const msg = result?.error || "Erro ao criar usuário."
-        toast.error(msg)
+        showToast(msg, "error")
         return
       }
 
@@ -82,10 +85,10 @@ export default function UsersPage() {
       const updatedUsers = await window.api.getUsers()
       setUsers(updatedUsers.data || [])
 
-      toast.success("Usuário criado com sucesso!")
+      showToast("Usuário criado com sucesso!", "success")
     } catch (error: any) {
       console.error("Erro ao criar usuário:", error)
-      toast.error("Erro: " + (error?.message || "Falha ao criar usuário."))
+      showToast("Erro: " + (error?.message || "Falha ao criar usuário.", "error"))
     }
   }
 
@@ -105,7 +108,7 @@ export default function UsersPage() {
 
       if (!result?.success) {
         const msg = result?.error || "Erro ao atualizar usuário."
-        toast.error(msg)
+        showToast(msg, "error")
         return
       }
 
@@ -114,10 +117,10 @@ export default function UsersPage() {
       setUsers(data)
       setEditUser(null)
 
-      toast.success("Usuário atualizado com sucesso!")
+      showToast("Usuário atualizado com sucesso!", "success")
     } catch (error: any) {
       console.error("Erro ao atualizar usuário:", error)
-      toast.error("Erro: " + (error?.message || "Falha ao atualizar usuário."))
+      showToast("Erro: " + (error?.message || "Falha ao atualizar usuário.", "error"))
     }
   }
 
@@ -134,15 +137,15 @@ export default function UsersPage() {
 
       if (!result?.success) {
         const msg = result?.error || "Erro ao excluir usuário."
-        toast.error(msg)
+        showToast(msg, "error")
         return
       }
 
       setUsers(users.filter(u => u.id !== id))
-      toast.success("Usuário excluído com sucesso!")
+      showToast("Usuário excluído com sucesso!", "success")
     } catch (error: any) {
       console.error("Erro ao excluir usuário:", error)
-      toast.error("Falha ao excluir usuário: " + (error?.message || "Erro desconhecido"))
+      showToast("Falha ao excluir usuário: " + (error?.message || "Erro desconhecido", "error"))
     }
   }
 
