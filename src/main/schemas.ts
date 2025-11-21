@@ -35,7 +35,7 @@ export const MovementSchema = z.object({
 export const ProductSchema = z.object({
   name: z.string().min(3, "Nome obrigatório e com pelo menos 3 caracteres"),
   code: z.string().min(2, "Código obrigatório e com pelo menos 2 caracteres"),
-  description: z.string().optional(),
+  description: z.string(),
   unit: z.string().min(2, "Unidade obrigatória e com pelo menos 2 caracteres"),
   department: DepartmentSchema
 });

@@ -101,7 +101,7 @@ export default function ProductInputPage() {
 
       <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
         <div className="flex items-center gap-3 mb-6">
-          <TrendingUp className="w-6 h-6 text-green-600 dark:text-green-400" />
+          <TrendingUp className="w-6 h-6 text-[#2c5396]" />
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">Lançar Entrada</h2>
         </div>
 
@@ -115,7 +115,7 @@ export default function ProductInputPage() {
               <select
                 value={formData.productId}
                 onChange={(e) => setFormData({ ...formData, productId: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-[#2c5396] focus:border-[#2c5396]"
                 required
               >
                 <option value="">Selecione um produto</option>
@@ -135,7 +135,7 @@ export default function ProductInputPage() {
               <select
                 value={formData.branchId}
                 onChange={(e) => setFormData({ ...formData, branchId: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-[#2c5396] focus:border-[#2c5396]"
                 required
               >
                 <option value="">Selecione uma filial</option>
@@ -159,7 +159,7 @@ export default function ProductInputPage() {
               onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
               placeholder="Digite a quantidade"
               min="1"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-[#2c5396] focus:border-[#2c5396]"
               required
             />
           </div>
@@ -174,7 +174,7 @@ export default function ProductInputPage() {
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               placeholder="Notas sobre a entrada (opcional)"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-[#2c5396] focus:border-[#2c5396]"
             />
           </div>
 
@@ -190,14 +190,14 @@ export default function ProductInputPage() {
               value={formData.invoiceNumber}
               onChange={(e) => setFormData({ ...formData, invoiceNumber: e.target.value })}
               placeholder="Digite o número da nota fiscal"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-[#2c5396] focus:border-[#2c5396]"
             />
           </div>
 
           <button
             type="submit"
             disabled={isFormEmpty}
-            className="px-6 py-2.5 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white rounded-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2.5 flex items-center justify-center gap-2 bg-[#2c5396] hover:bg-[#666] text-white rounded-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <TrendingUp className="w-4 h-4" />
             Registrar Entrada

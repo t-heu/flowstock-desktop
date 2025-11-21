@@ -2,12 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { Building2, PlusCircle, Trash2 } from "lucide-react";
 
 import { useToast } from "../context/ToastProvider"
-
-interface Branch {
-  id: string;
-  name: string;
-  code: string;
-}
+import {Branch} from "../../../shared/types"
 
 export default function BranchesPage() {
   const [branches, setBranches] = useState<Branch[]>([]);
@@ -84,7 +79,7 @@ export default function BranchesPage() {
       {/* Form */}
       <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
         <div className="flex items-center gap-3 mb-6">
-          <Building2 className="w-6 h-6 text-[#111]" />
+          <Building2 className="w-6 h-6 text-[#2c5396]" />
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">Nova Filial</h2>
         </div>
 
@@ -95,7 +90,7 @@ export default function BranchesPage() {
             placeholder="Código"
             value={formData.code}
             onChange={handleChange}
-            className="px-3 py-2 border border-gray-300 dark:border-slate-600 focus:outline-none bg-white dark:bg-slate-700 rounded-sm focus:ring-2 focus:ring-black dark:text-white"
+            className="px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-[#2c5396] focus:border-[#2c5396]"
             required
           />
           <input
@@ -104,7 +99,7 @@ export default function BranchesPage() {
             placeholder="Nome da Filial"
             value={formData.name}
             onChange={handleChange}
-            className="px-3 py-2 border border-gray-300 dark:border-slate-600 focus:outline-none bg-white dark:bg-slate-700 rounded-sm focus:ring-2 focus:ring-black dark:text-white"
+            className="px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-[#2c5396] focus:border-[#2c5396]"
             required
           />
           <button
@@ -138,14 +133,14 @@ export default function BranchesPage() {
                 </td>
               </tr>
             ) : (
-              branches.map((b) => (
-                <tr key={b.id} className="border-b border-gray-200 dark:border-slate-700">
+              branches.map((b, index) => (
+                <tr key={index} className="border-b border-gray-200 dark:border-slate-700">
                   <td className="p-4 text-sm text-gray-900 dark:text-white">{b.code}</td>
                   <td className="p-4 text-sm text-gray-900 dark:text-white">{b.name}</td>
                   <td className="p-4">
                     <button
                       title="delete"
-                      onClick={() => handleDelete(b.id)}
+                      onClick={() => handleDelete(b.id as string)}
                       className="text-red-600 hover:text-red-800 transition-colors"
                     >
                       <Trash2 className="w-5 h-5" />

@@ -1,33 +1,51 @@
 import { v4 as uuidv4 } from "uuid";
 
 import { supabase } from "../supabaseClient";
-import { IProduct, Product } from "../../shared/types";
+import { ProductDTO, Product } from "../../shared/types";
 import { getAllProductsFromCache, invalidateProductCache, setProductsCache } from "../cache";
 import { checkPermission } from "../checkPermission";
 
 /** 🔹 Listar produtos */
 export const getProducts = async (user: any) => {
   try {
-    if (!getAllProductsFromCache()) {
-      const { data, error } = await supabase.from("products").select("*");
-      if (error) throw error;
-      setProductsCache(data);
+    // Se já tem cache, usa o cache
+    const cached = getAllProductsFromCache();
+    if (cached) {
+      return {
+        success: true,
+        data: user.role === "admin"
+          ? cached
+          : cached.filter(p => p.department === user.department)
+      };
     }
 
-    const products: Product[] = getAllProductsFromCache() ?? [];
+    // Monta a query
+    let query = supabase.from("products").select("*");
+
+    // Se não é admin, aplica filtro por departamento
+    if (user.role !== "admin") {
+      query = query.eq("department", user.department);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+
+    // Salva cache com os dados completos (ou filtrados)
+    setProductsCache(data);
 
     return {
       success: true,
-      data: user.role === "admin" 
-        ? products 
-        : products.filter(p => p.department === user.department)
+      data
     };
   } catch (err: any) {
-    return { success: false, error: err?.message || "Erro ao carregar produtos" };
+    return {
+      success: false,
+      error: err?.message || "Erro ao carregar produtos"
+    };
   }
 };
 
-export const createProduct = async (user: any, product: Omit<IProduct, "id" | "createdAt">) => {
+export const createProduct = async (user: any, product: Omit<ProductDTO, "id" | "createdAt">) => {
   const perm = checkPermission(user, ["admin", "manager"]);
   if (!perm.success) return perm;
 

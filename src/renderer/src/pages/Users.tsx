@@ -3,13 +3,8 @@ import { UserPlus } from "lucide-react"
 import { Trash2, Pencil } from "lucide-react"
 
 import { useToast } from "../context/ToastProvider"
-
+import {Branch} from "../../../shared/types"
 import departments from "../../../shared/config/departments.json";
-
-interface Branch {
-  id: string
-  name: string
-}
 
 interface User {
   id: string
@@ -191,10 +186,10 @@ export default function UsersPage() {
               </select>
 
               <div className="flex justify-end gap-2 pt-3">
-                <button type="button" onClick={() => setEditUser(null)} className="px-4 py-2 bg-gray-500 text-white rounded">
+                <button type="button" onClick={() => setEditUser(null)} className="px-4 py-2 bg-gray-500 hover:bg-[#666] text-white rounded">
                   Cancelar
                 </button>
-                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded">
+                <button type="submit" className="px-4 py-2 bg-[#2c5396] hover:bg-[#666] text-white rounded">
                   Salvar
                 </button>
               </div>

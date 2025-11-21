@@ -2,30 +2,13 @@ import { useEffect, useState } from "react"
 import { Download, Filter } from "lucide-react"
 
 import { useToast } from "../context/ToastProvider"
-
-interface DetailedExit {
-  created_at: string
-  branch_name: string
-  destination_branch_name: string
-  product_code: string
-  product_name: string
-  quantity: number
-  notes: string
-  type: "entrada" | "saida",
-  invoice_number: string
-}
-
-interface Branch {
-  id: string
-  name: string
-  code: string
-}
+import {Branch, ReportMovement} from "../../../shared/types"
 
 export default function ReportsPage() {
   const { showToast } = useToast();
 
   const [branches, setBranches] = useState<Branch[]>([])
-  const [reportData, setReportData] = useState<DetailedExit[]>([])
+  const [reportData, setReportData] = useState<ReportMovement[]>([])
   const [selectedBranch, setSelectedBranch] = useState<string>("all")
   const [startDate, setStartDate] = useState("")
   const [endDate, setEndDate] = useState("")
@@ -120,7 +103,7 @@ export default function ReportsPage() {
       {/* Filtros */}
       <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
         <div className="flex items-center gap-3 mb-6">
-          <Filter className="w-6 h-6 text-black dark:text-blue-400" />
+          <Filter className="w-6 h-6 text-[#2c5396]" />
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">Filtros</h2>
         </div>
 
@@ -130,7 +113,7 @@ export default function ReportsPage() {
           <select
             value={type}
             onChange={(e) => setType(e.target.value as any)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-[#2c5396] focus:border-[#2c5396]"
           >
             <option value="all">Entradas + Saídas</option>
             <option value="entrada">Entradas</option>
@@ -145,7 +128,7 @@ export default function ReportsPage() {
             <select
               value={selectedBranch}
               onChange={(e) => setSelectedBranch(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-[#2c5396] focus:border-[#2c5396]"
             >
               <option value="all">Todas as Filiais</option>
               {branches.map((b) => (

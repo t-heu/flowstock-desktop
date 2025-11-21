@@ -1,13 +1,12 @@
-// ================= CACHE OTIMIZADO =================
-import { Product, Branch, BranchStockItem, Stats, Movement } from "../shared/types";
+import { Product, Branch, BranchStockItem, Stats, ReportMovement } from "../shared/types";
 
 let productsCache: Map<string, Product> | null = null;
 let branchesCache: Map<string, Branch> | null = null;
 let branchStockCache: Map<string, Map<string, BranchStockItem>> | null = null;
-let movementsCache: Movement[] | null = null; // sempre os 30 movimentos mais recentes
+let movementsCache: ReportMovement[] | null = null; // sempre os 30 movimentos mais recentes
 let statsCacheInternal: Record<string, Stats> = {}
 // chave: `${type}_${branchId}_${department}_${page}`
-export let movementsPageCache: Map<string, Movement[]> = new Map();
+export let movementsPageCache: Map<string, ReportMovement[]> = new Map();
 
 // ======= PRODUCTS =======
 export const getAllProductsFromCache = (): Product[] | null => productsCache ? Array.from(productsCache.values()) : null;
@@ -36,18 +35,18 @@ export const getBranchStockCache = (): BranchStockItem[] | null => {
   branchStockCache.forEach(branchMap => branchMap.forEach(item => result.push(item)));
   return result;
 };
-export const setBranchStockCache = (items: BranchStockItem[] | any[]) => {
+export const setBranchStockCache = (items: BranchStockItem[]) => {
   branchStockCache = new Map();
   items.forEach(item => {
-    if (!branchStockCache!.has(item.branchId)) branchStockCache!.set(item.branchId, new Map());
-    branchStockCache!.get(item.branchId)!.set(item.productId, item);
+    if (!branchStockCache!.has(item.branch_id)) branchStockCache!.set(item.branch_id, new Map());
+    branchStockCache!.get(item.branch_id)!.set(item.product_id, item);
   });
 };
 export const invalidateBranchStockCache = () => { branchStockCache = null; };
 
 // ======= MOVEMENTS (30 RECENTES) =======
-export const getMovementsCache = (): Movement[] | null => movementsCache;
-export const setMovementsCache = (data: Movement[]) => {
+export const getMovementsCache = (): ReportMovement[] | null => movementsCache;
+export const setMovementsCache = (data: ReportMovement[]) => {
   // Mantém apenas os 30 mais recentes
   movementsCache = data
   .filter(m => m.created_at) // remove itens sem created_at

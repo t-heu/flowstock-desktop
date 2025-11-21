@@ -1,6 +1,6 @@
 {
   "name": "flowstock-desktop",
-  "version": "1.4.10",
+  "version": "1.4.11",
   "description": "FlowStock - Sistema de Gestão de Materiais Internos",
   "main": "./out/main/index.js",
   "author": "theu",

@@ -1,6 +1,7 @@
 // movementBase.ts
 import { supabase } from "../supabaseClient";
 import { getMovementsCacheKey, movementsPageCache } from "../cache";
+import { ReportMovement } from "../../shared/types";
 
 export const fetchMovementsBase = async (filters?: {
   limit?: number;
@@ -51,17 +52,16 @@ export const fetchMovementsBase = async (filters?: {
 
   if (type) query = query.eq("type", type);
   if (branchId) query = query.eq("branch_id", branchId);
-  //if (department) query = query.eq("product.department", department);
   if (startDate) query = query.gte("created_at", startDate + "T00:00:00");
   if (endDate) query = query.lte("created_at", endDate + "T23:59:59");
 
   const { data, error } = await query;
   if (error) throw error;
 
-  const mapped: any = (data || [])
+  const mapped: ReportMovement[] = (data || [])
     .filter((m:any) => !department || m.product?.department === department)
     .map((m:any) => ({
-      date: m.created_at,
+      id: m.id,
       created_at: m.created_at,
       invoice_number: m.invoice_number ?? "-",
       branch_name: m.branch?.name ?? "-",

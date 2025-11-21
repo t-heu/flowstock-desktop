@@ -6,14 +6,14 @@ import { useToast } from "../context/ToastProvider"
 
 import { useAuth } from "../context/AuthProvider";
 import departments from "../../../shared/config/departments.json";
-import {IProduct, Product} from "../../../shared/types";
+import {ProductDTO, Product} from "../../../shared/types";
 
 export default function ProductsPage() {
   const { showToast } = useToast();
 
   const [products, setProducts] = useState<Product[]>([])
   const [isFormOpen, setIsFormOpen] = useState(false)
-  const [formData, setFormData] = useState<IProduct>({
+  const [formData, setFormData] = useState<ProductDTO>({
     code: "",
     name: "",
     description: "",
@@ -132,7 +132,7 @@ export default function ProductsPage() {
                   value={formData.code}
                   onChange={(e) => setFormData({ ...formData, code: e.target.value })}
                   placeholder="Ex: PROD-001"
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-[#2c5396] focus:border-[#2c5396]"
                   required
                 />
               </div>
@@ -144,7 +144,7 @@ export default function ProductsPage() {
                 <select
                   value={formData.unit}
                   onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-[#2c5396] focus:border-[#2c5396]"
                   required
                 >
                   <option value="UN">Unidade</option>
@@ -166,7 +166,7 @@ export default function ProductsPage() {
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Ex: Caneta Azul"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-[#2c5396] focus:border-[#2c5396]"
                 required
               />
             </div>
@@ -177,8 +177,8 @@ export default function ProductsPage() {
               </label>
               <select
                 value={formData.department}
-                onChange={(e) => setFormData({ ...formData, department: e.target.value as IProduct["department"] })}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                onChange={(e) => setFormData({ ...formData, department: e.target.value as ProductDTO["department"] })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-[#2c5396] focus:border-[#2c5396]"
                 required
               >
                 <option value="" disabled>Selecione...</option>
@@ -194,7 +194,7 @@ export default function ProductsPage() {
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Descrição detalhada do produto"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-[#2c5396] focus:border-[#2c5396]"
               />
             </div>
             <div className="flex gap-3">

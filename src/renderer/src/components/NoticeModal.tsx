@@ -1,15 +1,8 @@
 import { useState, useEffect } from "react";
+
 import { ModalBase } from "./ModalBase";
 
-export type Notice = {
-  id: string;
-  title?: string;
-  message: string;
-  level?: "info" | "warning" | "critical";
-  showOnce?: boolean;
-  expiresAt?: string;
-  link?: string;
-};
+import {Notice} from "../../../shared/types"
 
 export const NoticeModal = () => {
   const [notice, setNotice] = useState<Notice | null>(null);
@@ -88,7 +81,7 @@ export const NoticeModal = () => {
 
             <button
               onClick={handleCloseNotice}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md"
+              className="px-4 py-2 bg-[#2c5396] hover:bg-[#333] text-white rounded-md"
             >
               Fechar
             </button>

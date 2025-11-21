@@ -1,5 +1,5 @@
 import { ElectronAPI } from "@electron-toolkit/preload"
-import { IProduct, RomaneioItem, OpenFileResponse, GenerateRomaneioPayload, GenerateRomaneioResponse } from "../shared/types"
+import { ProductDTO, RomaneioItem, OpenFileResponse, GenerateRomaneioPayload, GenerateRomaneioResponse } from "../shared/types"
 
 declare global {
   interface Window {
@@ -16,7 +16,7 @@ declare global {
 
       // 📦 Produtos
       getProducts: () => Promise<any>
-      createProduct: (product: IProduct) => Promise<any>
+      createProduct: (product: ProductDTO) => Promise<any>
       updateProduct: ({id, updates}: {id: string, updates: Partial<Product>}) => Promise<any>
       deleteProduct: (id: string) => Promise<any>
 

@@ -3,29 +3,22 @@ import { AlertCircle } from "lucide-react";
 
 import { useToast } from "../context/ToastProvider"
 
-export interface BranchStock {
-  branchId: string;
-  branchName: string;
-  productId: string;
-  productName: string;
-  quantity: number;
-  createdAt?: string;
-}
+import {BranchStockItem} from "../../../shared/types";
 
-const BranchStockRow = ({ item }: { item: BranchStock }) => (
+const BranchStockRow = ({ item }: { item: BranchStockItem }) => (
   <tr
     className="border-b border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/50"
   >
-    <td className="p-4 text-gray-900 dark:text-white">{item.branchName}</td>
-    <td className="p-4 text-gray-900 dark:text-white">{item.productName}</td>
-    <td className="p-4 text-gray-600 dark:text-gray-400">{item.productName}</td>
+    <td className="p-4 text-gray-900 dark:text-white">{item.branch_name}</td>
+    <td className="p-4 text-gray-900 dark:text-white">{item.product_name}</td>
+    <td className="p-4 text-gray-600 dark:text-gray-400">{item.product_description}</td>
     <td className="p-4 text-right font-semibold text-black dark:text-blue-400">{item.quantity}</td>
   </tr>
 );
 
 export default function BranchStockPage() {
   const { showToast } = useToast();
-  const [dados, setDados] = useState<BranchStock[]>([]);
+  const [dados, setDados] = useState<BranchStockItem[]>([]);
   const [filialSelecionada, setFilialSelecionada] = useState<string>("");
 
   // -------- Carregamento --------
@@ -49,12 +42,12 @@ export default function BranchStockPage() {
 
   // -------- Memoizações --------
   const filiais = useMemo(
-    () => Array.from(new Set(dados.map((d) => d.branchName))),
+    () => Array.from(new Set(dados.map((d) => d.branch_name))),
     [dados]
   );
 
   const dadosFiltrados = useMemo(
-    () => (filialSelecionada ? dados.filter((d) => d.branchName === filialSelecionada) : dados),
+    () => (filialSelecionada ? dados.filter((d) => d.branch_name === filialSelecionada) : dados),
     [dados, filialSelecionada]
   );
 
@@ -73,7 +66,7 @@ export default function BranchStockPage() {
       {/* Filtros */}
       <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
         <div className="flex items-center gap-3 mb-4">
-          <AlertCircle className="w-6 h-6 text-black dark:text-blue-400" />
+          <AlertCircle className="w-6 h-6 text-[#2c5396]" />
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">Filtros</h2>
         </div>
 
@@ -81,7 +74,7 @@ export default function BranchStockPage() {
           <select
             value={filialSelecionada}
             onChange={(e) => setFilialSelecionada(e.target.value)}
-            className="px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+            className="px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-[#2c5396] focus:border-[#2c5396]"
           >
             <option value="">Todas as filiais</option>
             {filiais.map((filial, i) => (
@@ -123,7 +116,7 @@ export default function BranchStockPage() {
                   </td>
                 </tr>
               ) : (
-                dadosFiltrados.map((item) => <BranchStockRow key={`${item.branchId}-${item.productId}`} item={item} />)
+                dadosFiltrados.map((item) => <BranchStockRow key={`${item.branch_id}-${item.product_id}`} item={item} />)
               )}
             </tbody>
           </table>

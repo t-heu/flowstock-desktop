@@ -77,7 +77,7 @@ export default function LoginPage() {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full pl-10 pr-12 py-3 rounded-sm bg-white focus:outline-none dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white shadow-sm focus:ring-2 focus:ring-[#2c5396] focus:border-[#2c5396]"
+                className="w-full pl-10 pr-12 py-3 rounded-sm bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#2c5396] focus:border-[#2c5396]"
                 placeholder="ex: admin"
                 required
               />

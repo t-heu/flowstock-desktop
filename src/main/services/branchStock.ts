@@ -5,7 +5,6 @@ import { getBranchStockCache, setBranchStockCache } from "../cache";
 /** 🔹 Listar branch_stock usando o mesmo padrão do getProducts */
 export const getBranchStock = async () => {
   try {
-    // 1️⃣ Se já existe cache → usa ele
     const cache = getBranchStockCache();
 
     if (cache) {
@@ -20,17 +19,18 @@ export const getBranchStock = async () => {
         product_id,
         quantity,
         branches!inner(name),
-        products!inner(name)
+        products!inner(name, description)
       `);
 
     if (error) throw error;
 
     // 3️⃣ Converte para BranchStockItem (formato único)
     const normalized: BranchStockItem[] = (data || []).map((raw: any) => ({
-      branchId: raw.branch_id,
-      branchName: raw.branches?.name ?? "Desconhecida",
-      productId: raw.product_id,
-      productName: raw.products?.name ?? "Sem nome",
+      branch_id: raw.branch_id,
+      branch_name: raw.branches?.name ?? "Desconhecida",
+      product_id: raw.product_id,
+      product_name: raw.products?.name ?? "Sem nome",
+      product_description: raw.products?.description ?? "-",
       quantity: Number(raw.quantity ?? 0),
     }));
 

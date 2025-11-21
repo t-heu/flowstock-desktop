@@ -27,37 +27,47 @@ export interface OpenFileResponse {
   error?: string
 }
 
-export interface BranchStockItem {
+export interface ProductDTO {
+  name: string;
+  code: string;
+  description: string;
+  unit: string;
+  department: DepartmentId;
+}
+
+export interface UserDTO {
+  name: string;
+  email: string;
+  role:  "admin" | "manager" | "operator";
+  username: string;
   branchId: string;
-  branchName?: string;
-  productId: string;
-  productName?: string;
+  department: string | null;
+}
+
+// ===
+export interface ReportMovement {
+  id: string;
+  invoice_number: string;
+  branch_name: string;
+  product_code: string;
+  product_name: string;
   quantity: number;
-  createdAt?: string;
+  notes: string;
+  created_at: string;
+  branch_code: string
+  destination_branch_name: string
+  destination_branch_code: string
+  product_department: string
+  type: string
 }
 
 export interface Product {
   id: string;
   name: string;
   code: string;
-  description?: string;
+  description: string;
   unit: string;
   department: DepartmentId;
-  created_at?: string;
-}
-
-export interface IProduct {
-  name: string;
-  code: string;
-  description?: string;
-  unit: string;
-  department: DepartmentId;
-}
-
-export interface Branch {
-  id?: string;
-  name: string;
-  code: string;
   created_at?: string;
 }
 
@@ -73,24 +83,6 @@ export interface User {
   created_at?: string;
 }
 
-export interface IUser {
-  name: string;
-  email: string;
-  role:  "admin" | "manager" | "operator";
-  username: string;
-  branchId: string;
-  department: string | null;
-}
-
-export interface Movement {
-  id?: string;
-  productId: string;
-  branchId: string;
-  type: "entrada" | "saida";
-  quantity: number;
-  created_at?: string;
-}
-
 export interface AuthUser {
   id: string;
   name: string;
@@ -99,16 +91,6 @@ export interface AuthUser {
   role: "admin" | "manager" | "operator";
   branchId: string;
   department: DepartmentId;
-}
-
-export interface DetailedReportItem {
-  branchName: string;
-  destinationBranchName: string;
-  productCode: string;
-  productName: string;
-  quantity: number;
-  notes?: string;
-  created_at: string;
 }
 
 export interface Stats {
@@ -126,4 +108,21 @@ export type Notice = {
   level?: 'info' | 'warning' | 'critical';
   showOnce?: boolean;
   expiresAt?: string;
+  link: string;
 };
+
+export interface Branch {
+  id?: string;
+  name: string;
+  code: string;
+  created_at?: string;
+}
+
+export interface BranchStockItem {
+  branch_id: string;
+  branch_name: string;
+  product_id: string;
+  product_name: string;
+  product_description: string;
+  quantity: number;
+}

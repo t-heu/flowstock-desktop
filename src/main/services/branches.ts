@@ -11,6 +11,7 @@ import {
 export const getBranches = async (): Promise<{ success: boolean; data?: Branch[]; error?: string }> => {
   try {
     let branches = getAllBranchesFromCache();
+    
     if (!branches) {
       const { data, error } = await supabase.from("branches").select("*");
       if (error) throw error;

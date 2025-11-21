@@ -3,23 +3,7 @@ import { useEffect, useState, useRef, useMemo } from "react"
 import { Package, AlertCircle, TrendingDown } from "lucide-react"
 
 import { useToast } from "../context/ToastProvider"
-
-export interface Branch {
-  id?: string;
-  name: string;
-  code: string;
-  location?: string;
-  createdAt?: string;
-}
-
-export interface Product {
-  id: string;
-  name: string;
-  code: string;
-  description?: string;
-  unit: string;
-  createdAt?: string;
-}
+import {Product, Branch} from "../../../shared/types"
 
 export default function ProductOutputPage() {
   const { showToast } = useToast();
@@ -214,7 +198,7 @@ export default function ProductOutputPage() {
 
       <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
         <div className="flex items-center gap-3 mb-6">
-          <TrendingDown className="w-6 h-6 text-red-600 dark:text-red-400" />
+          <TrendingDown className="w-6 h-6 text-[#2c5396]" />
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">Lançar Saída</h2>
         </div>
 
@@ -229,7 +213,7 @@ export default function ProductOutputPage() {
               <select
                 value={formData.productId}
                 onChange={(e) => handleProductChange(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-[#2c5396] focus:border-[#2c5396]"
                 required
               >
                 <option value="">Selecione um produto</option>
@@ -249,7 +233,7 @@ export default function ProductOutputPage() {
               <select
                 value={formData.branchId}
                 onChange={(e) => setFormData({ ...formData, branchId: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-[#2c5396] focus:border-[#2c5396]"
                 required
               >
                 <option value="">Selecione a filial</option>
@@ -271,7 +255,7 @@ export default function ProductOutputPage() {
             <select
               value={formData.destinationBranchName} // agora guarda o nome
               onChange={(e) => setFormData({ ...formData, destinationBranchName: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-[#2c5396] focus:border-[#2c5396]"
               required
             >
               <option value="">Selecione a filial destino</option>
@@ -311,7 +295,7 @@ export default function ProductOutputPage() {
               placeholder="Digite a quantidade"
               min="1"
               max={0 || undefined}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-[#2c5396] focus:border-[#2c5396]"
               required
             />
           </div>
@@ -324,7 +308,7 @@ export default function ProductOutputPage() {
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               placeholder="Notas sobre a saída (opcional)"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-[#2c5396] focus:border-[#2c5396]"
             />
           </div>
 
@@ -332,7 +316,7 @@ export default function ProductOutputPage() {
           <button
             type="submit"
             disabled={isFormEmpty}
-            className="rounded-sm px-6 py-2.5  flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium transition-colors"
+            className="rounded-sm px-6 py-2.5  flex items-center justify-center gap-2 bg-[#2c5396] hover:bg-[#666] disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium transition-colors"
           >
             <TrendingDown className="w-4 h-4" />
             Registrar Saída
