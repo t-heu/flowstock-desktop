@@ -1,4 +1,6 @@
 import { ipcMain } from "electron";
+
+import { apiFetch } from "../apiClient";
 import { safeIpc } from "../ipc-utils";
 import { 
   savePersistedToken,
@@ -9,26 +11,20 @@ import {
   readPersistedUser
 } from "../authSession";
 
-const API_URL = import.meta.env.MAIN_VITE_API_URL;
-
 export function registerAuthIPC() {
   ipcMain.handle(
     "auth:login",
     safeIpc(async (_, { username, password }) => {
-      const res = await fetch(`${API_URL}/auth/login`, {
+      const res = await apiFetch(`/auth/login`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: { username, password },
       });
       
-      const result = await res.json();
-      if (!res.ok) return { success: false, error: result.error || "Credenciais inválidas" };
-      
       // salva token e usuário localmente
-      savePersistedToken(result.token);
-      savePersistedUser(result.user);
+      savePersistedToken(res.token);
+      savePersistedUser(res.user);
 
-      return { success: true, data: result };
+      return { success: true, data: res };
     }, "Erro ao fazer login")
   );
 
@@ -52,14 +48,6 @@ export function registerAuthIPC() {
   ipcMain.handle(
     "auth:logout",
     safeIpc(async () => {
-      const token = readPersistedToken();
-      if (token) {
-        await fetch(`${API_URL}/auth/logout`, {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-        });
-      }
-
       // limpa token e user localmente
       clearPersistedToken();
       clearPersistedUser();

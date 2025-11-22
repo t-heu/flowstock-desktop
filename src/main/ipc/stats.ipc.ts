@@ -1,10 +1,10 @@
 import { ipcMain } from "electron";
+
+import { apiFetch } from "../apiClient";
 import { safeIpc } from "../ipc-utils";
 import { 
   readPersistedToken,
 } from "../authSession";
-
-const API_URL = import.meta.env.MAIN_VITE_API_URL;
 
 export function registerStatsIPC() {
   ipcMain.handle(
@@ -15,17 +15,10 @@ export function registerStatsIPC() {
 
       if (!token) return { success: false, error: "Falta de token" };
       
-      const url = `${API_URL}/stats${branchFilter ? `?branch=${branchFilter}` : ""}`;
-      const res = await fetch(url, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const url = `/stats${branchFilter ? `?branch=${branchFilter}` : ""}`;
+      const res = await apiFetch(url, {token});
 
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        return { success: false, error: err.error || "Erro ao obter estatísticas" };
-      }
-
-      const data = await res.json();
+      const data = res;
       return { success: true, data: data.data };
     }, "Erro ao obter estatísticas")
   );

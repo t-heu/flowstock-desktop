@@ -1,9 +1,9 @@
 import { ipcMain } from "electron";
+
+import { apiFetch } from "../apiClient";
 import { safeIpc } from "../ipc-utils";
 import { ReportFilterSchema } from "../schemas";
 import { readPersistedToken } from "../authSession";
-
-const API_URL = import.meta.env.MAIN_VITE_API_URL;
 
 export function registerReportIPC() {
   ipcMain.handle(
@@ -24,13 +24,11 @@ export function registerReportIPC() {
       if (pageSize) queryParams.append("pageSize", pageSize.toString());
       if (type) queryParams.append("type", type);
 
-      const res = await fetch(`${API_URL}/report/detailed?${queryParams.toString()}`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await apiFetch(`/report/detailed?${queryParams.toString()}`, {
+        token,
       });
 
-      const result = await res.json();
-      if (!res.ok) return { success: false, error: result.error || "Erro ao gerar relatório" };
-      return { success: true, data: result.data };
+      return { success: true, data: res.data };
     }, "Erro ao gerar relatório detalhado")
   );
 }

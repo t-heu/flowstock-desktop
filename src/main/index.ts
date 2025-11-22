@@ -7,6 +7,7 @@ import icon from '../../resources/icon.png?asset'
 import { registerProductIPC } from "./ipc/products.ipc";
 import { registerBranchesIPC } from "./ipc/branches.ipc";
 import { registerMovementsIPC } from "./ipc/movements.ipc";
+import { registerStockIPC } from "./ipc/stock.ipc";
 import { registerRomaneioIPC } from "./ipc/shipping.ipc";
 import { registerUserIPC } from "./ipc/users.ipc";
 import { registerReportIPC } from "./ipc/reports.ipc";
@@ -97,6 +98,7 @@ app.whenReady().then(() => {
   registerBranchesIPC();
   registerProductIPC();
   registerMovementsIPC();
+  registerStockIPC();
   registerRomaneioIPC();
   registerUserIPC();
   registerReportIPC();

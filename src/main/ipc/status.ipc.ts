@@ -1,6 +1,8 @@
 import { ipcMain, WebContents } from "electron";
 import WebSocket from "ws";
 
+import { URL } from "../apiClient";
+
 let subscribers: WebContents[] = [];
 let ws: WebSocket | null = null;
 let currentStatus: "online" | "instavel" | "offline" = "offline"; // inicializa offline
@@ -23,7 +25,7 @@ export function statusIPC() {
 }
 
 export function setupWebSocket() {
-  ws = new WebSocket("ws://localhost:3000/ws/status");
+  ws = new WebSocket(`ws://${URL}/ws/status`);
 
   ws.on("open", () => {
     console.log("WS status conectado");

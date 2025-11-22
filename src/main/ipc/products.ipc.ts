@@ -1,9 +1,9 @@
 import { ipcMain } from "electron";
+
+import { apiFetch } from "../apiClient";
 import { safeIpc } from "../ipc-utils";
 import { ProductSchema, UpdateProductSchema, IdSchema } from "../schemas";
 import { readPersistedToken } from "../authSession";
-
-const API_URL = import.meta.env.MAIN_VITE_API_URL;
 
 export function registerProductIPC() {
   // 🔹 Obter produtos
@@ -13,17 +13,11 @@ export function registerProductIPC() {
       const token = readPersistedToken();
       if (!token) return { success: false, error: "Falta de token" };
 
-      const res = await fetch(`${API_URL}/products`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await apiFetch(`/products`, {
+        token
       });
 
-      if (!res.ok) {
-        const err = await res.json();
-        return { success: false, error: err.error || "Erro ao carregar produtos" };
-      }
-
-      const data = await res.json();
-      return { success: true, data: data.data };
+      return { success: true, data: res.data };
     }, "Erro ao carregar produtos")
   );
 
@@ -35,18 +29,13 @@ export function registerProductIPC() {
       if (!token) return { success: false, error: "Falta de token" };
 
       const valid = ProductSchema.parse(args);
-      const res = await fetch(`${API_URL}/products`, {
+      const res = await apiFetch(`/products`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(valid),
+        token,
+        body: valid,
       });
 
-      const result = await res.json();
-      if (!res.ok) return { success: false, error: result.error || "Erro ao criar produto" };
-      return { success: true, data: result };
+      return { success: true, data: res };
     }, "Erro ao criar produto")
   );
 
@@ -58,18 +47,13 @@ export function registerProductIPC() {
       if (!token) return { success: false, error: "Falta de token" };
 
       const { id, updates } = UpdateProductSchema.parse(args);
-      const res = await fetch(`${API_URL}/products/${id}`, {
+      const res = await apiFetch(`/products/${id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(updates),
+        token,
+        body: updates,
       });
 
-      const result = await res.json();
-      if (!res.ok) return { success: false, error: result.error || "Erro ao atualizar produto" };
-      return { success: true, data: result };
+      return { success: true, data: res };
     }, "Erro ao atualizar produto")
   );
 
@@ -77,17 +61,15 @@ export function registerProductIPC() {
   ipcMain.handle(
     "delete-product",
     safeIpc(async (_, args) => {
-      const token = args?.token ?? readPersistedToken();
+      const token = readPersistedToken();
       if (!token) return { success: false, error: "Falta de token" };
 
       const validId = IdSchema.parse(args);
-      const res = await fetch(`${API_URL}/products/${validId}`, {
+      await apiFetch(`/products/${validId}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
+        token
       });
 
-      const result = await res.json();
-      if (!res.ok) return { success: false, error: result.error || "Erro ao excluir produto" };
       return { success: true };
     }, "Erro ao excluir produto")
   );

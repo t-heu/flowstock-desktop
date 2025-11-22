@@ -1,9 +1,9 @@
 import { ipcMain } from "electron";
+
+import { apiFetch } from "../apiClient";
 import { safeIpc } from "../ipc-utils";
 import { CreateUserSchema, IdSchema } from "../schemas";
 import { readPersistedToken } from "../authSession";
-
-const API_URL = import.meta.env.MAIN_VITE_API_URL;
 
 export function registerUserIPC() {
   // 🔹 Obter usuários
@@ -13,12 +13,11 @@ export function registerUserIPC() {
       const token = args?.token ?? readPersistedToken();
       if (!token) return { success: false, error: "Falta de token" };
 
-      const res = await fetch(`${API_URL}/users`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await apiFetch(`/users`, {
+        token,
       });
-      const result = await res.json();
-      if (!res.ok) return { success: false, error: result.error || "Erro ao carregar usuários" };
-      return { success: true, data: result.data };
+      
+      return { success: true, data: res.data };
     }, "Erro ao carregar usuários")
   );
 
@@ -30,17 +29,13 @@ export function registerUserIPC() {
       if (!token) return { success: false, error: "Falta de token" };
       
       const parsed = CreateUserSchema.parse(args ?? {});
-      const res = await fetch(`${API_URL}/users`, {
+      const res = await apiFetch(`/users`, {
         method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(parsed),
+        token,
+        body: parsed,
       });
-      const result = await res.json();
-      if (!res.ok) return { success: false, error: result.error || "Erro ao criar usuário" };
-      return { success: true, data: result };
+      
+      return { success: true, data: res };
     }, "Erro ao criar usuário")
   );
 
@@ -67,19 +62,13 @@ export function registerUserIPC() {
         created_at: updates.created_at
       };
 
-      const res = await fetch(`${API_URL}/users/${validId}`, {
+      const res = await apiFetch(`/users/${validId}`, {
         method: "PUT",
-        headers: { 
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(body),
+        token,
+        body,
       });
 
-      const result = await res.json();
-      if (!res.ok) return { success: false, error: result.error || "Erro ao atualizar usuário" };
-
-      return { success: true, data: result };
+      return { success: true, data: res };
     }, "Erro ao atualizar usuário")
   );
 
@@ -91,13 +80,12 @@ export function registerUserIPC() {
       if (!token) return { success: false, error: "Falta de token" };
 
       const validId = IdSchema.parse(args);
-      const res = await fetch(`${API_URL}/users/${validId}`, {
+      const res = await apiFetch(`/users/${validId}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
+        token
       });
-      const result = await res.json();
-      if (!res.ok) return { success: false, error: result.error || "Erro ao excluir usuário" };
-      return { success: true, data: result };
+
+      return { success: true, data: res };
     }, "Erro ao excluir usuário")
   );
 }

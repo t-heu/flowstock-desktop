@@ -43,7 +43,7 @@ const api = {
   deleteMovement: (id) => ipcRenderer.invoke("delete-movement", id),
 
   // 🗃️ Estoque por filial (novo)
-  getBranchStock: () => ipcRenderer.invoke("get-branch-stock"),
+  getBranchStock: () => ipcRenderer.invoke("get-stock"),
 
    // 🔹 Usuários (novo)
   getUsers: () => ipcRenderer.invoke("get-users"),

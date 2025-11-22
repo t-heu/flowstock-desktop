@@ -1,9 +1,8 @@
-// ipc/branches.ts
 import { ipcMain } from "electron";
+
+import { apiFetch } from "../apiClient";
 import { safeIpc } from "../ipc-utils";
 import { readPersistedToken } from "../authSession";
-
-const API_URL = import.meta.env.MAIN_VITE_API_URL;
 
 export function registerBranchesIPC() {
   // 🔹 Obter filiais
@@ -13,17 +12,11 @@ export function registerBranchesIPC() {
       const token = readPersistedToken();
       if (!token) return { success: false, error: "Usuário não autenticado" };
 
-      const res = await fetch(`${API_URL}/branches`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await apiFetch(`/branches`, {
+        token
       });
 
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        return { success: false, error: err.error || "Erro ao obter filiais" };
-      }
-
-      const data = await res.json();
-      return { success: true, data: data.data };
+      return { success: true, data: res.data };
     }, "Erro ao obter filiais")
   );
 
@@ -34,18 +27,13 @@ export function registerBranchesIPC() {
       const token = readPersistedToken();
       if (!token) return { success: false, error: "Usuário não autenticado" };
 
-      const res = await fetch(`${API_URL}/branches`, {
+      const res = await apiFetch(`/branches`, {
         method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(branch)
+        token,
+        body: branch
       });
 
-      const result = await res.json();
-      if (!res.ok) return { success: false, error: result.error || "Erro ao adicionar filial" };
-      return { success: true, data: result };
+      return { success: true, data: res };
     }, "Erro ao adicionar filial")
   );
 
@@ -56,13 +44,11 @@ export function registerBranchesIPC() {
       const token = readPersistedToken();
       if (!token) return { success: false, error: "Usuário não autenticado" };
 
-      const res = await fetch(`${API_URL}/branches/${id}`, {
+      await apiFetch(`/branches/${id}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` }
+        token
       });
 
-      const result = await res.json().catch(() => ({}));
-      if (!res.ok) return { success: false, error: result.error || "Erro ao excluir filial" };
       return { success: true };
     }, "Erro ao excluir filial")
   );
