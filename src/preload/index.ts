@@ -1,8 +1,21 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
-// Custom APIs for renderer
+let statusListeners: ((status: string) => void)[] = [];
+
+ipcRenderer.on("service-status:update", (_, status: string) => {
+  statusListeners.forEach(cb => cb(status));
+});
+
 const api = {
+  subscribeServiceStatus: () => ipcRenderer.send("subscribe-service-status"),
+  onServiceStatus: (cb: (status: string) => void) => {
+    statusListeners.push(cb);
+    return () => {
+      statusListeners = statusListeners.filter(l => l !== cb);
+    };
+  },
+
   // Autenticação
   loginUser: (username, password) =>
     ipcRenderer.invoke('auth:login', {username, password}),

@@ -29,7 +29,6 @@ export default function ReportsPage() {
     async function loadData() {
       try {
         const response = await window.api.getBranches();
-        
         if (!response.success) showToast(response.error, "error");
 
         setBranches(response.data || []);

@@ -1,55 +1,94 @@
 import { ipcMain } from "electron";
-import { authenticated } from "../authMiddleware";
 import { safeIpc } from "../ipc-utils";
-import { 
-  getProducts,
-  createProduct,
-  updateProduct,
-  deleteProduct
-} from "../services/products";
 import { ProductSchema, UpdateProductSchema, IdSchema } from "../schemas";
+import { readPersistedToken } from "../authSession";
+
+const API_URL = import.meta.env.MAIN_VITE_API_URL;
 
 export function registerProductIPC() {
   // 🔹 Obter produtos
   ipcMain.handle(
     "get-products",
-    authenticated(
-      safeIpc(async (user) => {
-        return await getProducts(user); // já retorna { success, data?, error? }
-      }, "Erro ao carregar produtos")
-    )
+    safeIpc(async () => {
+      const token = readPersistedToken();
+      if (!token) return { success: false, error: "Falta de token" };
+
+      const res = await fetch(`${API_URL}/products`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        return { success: false, error: err.error || "Erro ao carregar produtos" };
+      }
+
+      const data = await res.json();
+      return { success: true, data: data.data };
+    }, "Erro ao carregar produtos")
   );
 
   // 🔹 Criar produto
   ipcMain.handle(
     "create-product",
-    authenticated(
-      safeIpc(async (user, data) => {
-        const product = ProductSchema.parse(data); // ZodError será capturado pelo safeIpc
-        return await createProduct(user, product); // { success, data?, error? }
-      }, "Erro ao criar produto")
-    )
+    safeIpc(async (_, args) => {
+      const token = readPersistedToken();
+      if (!token) return { success: false, error: "Falta de token" };
+
+      const valid = ProductSchema.parse(args);
+      const res = await fetch(`${API_URL}/products`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(valid),
+      });
+
+      const result = await res.json();
+      if (!res.ok) return { success: false, error: result.error || "Erro ao criar produto" };
+      return { success: true, data: result };
+    }, "Erro ao criar produto")
   );
 
   // 🔹 Atualizar produto
   ipcMain.handle(
     "update-product",
-    authenticated(
-      safeIpc(async (user, payload) => {
-        const { id, updates } = UpdateProductSchema.parse(payload);
-        return await updateProduct(user, id, updates);
-      }, "Erro ao atualizar produto")
-    )
+    safeIpc(async (_, args) => {
+      const token = readPersistedToken();
+      if (!token) return { success: false, error: "Falta de token" };
+
+      const { id, updates } = UpdateProductSchema.parse(args);
+      const res = await fetch(`${API_URL}/products/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(updates),
+      });
+
+      const result = await res.json();
+      if (!res.ok) return { success: false, error: result.error || "Erro ao atualizar produto" };
+      return { success: true, data: result };
+    }, "Erro ao atualizar produto")
   );
 
   // 🔹 Excluir produto
   ipcMain.handle(
     "delete-product",
-    authenticated(
-      safeIpc(async (user, id) => {
-        const validId = IdSchema.parse(id);
-        return await deleteProduct(user, validId);
-      }, "Erro ao excluir produto")
-    )
+    safeIpc(async (_, args) => {
+      const token = args?.token ?? readPersistedToken();
+      if (!token) return { success: false, error: "Falta de token" };
+
+      const validId = IdSchema.parse(args);
+      const res = await fetch(`${API_URL}/products/${validId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const result = await res.json();
+      if (!res.ok) return { success: false, error: result.error || "Erro ao excluir produto" };
+      return { success: true };
+    }, "Erro ao excluir produto")
   );
 }

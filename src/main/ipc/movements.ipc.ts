@@ -1,54 +1,92 @@
 import { ipcMain } from "electron";
-import { authenticated } from "../authMiddleware";
 import { safeIpc } from "../ipc-utils";
-import { 
-  getMovements, createMovement, deleteMovement
-} from "../services/movements";
-import { 
-  getBranchStock
-} from "../services/branchStock";
-import { IdSchema, MovementSchema } from "../schemas";
+import { readPersistedToken } from "../authSession";
+
+const API_URL = import.meta.env.MAIN_VITE_API_URL;
 
 export function registerMovementsIPC() {
   // 🔹 Obter movimentos
   ipcMain.handle(
     "get-movements",
-    authenticated(
-      safeIpc(async (user, typeFilter) => {
-        return await getMovements(user, typeFilter);
-      }, "Erro ao obter movimentos")
-    )
+    safeIpc(async (_, args) => {
+      const token = readPersistedToken();
+      if (!token) return { success: false, error: "Falta de token" };
+
+      const typeFilter = args || "";
+      const res = await fetch(`${API_URL}/movements?type=${typeFilter}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        return { success: false, error: err.error || "Erro ao obter movimentos" };
+      }
+
+      const data = await res.json();
+      return { success: true, data: data.data };
+    }, "Erro ao obter movimentos")
   );
 
   // 🔹 Criar movimento
   ipcMain.handle(
     "create-movement",
-    authenticated(
-      safeIpc(async (_, movement) => {
-        const valid = MovementSchema.parse(movement); // ZodError será capturado
-        return await createMovement(valid); // { success, data?, error? }
-      }, "Erro ao criar movimento")
-    )
+    safeIpc(async (_, args) => {
+      const token = readPersistedToken();
+      if (!token) return { success: false, error: "Falta de token" };
+
+      const movement = args;
+      const res = await fetch(`${API_URL}/movements`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(movement),
+      });
+
+      const result = await res.json();
+      if (!res.ok) return { success: false, error: result.error || "Erro ao criar movimento" };
+      return { success: true, data: result };
+    }, "Erro ao criar movimento")
   );
 
   // 🔹 Excluir movimento
   ipcMain.handle(
     "delete-movement",
-    authenticated(
-      safeIpc(async (_, id) => {
-        const validId = IdSchema.parse(id); // ZodError será capturado
-        return await deleteMovement(validId); // { success, data?, error? }
-      }, "Erro ao excluir movimento")
-    )
+    safeIpc(async (_, args) => {
+      const token = args?.token ?? readPersistedToken();
+      if (!token) return { success: false, error: "Falta de token" };
+
+      const id = args;
+      const res = await fetch(`${API_URL}/movements/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const result = await res.json();
+      if (!res.ok) return { success: false, error: result.error || "Erro ao excluir movimento" };
+      return { success: true };
+    }, "Erro ao excluir movimento")
   );
 
   // 🔹 Obter estoque da filial
   ipcMain.handle(
     "get-branch-stock",
-    authenticated(
-      safeIpc(async () => {
-        return await getBranchStock(); // { success, data?, error? }
-      }, "Erro ao obter estoque")
-    )
+    safeIpc(async () => {
+      const token = readPersistedToken();
+      if (!token) return { success: false, error: "Falta de token" };
+
+      const res = await fetch(`${API_URL}/stock`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        return { success: false, error: err.error || "Erro ao obter estoque" };
+      }
+
+      const data = await res.json();
+      return { success: true, data: data.data };
+    }, "Erro ao obter estoque")
   );
 }

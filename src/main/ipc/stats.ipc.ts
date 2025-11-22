@@ -1,15 +1,32 @@
 import { ipcMain } from "electron";
-import { authenticated } from "../authMiddleware";
 import { safeIpc } from "../ipc-utils";
-import { getStats } from "../services/stats";
+import { 
+  readPersistedToken,
+} from "../authSession";
+
+const API_URL = import.meta.env.MAIN_VITE_API_URL;
 
 export function registerStatsIPC() {
   ipcMain.handle(
     "get-stats",
-    authenticated(
-      safeIpc(async (event, data) => {
-        return await getStats(event, data); // { success, data?, error? }
-      }, "Erro ao obter estatísticas")
-    )
+    safeIpc(async (_, args) => { // default = {}
+      const branchFilter = args;
+      const token = readPersistedToken();
+
+      if (!token) return { success: false, error: "Falta de token" };
+      
+      const url = `${API_URL}/stats${branchFilter ? `?branch=${branchFilter}` : ""}`;
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        return { success: false, error: err.error || "Erro ao obter estatísticas" };
+      }
+
+      const data = await res.json();
+      return { success: true, data: data.data };
+    }, "Erro ao obter estatísticas")
   );
 }

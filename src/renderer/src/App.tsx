@@ -13,7 +13,8 @@ import ProductOutput from './pages/ProductOutput'
 import Filiais from './pages/BranchStock'
 import Users from './pages/Users'
 import Reports from './pages/Reports'
-import ProfilePage from './pages/ProfilePage'
+import ProfilePage from './pages/ProfilePage';
+import StatusPage from './pages/StatusPage'
 
 import { NoticeModal } from './components/NoticeModal';
 import { SidebarWrapper } from './components/SidebarWrapper';
@@ -51,6 +52,7 @@ function AppContent() {
         {currentPage === 'users' && <Users />}
         {currentPage === 'relatorios' && <Reports />}
         {currentPage === 'profile' && <ProfilePage />}
+        {currentPage === 'status' && <StatusPage />}
       </main>
     </div>
   )

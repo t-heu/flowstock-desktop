@@ -4,8 +4,6 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 
 import icon from '../../resources/icon.png?asset'
 
-import { initRealtimeCache } from "./realtime-cache";
-
 import { registerProductIPC } from "./ipc/products.ipc";
 import { registerBranchesIPC } from "./ipc/branches.ipc";
 import { registerMovementsIPC } from "./ipc/movements.ipc";
@@ -15,6 +13,7 @@ import { registerReportIPC } from "./ipc/reports.ipc";
 import { registerNoticeIPC } from "./ipc/notices.ipc";
 import { registerAuthIPC } from "./ipc/auth.ipc";
 import { registerStatsIPC } from "./ipc/stats.ipc";
+import { statusIPC, setupWebSocket } from "./ipc/status.ipc";
 
 app.disableHardwareAcceleration();
 
@@ -90,10 +89,7 @@ app.whenReady().then(() => {
   // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
-  })
-
-  // Inicializa Realtime para produtos
-  initRealtimeCache();
+  });
 
   // IPC HANDLERS
   registerAuthIPC();
@@ -105,6 +101,10 @@ app.whenReady().then(() => {
   registerUserIPC();
   registerReportIPC();
   registerNoticeIPC();
+  statusIPC()
+
+  // Conecta ao WS do servidor para status
+  setupWebSocket();
 
   createWindow()
 

@@ -74,12 +74,12 @@ export default function ProductOutputPage() {
   // =====================================================
   const availableStock = useMemo(() => {
     if (!selectedProduct || !formData.branchId) return 0;
-
+    
     return branchStockRef.current
       .filter(
         (item) =>
-          String(item.productId) === String(selectedProduct.id) &&
-          String(item.branchId) === String(formData.branchId)
+          String(item.product_id) === String(selectedProduct.id) &&
+          String(item.branch_id) === String(formData.branchId)
       )
       .reduce((sum, item) => sum + Number(item.quantity), 0);
   }, [selectedProduct, formData.branchId]);

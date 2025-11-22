@@ -35,7 +35,7 @@ export default function UsersPage() {
         const [branchesData, usersData] = await Promise.all([
           window.api.getBranches(),
           window.api.getUsers()
-        ])
+        ]);
 
         setBranches(branchesData.data || [])
         setUsers(usersData.data || [])

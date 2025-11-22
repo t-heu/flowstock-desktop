@@ -8,7 +8,8 @@ import {
   TrendingDown,
   Users,
   Warehouse,
-  User
+  User,
+  ChartNoAxesColumn 
 } from "lucide-react"
 
 import { useAuth } from '../../context/AuthProvider'
@@ -22,7 +23,8 @@ const navItems = [
   { title: "Entrada de Estoque", key: "entrada", icon: TrendingUp },
   { title: "Saída de Estoque", key: "saida", icon: TrendingDown },
   { title: "Relatórios", key: "relatorios", icon: BarChart3 },
-  { title: "Estoque das Filiais", key: "filiais", icon: Warehouse }
+  { title: "Estoque das Filiais", key: "filiais", icon: Warehouse },
+  { title: "Status", key: "status", icon: ChartNoAxesColumn }
 ]
 
 export default function Sidebar({

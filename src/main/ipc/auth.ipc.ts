@@ -1,64 +1,43 @@
 import { ipcMain } from "electron";
 import { safeIpc } from "../ipc-utils";
-import { LoginSchema } from "../schemas";
-import { loginUser } from "../services/login";
-
-import {
+import { 
   savePersistedToken,
   readPersistedToken,
   clearPersistedToken,
   savePersistedUser,
-  readPersistedUser,
-  clearPersistedUser
+  clearPersistedUser,
+  readPersistedUser
 } from "../authSession";
 
-import {
-  invalidateBranchCache,
-  invalidateBranchStockCache,
-  invalidateMovementsCache,
-  invalidateProductCache
-  ,movementsPageCache,
-  invalidateStatsCache
-} from "../cache";
+const API_URL = import.meta.env.MAIN_VITE_API_URL;
 
 export function registerAuthIPC() {
-
-  // ============================================================
-  // LOGIN
-  // ============================================================
   ipcMain.handle(
     "auth:login",
-    safeIpc(async (_, data) => {
-      const { username, password } = LoginSchema.parse(data);
-      const result = await loginUser(username, password);
-
-      if (!result?.success || !result.token) {
-        return { success: false, error: result?.error || "Credenciais inválidas" };
-      }
-
-      // Salva token e user
+    safeIpc(async (_, { username, password }) => {
+      const res = await fetch(`${API_URL}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+      
+      const result = await res.json();
+      if (!res.ok) return { success: false, error: result.error || "Credenciais inválidas" };
+      
+      // salva token e usuário localmente
       savePersistedToken(result.token);
       savePersistedUser(result.user);
 
-      return {
-        success: true,
-        data: {
-          user: result.user,
-          token: result.token
-        }
-      };
+      return { success: true, data: result };
     }, "Erro ao fazer login")
   );
 
-  // ============================================================
-  // RESTAURAR SESSÃO (startup)
-  // ============================================================
-  ipcMain.handle(
+   ipcMain.handle(
     "auth:load-session",
     safeIpc(async () => {
       const token = readPersistedToken();
       const user = readPersistedUser();
-
+      
       if (!token || !user) {
         return { success: false, error: "session_missing" };
       }
@@ -70,38 +49,30 @@ export function registerAuthIPC() {
     }, "Erro ao restaurar sessão")
   );
 
-  // ============================================================
-  // LOGOUT
-  // ============================================================
   ipcMain.handle(
     "auth:logout",
     safeIpc(async () => {
+      const token = readPersistedToken();
+      if (token) {
+        await fetch(`${API_URL}/auth/logout`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
+
+      // limpa token e user localmente
       clearPersistedToken();
       clearPersistedUser();
-
-      // limpa todos os caches
-      invalidateProductCache();
-      invalidateBranchCache();
-      invalidateBranchStockCache();
-      invalidateMovementsCache();
-      movementsPageCache.clear(); // limpa cache de páginas
-
-      invalidateStatsCache(); // opcional, limpa todos os stats
 
       return { success: true };
     }, "Erro ao fazer logout")
   );
 
-  // ============================================================
-  // GET TOKEN
-  // ============================================================
   ipcMain.handle(
     "auth:get-token",
     safeIpc(async () => {
-      return {
-        success: true,
-        data: readPersistedToken() ?? null
-      };
+      const token = readPersistedToken();
+      return { success: true, data: token };
     }, "Erro ao obter token")
   );
 }

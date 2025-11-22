@@ -1,10 +1,14 @@
 import { ElectronAPI } from "@electron-toolkit/preload"
 import { ProductDTO, RomaneioItem, OpenFileResponse, GenerateRomaneioPayload, GenerateRomaneioResponse } from "../shared/types"
 
+type ServiceStatus = "online" | "instavel" | "offline";
+
 declare global {
   interface Window {
     electron: ElectronAPI
     api: {
+      onServiceStatus: (callback: (status: ServiceStatus) => void) => () => void;
+      subscribeServiceStatus: () => any;
       // 📊 Dashboard
       getStats: (branch?: string) => Promise<any>
 

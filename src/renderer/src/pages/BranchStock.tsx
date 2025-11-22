@@ -21,7 +21,6 @@ export default function BranchStockPage() {
   const [dados, setDados] = useState<BranchStockItem[]>([]);
   const [filialSelecionada, setFilialSelecionada] = useState<string>("");
 
-  // -------- Carregamento --------
   useEffect(() => {
     const load = async () => {
       try {

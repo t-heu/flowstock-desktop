@@ -24,8 +24,9 @@ export default function DashboardPage() {
     const loadBranches = async () => {
       try {
         const result = await window.api.getBranches();
-        const data = Array.isArray(result) ? result : result?.data || [];
+        const data = result.data || [];
         if (!result.success) showToast(result.error, "error");
+        
         setBranches(data);
       } catch (error: any) {
         console.error("Erro ao carregar filiais:", error);
@@ -40,8 +41,9 @@ export default function DashboardPage() {
   const loadStats = useCallback(async () => {
     setLoading(true);
     try {
-      const branchId = selectedBranch === 'ALL' ? null : selectedBranch;
-      const result = await window.api.getStats(branchId ?? undefined);
+      const API = selectedBranch === 'ALL' ? await window.api.getStats() : await window.api.getStats(selectedBranch);
+      const result = API
+      
       const data = result?.data || result || {};
       setStats({
         totalProducts: data.totalProducts || 0,
