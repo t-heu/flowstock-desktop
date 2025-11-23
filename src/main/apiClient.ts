@@ -1,7 +1,5 @@
 const API_URL = import.meta.env.MAIN_VITE_API_URL;
 
-export const URL = import.meta.env.MAIN_VITE_URL;
-
 type ApiOptions = {
   method?: "GET" | "POST" | "PUT" | "DELETE";
   body?: any;
@@ -28,7 +26,7 @@ export async function apiFetch<T = any>(endpoint: string, options: ApiOptions = 
   const result = await res.json();
 
   if (!res.ok) {
-    throw new Error(result.error || "Erro na requisição API");
+    return result.error || "Erro na requisição API";
   }
 
   return result;
