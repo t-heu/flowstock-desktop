@@ -1,72 +1,88 @@
-import { useEffect, useState, useCallback } from "react";
+import { useState } from "react";
+import useSWR from "swr";
 import { Building2, PlusCircle, Trash2 } from "lucide-react";
 
-import { useToast } from "../context/ToastProvider"
-import {Branch} from "../../../shared/types"
+import { useToast } from "../context/ToastProvider";
 
 export default function BranchesPage() {
-  const [branches, setBranches] = useState<Branch[]>([]);
-  const [formData, setFormData] = useState({ name: "", code: "" });
   const { showToast } = useToast();
+  const [formData, setFormData] = useState({ name: "", code: "" });
 
-  const loadBranches = useCallback(async () => {
-    try {
-      const response = await window.api.getBranches();
-      if (response?.success && Array.isArray(response.data)) {
-        setBranches(response.data);
-      } else {
-        showToast(response?.error || "Erro ao carregar filiais 😢", "error");
-        
-        setBranches([]);
-      }
-    } catch (e: any) {
-      showToast(e.message || "Erro ao carregar filiais 😢", "error");
-    }
-  }, []);
+  // ---------- SWR ----------
+  const fetchBranches = async () => {
+    const res = await window.api.getBranches();
+    if (!res.success) {
+      showToast(res.error)
+      return
+    };
+    return res.data;
+  };
 
-  useEffect(() => {
-    loadBranches();
-  }, [loadBranches]);
+  const { data: branches, mutate } = useSWR("branches", fetchBranches, {
+    revalidateOnFocus: false,
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.code) {
       showToast("Preencha todos os campos!", "error");
-      return
-    };
+      return;
+    }
 
-    const { error, success } = await window.api.addBranch(formData);
-    if (success) {
+    try {
+      // otimistic update: adiciona temporariamente
+      const tempId = "temp-" + Math.random();
+      mutate([...branches, { ...formData, id: tempId }], false);
+
+      const { success, error } = await window.api.addBranch(formData);
+
+      if (!success) {
+        showToast(error)
+        return
+      };
+
+      // revalida para pegar ID real
+      mutate();
       setFormData({ name: "", code: "" });
-      await loadBranches();
       showToast("Filial criada com sucesso!", "success");
-    } else {
-      showToast(error || "Erro ao criar filial!", "error");
+    } catch (err: any) {
+      console.error(err);
+      showToast(err?.message || "Erro ao criar filial", "error");
+      mutate(); // rollback
     }
   };
 
-  const handleDelete = useCallback(
-    async (id: string) => {
+  const handleDelete = async (id: string) => {
+    try {
       const confirmed = await window.api.confirmDialog({
         message: "Tem certeza que deseja excluir esta filial? 🏢",
       });
       if (!confirmed) return;
 
+      // otimistic update: remove temporariamente
+      mutate(branches?.filter((b) => b.id !== id), false);
+
       const result = await window.api.deleteBranch(id);
-      if (result.success) {
-        await loadBranches();
-        showToast("Filial removida", "error");
-      } else {
-        showToast(result.error || "Erro ao excluir filial", "error");
-      }
-    },
-    [loadBranches]
-  );
+      if (!result.success) {
+        showToast(result.error)
+        return
+      };
+
+      showToast("Filial removida", "success");
+
+      // revalida para consistência
+      mutate();
+    } catch (err: any) {
+      console.error(err);
+      showToast(err?.message || "Erro ao excluir filial", "error");
+      mutate(); // rollback
+    }
+  };
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">

@@ -1,101 +1,111 @@
-import type React from "react"
-import { useEffect, useState, useRef } from "react"
-import { Plus, Trash2, Package, Pencil, Ban } from "lucide-react"
+import type React from "react";
+import { useState, useRef, useEffect } from "react";
+import { Plus, Trash2, Package, Pencil, Ban } from "lucide-react";
 
-import { useToast } from "../context/ToastProvider"
-
+import { useToast } from "../context/ToastProvider";
 import { useAuth } from "../context/AuthProvider";
 import departments from "../../../shared/config/departments.json";
-import {ProductDTO, Product} from "../../../shared/types";
+import { ProductDTO, Product } from "../../../shared/types";
+import { useProductsAndBranches } from "../hooks/useProductsAndBranches";
 
 export default function ProductsPage() {
   const { showToast } = useToast();
+  const { user } = useAuth();
 
-  const [products, setProducts] = useState<Product[]>([])
-  const [isFormOpen, setIsFormOpen] = useState(false)
+  const { products, refresh } = useProductsAndBranches();
+
+  const [isFormOpen, setIsFormOpen] = useState(false);
   const [formData, setFormData] = useState<ProductDTO>({
     code: "",
     name: "",
     description: "",
     unit: "UN",
-    department: ""
-  })
+    department: "",
+  });
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const formRef = useRef<HTMLDivElement>(null);
 
-  const { user } = useAuth();
-
-  useEffect(() => {
-    loadProducts()
-  }, []);
-
-  // Scroll para o formulário quando ele abrir
   useEffect(() => {
     if (isFormOpen && formRef.current) {
       formRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [isFormOpen]);
 
-  const loadProducts = async () => {
-    try {
-      const {data} = await window.api.getProducts()
-      setProducts(data || [])
-    } catch (error) {
-      console.error("Erro ao carregar produtos:", error)
-      showToast("Falha ao carregar produtos", "error")
-      setProducts([])
-    }
-  }
-
+  // ----------------------------------------------
+  // HANDLE SUBMIT (CREATE / UPDATE)
+  // ----------------------------------------------
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      let result;
       if (editingProduct) {
-        result = await window.api.updateProduct({ id: editingProduct.id, updates: formData });
-        if (result?.success) {
-          setProducts(prev => prev.map(p => (p.id === editingProduct.id ? { ...p, ...formData } : p)));
-          showToast("Produto atualizado com sucesso!", "success");
-        }
+        const result = await window.api.updateProduct({
+          id: editingProduct.id,
+          updates: formData,
+        });
+        if (!result.success) {
+          showToast("Erro ao atualizar")
+          return;
+        };
+        showToast("Produto atualizado!", "success");
       } else {
-        result = await window.api.createProduct(formData);
-        if (result?.success) {
-          setProducts(prev => [...prev, { ...formData, id: result.id }]);
-          showToast("Produto criado com sucesso!", "success");
-        }
+        const result = await window.api.createProduct(formData);
+        if (!result.success) {
+          showToast("Erro ao criar")
+          return
+        };
+        showToast("Produto criado!", "success");
       }
 
-      setFormData({ code: "", name: "", description: "", department: "", unit: "UN" });
+      // Recarrega a lista via hook
+      refresh();
+
+      // Reset form
+      setFormData({
+        code: "",
+        name: "",
+        description: "",
+        unit: "UN",
+        department: "",
+      });
       setEditingProduct(null);
       setIsFormOpen(false);
-    } catch (error) {
-      console.error(error);
-      showToast("Falha ao salvar produto", "error");
+    } catch (err) {
+      console.error(err);
+      showToast("Falha ao salvar", "error");
     }
   };
 
+  // ----------------------------------------------
+  // DELETE PRODUCT
+  // ----------------------------------------------
   const handleDelete = async (id: string) => {
     try {
-      const confirm = await window.api.confirmDialog({ message: "Deseja excluir este produto?" });
+      const confirm = await window.api.confirmDialog({
+        message: "Deseja excluir este produto?",
+      });
       if (!confirm) return;
 
       const result = await window.api.deleteProduct(id);
-      if (result?.success) {
-        setProducts(prev => prev.filter(p => p.id !== id));
-        showToast("Produto excluído!", "success");
-      }
-    } catch (error) {
-      console.error(error);
-      showToast("Falha ao excluir produto", "error");
+      if (!result.success) {
+        showToast("Erro ao excluir")
+        return
+      };
+
+      showToast("Produto excluído!", "success");
+      refresh();
+    } catch (err) {
+      console.error(err);
+      showToast("Falha ao excluir", "error");
     }
   };
 
-  // 🔹 Função para abrir formulário de edição
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
     setFormData(product);
     setIsFormOpen(true);
-  }
+  };
+
+  if (!products) return <div>Carregando...</div>;
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">

@@ -1,9 +1,8 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { AlertCircle } from "lucide-react";
 
-import { useToast } from "../context/ToastProvider"
-
-import {BranchStockItem} from "../../../shared/types";
+import { BranchStockItem } from "../../../shared/types";
+import { useStock } from "../hooks/useStock";
 
 const BranchStockRow = ({ item }: { item: BranchStockItem }) => (
   <tr
@@ -17,29 +16,10 @@ const BranchStockRow = ({ item }: { item: BranchStockItem }) => (
 );
 
 export default function BranchStockPage() {
-  const { showToast } = useToast();
-  const [dados, setDados] = useState<BranchStockItem[]>([]);
   const [filialSelecionada, setFilialSelecionada] = useState<string>("");
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const result = await window.api.getBranchStock();
-        if (!result?.success) {
-          showToast(result?.error || "Erro ao carregar branch stock.", "error");
-          
-          return;
-        }
-        setDados(result.data || []);
-      } catch (error: any) {
-        console.error("Erro ao carregar branchStock:", error);
-        showToast("Falha ao carregar branchStock: " + (error?.message || "Erro desconhecido"), "error");
-      }
-    };
-    load();
-  }, []);
+  const { branchStock: dados, loading, error } = useStock();
 
-  // -------- Memoizações --------
   const filiais = useMemo(
     () => Array.from(new Set(dados.map((d) => d.branch_name))),
     [dados]
@@ -51,6 +31,9 @@ export default function BranchStockPage() {
   );
 
   const limparFiltro = useCallback(() => setFilialSelecionada(""), []);
+
+  if (error) return <div className="p-6 text-red-600">Erro ao carregar estoque: {error.message}</div>;
+  if (loading) return <div className="p-6 text-gray-700">Carregando estoque...</div>;
 
   return (
     <div className="space-y-6 p-6 max-w-6xl mx-auto">

@@ -1,13 +1,17 @@
 import { ElectronAPI } from "@electron-toolkit/preload"
 import { ProductDTO, RomaneioItem, OpenFileResponse, GenerateRomaneioPayload, GenerateRomaneioResponse } from "../shared/types"
 
-type ServiceStatus = "online" | "instavel" | "offline";
+export type StatusType = "online" | "offline" | "instavel";
+
+export interface ServiceStatus {
+  service: string; // "api" | "database" ou string genérico
+  status: StatusType;
+}
 
 declare global {
   interface Window {
     electron: ElectronAPI
     api: {
-      onServiceStatus: (callback: (status: ServiceStatus) => void) => () => void;
       subscribeServiceStatus: () => any;
       // 📊 Dashboard
       getStats: (branch?: string) => Promise<any>
@@ -35,7 +39,7 @@ declare global {
       deleteMovement: (id: string) => Promise<any>
 
       // 🏗️ Estoque
-      getBranchStock: () => Promise<any>
+      getStock: () => Promise<any>
 
       // 👥 Usuários
       getUsers: () => Promise<any>

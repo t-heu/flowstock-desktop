@@ -14,7 +14,7 @@ import { registerReportIPC } from "./ipc/reports.ipc";
 import { registerNoticeIPC } from "./ipc/notices.ipc";
 import { registerAuthIPC } from "./ipc/auth.ipc";
 import { registerStatsIPC } from "./ipc/stats.ipc";
-import { statusIPC, setupWebSocket } from "./ipc/status.ipc";
+import { initStatusIPC } from "./ipc/status.ipc";
 
 app.disableHardwareAcceleration();
 
@@ -103,10 +103,7 @@ app.whenReady().then(() => {
   registerUserIPC();
   registerReportIPC();
   registerNoticeIPC();
-  statusIPC()
-
-  // Conecta ao WS do servidor para status
-  setupWebSocket();
+  initStatusIPC()
 
   createWindow()
 

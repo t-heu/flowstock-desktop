@@ -23,7 +23,7 @@ const navItems = [
   { title: "Entrada de Estoque", key: "entrada", icon: TrendingUp },
   { title: "Saída de Estoque", key: "saida", icon: TrendingDown },
   { title: "Relatórios", key: "relatorios", icon: BarChart3 },
-  { title: "Estoque das Filiais", key: "filiais", icon: Warehouse },
+  { title: "Estoque Geral", key: "stock", icon: Warehouse },
   { title: "Status", key: "status", icon: ChartNoAxesColumn }
 ]
 

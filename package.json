@@ -28,7 +28,7 @@
     "electron-store": "^11.0.2",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.552.0",
-    "ws": "^8.18.3",
+    "swr": "^2.3.6",
     "zod": "^4.1.12"
   },
   "devDependencies": {

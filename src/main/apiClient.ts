@@ -24,7 +24,7 @@ export async function apiFetch<T = any>(endpoint: string, options: ApiOptions = 
     headers,
     body: body ? JSON.stringify(body) : undefined,
   });
-
+  
   const result = await res.json();
 
   if (!res.ok) {

@@ -1,79 +1,48 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useMemo } from 'react';
+import useSWR from 'swr';
 import { Package, TrendingUp, TrendingDown } from "lucide-react";
 
-import { useToast } from "../context/ToastProvider"
-//import branchesJson from "../../../shared/config/branches.json";
-
+import { useToast } from "../context/ToastProvider";
 import LoadingSpinner from "../components/LoadingSpinner";
+import { useProductsAndBranches } from "../hooks/useProductsAndBranches";
 
 export default function DashboardPage() {
   const { showToast } = useToast();
-  const [stats, setStats] = useState({
-    totalProducts: 0,
-    totalStock: 0,
-    totalEntries: 0,
-    totalExits: 0,
-    totalBranches: 0,
-  });
-  const [branches, setBranches] = useState<{ id: string; name: string }[]>([]);
   const [selectedBranch, setSelectedBranch] = useState<string>('ALL');
-  const [loading, setLoading] = useState<boolean>(true);
 
-  // -------- Carregar branches apenas uma vez --------
-  useEffect(() => {
-    const loadBranches = async () => {
-      try {
-        const result = await window.api.getBranches();
-        const data = result.data || [];
-        if (!result.success) showToast(result.error, "error");
-        
-        setBranches(data);
-      } catch (error: any) {
-        console.error("Erro ao carregar filiais:", error);
-        showToast("Falha ao carregar filiais: " + (error?.message || "Erro desconhecido"), "error");
-        setBranches([]);
-      }
+  // ---------- Hook de produtos e filiais ----------
+  const { branches } = useProductsAndBranches();
+
+  // ---------- SWR: Stats ----------
+  const fetchStats = async () => {
+    const res = selectedBranch === 'ALL' 
+      ? await window.api.getStats() 
+      : await window.api.getStats(selectedBranch);
+
+    if (!res.success) {
+      showToast(res.error || "Erro ao carregar estatísticas.")
+      return
     };
-    loadBranches();
-  }, []);
+    return res.data || {};
+  };
 
-  // -------- Carregar stats sempre que selectedBranch mudar --------
-  const loadStats = useCallback(async () => {
-    setLoading(true);
-    try {
-      const API = selectedBranch === 'ALL' ? await window.api.getStats() : await window.api.getStats(selectedBranch);
-      const result = API
-      
-      const data = result?.data || result || {};
-      setStats({
-        totalProducts: data.totalProducts || 0,
-        totalStock: data.totalStock || 0,
-        totalEntries: data.totalEntries || 0,
-        totalExits: data.totalExits || 0,
-        totalBranches: data.totalBranches || 0,
-      });
-    } catch (error: any) {
-      console.error("Erro ao carregar estatísticas:", error);
-      showToast("Falha ao carregar estatísticas: " + (error?.message || "Erro desconhecido"), "error");
-      setStats({ totalProducts: 0, totalStock: 0, totalEntries: 0, totalExits: 0, totalBranches: 0 });
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedBranch]);
+  // Mantém o SWR só para stats
+  const { data: stats = {}, isLoading, error: statsError } = useSWR(
+    ['stats', selectedBranch],
+    fetchStats,
+    { revalidateOnFocus: false }
+  );
+  
+  if (statsError) showToast(statsError.message, "error");
 
-  useEffect(() => {
-    loadStats();
-  }, [loadStats]);
-
-  // -------- Cards memoizados --------
   const cards = useMemo(() => [
-    { title: "Total de Produtos", value: stats.totalProducts, icon: Package, iconColor: "text-[#2b7fff]", textColor: "text-black" },
-    { title: "Estoque Total", value: stats.totalStock, icon: Package, iconColor: "text-[#00c951]", textColor: "text-black" },
-    { title: "Entradas", value: stats.totalEntries, icon: TrendingUp, iconColor: "text-[#00bc7d]", textColor: "text-black" },
-    { title: "Saídas", value: stats.totalExits, icon: TrendingDown, iconColor: "text-[#fb2c36]", textColor: "text-black" },
+    { title: "Total de Produtos", value: stats.totalProducts || 0, icon: Package, iconColor: "text-[#2b7fff]", textColor: "text-black" },
+    { title: "Estoque Total", value: stats.totalStock || 0, icon: Package, iconColor: "text-[#00c951]", textColor: "text-black" },
+    { title: "Entradas", value: stats.totalEntries || 0, icon: TrendingUp, iconColor: "text-[#00bc7d]", textColor: "text-black" },
+    { title: "Saídas", value: stats.totalExits || 0, icon: TrendingDown, iconColor: "text-[#fb2c36]", textColor: "text-black" },
   ], [stats]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <LoadingSpinner size={60} />
@@ -123,7 +92,7 @@ export default function DashboardPage() {
           <Package className="w-6 h-6 text-black" />
           <h2 className="text-xl font-bold text-gray-900">Filiais Cadastradas</h2>
         </div>
-        <p className="text-2xl font-bold text-black">{stats.totalBranches}</p>
+        <p className="text-2xl font-bold text-black">{branches.length}</p>
         <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Filiais ativas no sistema</p>
       </div>
     </div>

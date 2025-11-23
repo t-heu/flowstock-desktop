@@ -1,16 +1,16 @@
-import { useEffect, useState, useCallback } from "react";
-import { Package, TrendingUp } from "lucide-react";
+import { useState } from "react";
+import { TrendingUp, Package } from "lucide-react";
 
-import { useToast } from "../context/ToastProvider"
-
-import {Product, Branch} from "../../../shared/types"
+import { useToast } from "../context/ToastProvider";
+import { Product, Branch } from "../../../shared/types";
+import { useProductsAndBranches } from "../hooks/useProductsAndBranches";
+import { useMovements } from "../hooks/useMovements";
 
 export default function ProductInputPage() {
   const { showToast } = useToast();
+  const { products, branches } = useProductsAndBranches();
+  const { movements: recentEntries, loadMovements: loadRecentEntries } = useMovements("entrada");
 
-  const [products, setProducts] = useState<Product[]>([]);
-  const [branches, setBranches] = useState<Branch[]>([]);
-  const [recentEntries, setRecentEntries] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     productId: "",
     branchId: "",
@@ -18,44 +18,6 @@ export default function ProductInputPage() {
     notes: "",
     invoiceNumber: "",
   });
-
-  // -------- Load produtos, filiais e entradas em paralelo --------
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [productsRes, branchesRes, movementsRes] = await Promise.all([
-          window.api.getProducts(),
-          window.api.getBranches(),
-          window.api.getMovements("entrada"),
-        ]);
-
-        if (productsRes.success) setProducts(productsRes.data || []);
-        else showToast(productsRes.error || "Erro ao carregar produtos", "error");
-
-        if (branchesRes.success) setBranches(branchesRes.data || []);
-        else showToast(branchesRes.error || "Erro ao carregar filiais", "error");
-
-        if (movementsRes.success) setRecentEntries(movementsRes.data || []);
-        else showToast(movementsRes.error || "Erro ao carregar entradas recentes", "error");
-      } catch (error: any) {
-        console.error("Erro ao carregar dados:", error);
-        showToast(error?.message || "Falha ao carregar dados", "error");
-      }
-    };
-
-    loadData();
-  }, []);
-
-  const loadRecentEntries = useCallback(async () => {
-    try {
-      const res = await window.api.getMovements("entrada");
-      if (res.success) setRecentEntries(res.data || []);
-      else showToast(res.error || "Erro ao carregar entradas recentes", "error");
-    } catch (error: any) {
-      console.error("Erro ao carregar entradas recentes:", error);
-      showToast(error?.message || "Erro desconhecido", "error");
-    }
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,13 +52,16 @@ export default function ProductInputPage() {
     }
   };
 
-  const isFormEmpty = !formData.productId || !formData.branchId || !formData.quantity || !formData.invoiceNumber;
+  const isFormEmpty =
+    !formData.productId || !formData.branchId || !formData.quantity || !formData.invoiceNumber;
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       <div>
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Entrada de Estoque</h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">Registre a entrada de produtos no estoque</p>
+        <p className="text-gray-600 dark:text-gray-400 mt-2">
+          Registre a entrada de produtos no estoque
+        </p>
       </div>
 
       <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
@@ -119,7 +84,7 @@ export default function ProductInputPage() {
                 required
               >
                 <option value="">Selecione um produto</option>
-                {products.map((product) => (
+                {products.map((product: Product) => (
                   <option key={product.id} value={product.id}>
                     {product.code} - {product.name}
                   </option>
@@ -139,7 +104,7 @@ export default function ProductInputPage() {
                 required
               >
                 <option value="">Selecione uma filial</option>
-                {branches.map((branch) => (
+                {branches.map((branch: Branch) => (
                   <option key={branch.id} value={branch.id}>
                     {branch.code} - {branch.name}
                   </option>
@@ -164,7 +129,6 @@ export default function ProductInputPage() {
             />
           </div>
 
-          {/* Campo de Observações */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Observações
@@ -178,7 +142,6 @@ export default function ProductInputPage() {
             />
           </div>
 
-          {/* Novo campo Número da Nota Fiscal */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Número da Nota Fiscal
@@ -257,5 +220,5 @@ export default function ProductInputPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

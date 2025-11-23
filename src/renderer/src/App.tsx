@@ -10,7 +10,7 @@ import Products from './pages/Products'
 import Branches from './pages/Branches'
 import ProductInput from './pages/ProductInput'
 import ProductOutput from './pages/ProductOutput'
-import Filiais from './pages/BranchStock'
+import Stock from './pages/Stock'
 import Users from './pages/Users'
 import Reports from './pages/Reports'
 import ProfilePage from './pages/ProfilePage';
@@ -48,7 +48,7 @@ function AppContent() {
         {currentPage === 'branches' && <Branches />}
         {currentPage === 'entrada' && <ProductInput />}
         {currentPage === 'saida' && <ProductOutput />}
-        {currentPage === 'filiais' && <Filiais />}
+        {currentPage === 'stock' && <Stock />}
         {currentPage === 'users' && <Users />}
         {currentPage === 'relatorios' && <Reports />}
         {currentPage === 'profile' && <ProfilePage />}
