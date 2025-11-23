@@ -3,11 +3,11 @@ import { ipcMain, dialog } from "electron";
 import { Notice } from "../../shared/types";
 
 export function registerNoticeIPC() {
-  ipcMain.handle('fetch-notice', async (_event): Promise<Notice | null> => {
+  ipcMain.handle('fetch-notice', async (_event): Promise<Notice | string | null> => {
     try {
       const res = await fetch('https://raw.githubusercontent.com/t-heu/flowstock-desktop/refs/heads/main/src/shared/config/noticeApp.json');
 
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) return `HTTP ${res.status}`;
 
       const text = await res.text();
       let data;

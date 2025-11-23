@@ -6,13 +6,11 @@ export function initStatusIPC() {
     try {
       const res = await apiFetch("/health");
 
-      // garante que tenha api, database e status
       return {
         success: true,
         data: {
           api: res.api || "offline",
           database: res.database || "offline",
-          auth: res.auth || "offline",
           status: res.status === "ok" ? "ok" : "error",
         },
       };
@@ -21,7 +19,6 @@ export function initStatusIPC() {
         success: false,
         data: {
           api: "offline",
-          auth: "offline",
           database: "offline",
           status: "error",
         },

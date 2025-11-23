@@ -3,7 +3,7 @@ import StatusBarHistory, { StatusBarRef } from "../components/StatusBarHistory";
 import { useRef } from "react";
 
 export default function StatusPage() {
-  const services = ["api", "auth", "database"] as const;
+  const services = ["api", "database"] as const;
 
   // refs para cada serviço
   const refs: Record<string, React.RefObject<StatusBarRef | null>> = {
