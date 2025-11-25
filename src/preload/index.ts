@@ -6,7 +6,7 @@ interface StatusAPI {
 }
 
 const statusAPI: StatusAPI = {
-  subscribeServiceStatus: () => ipcRenderer.invoke('get-service-status'),
+  subscribeServiceStatus: () => ipcRenderer.invoke('healthcheck'),
 };
 
 // adiciona statusAPI ao api já existente

@@ -14,7 +14,7 @@ import { registerReportIPC } from "./ipc/reports.ipc";
 import { registerNoticeIPC } from "./ipc/notices.ipc";
 import { registerAuthIPC } from "./ipc/auth.ipc";
 import { registerStatsIPC } from "./ipc/stats.ipc";
-import { initStatusIPC } from "./ipc/status.ipc";
+import { initHealthIPC } from "./ipc/health.ipc";
 
 app.disableHardwareAcceleration();
 
@@ -93,6 +93,7 @@ app.whenReady().then(() => {
   });
 
   // IPC HANDLERS
+  initHealthIPC()
   registerAuthIPC();
   registerStatsIPC();
   registerBranchesIPC();
@@ -103,7 +104,6 @@ app.whenReady().then(() => {
   registerUserIPC();
   registerReportIPC();
   registerNoticeIPC();
-  initStatusIPC()
 
   createWindow()
 
