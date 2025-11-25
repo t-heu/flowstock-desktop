@@ -1,12 +1,25 @@
 {
   "allowed": [
-    { 
-      "id": "rh", 
-      "label": "RH" 
-    },
-    { 
-      "id": "transferencia", 
-      "label": "Transferência" 
-    }
+    { "id": "rh", "label": "RH" },
+    { "id": "dp", "label": "Departmento Pessoal" },
+    { "id": "transferencia", "label": "Transferência" },
+    { "id": "almoxarifado", "label": "Almoxarifado" },
+    { "id": "compras", "label": "Compras" },
+    { "id": "financeiro", "label": "Financeiro" },
+    { "id": "contabilidade", "label": "Contabilidade" },
+    { "id": "ti", "label": "TI" },
+    { "id": "manutencao", "label": "Manutenção" },
+    { "id": "producao", "label": "Produção" },
+    { "id": "engenharia", "label": "Engenharia" },
+    { "id": "qualidade", "label": "Qualidade" },
+    { "id": "logistica", "label": "Logística" },
+    { "id": "expedicao", "label": "Expedição" },
+    { "id": "recebimento", "label": "Recebimento" },
+    { "id": "comercial", "label": "Comercial" },
+    { "id": "marketing", "label": "Marketing" },
+    { "id": "juridico", "label": "Jurídico" },
+    { "id": "diretoria", "label": "Diretoria" },
+    { "id": "suprimentos", "label": "Suprimentos" },
+    { "id": "operacoes", "label": "Operações" }
   ]
 }

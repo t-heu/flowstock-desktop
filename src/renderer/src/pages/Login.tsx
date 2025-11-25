@@ -43,23 +43,20 @@ export default function LoginPage() {
 
         {/* Logo + Título */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4 opacity-90">
+          <div className="flex items-center justify-center gap-3 mb-5">
             <img src={logo} className="w-14 h-14 rounded-lg shadow-sm" />
-            
-            <span className="text-gray-500 dark:text-gray-400 text-sm">•</span>
-
-            <img src={theu} title="by theu" className="w-10 h-10 rounded-lg opacity-80" />
           </div>
-          <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">
-            desenvolvido por theu
-          </p>
 
           <h1 className="text-2xl font-semibold text-gray-900 dark:text-white tracking-tight">
-            Gestão de estoque de materiais interno
+            Gestão de Estoque Interno
           </h1>
 
-          <p className="text-gray-600 dark:text-gray-400 mt-1 text-sm">
-            Plataforma corporativa para controle de estoque e movimentações internas. Faça login para acessar.
+          <p className="text-gray-600 dark:text-gray-400 mt-2 text-sm max-w-sm mx-auto">
+            Plataforma corporativa para controle de materiais, estoque e movimentações internas.
+          </p>
+
+          <p className="text-gray-400 dark:text-gray-500 text-xs mt-6">
+            Desenvolvido por <img src={theu} title="theu" className="w-5 h-5 inline rounded-md align-text-bottom ml-1" />
           </p>
         </div>
 

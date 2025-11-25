@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import departments from "../shared/config/departments.json";
 
 export const DepartmentSchema = z.enum(
@@ -16,7 +17,11 @@ export const IdSchema = z.string().uuid();
 export const UpdateProductSchema = z.object({
   id: z.string().uuid(),
   updates: z.object({
+    code: z.string().min(1).optional(),
     name: z.string().min(1).max(120).optional(),
+    description: z.string().optional(),
+    unit: z.string().min(1).optional(),
+    department: z.string().min(1).optional(),
     price: z.number().nonnegative().optional()
   })
 });

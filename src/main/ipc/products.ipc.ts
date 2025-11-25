@@ -47,6 +47,7 @@ export function registerProductIPC() {
       if (!token) return { success: false, error: "Falta de token" };
 
       const { id, updates } = UpdateProductSchema.parse(args);
+      
       const res = await apiFetch(`/products/${id}`, {
         method: "PUT",
         token,

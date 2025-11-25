@@ -185,6 +185,16 @@ export default function UsersPage() {
                 <option value="manager">Manager</option>
               </select>
 
+              <select
+                className="w-full px-3 py-2 rounded border dark:bg-slate-700 dark:text-white"
+                value={formData.department}
+                onChange={(e) => setEditUser({ ...editUser, department: e.target.value })}
+              >
+                {departments.allowed.map(d => (
+                  <option key={d.id} value={d.id}>{d.label}</option>
+                ))}
+              </select>
+
               <div className="flex justify-end gap-2 pt-3">
                 <button type="button" onClick={() => setEditUser(null)} className="px-4 py-2 bg-gray-500 hover:bg-[#666] text-white rounded">
                   Cancelar

@@ -42,6 +42,7 @@ export default function ProductsPage() {
           id: editingProduct.id,
           updates: formData,
         });
+
         if (!result.success) {
           showToast("Erro ao atualizar", "error")
           return;
@@ -101,7 +102,13 @@ export default function ProductsPage() {
 
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
-    setFormData(product);
+    setFormData({
+      code: product.code,
+      name: product.name,
+      description: product.description ?? "",
+      unit: product.unit,
+      department: product.department,
+    });
     setIsFormOpen(true);
   };
 
