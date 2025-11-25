@@ -20,7 +20,7 @@ export default function DashboardPage() {
       : await window.api.getStats(selectedBranch);
 
     if (!res.success) {
-      showToast(res.error || "Erro ao carregar estatísticas.")
+      showToast(res.error || "Erro ao carregar estatísticas.", "error")
       return
     };
     return res.data || {};

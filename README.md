@@ -41,12 +41,10 @@ Before running or building the application, you must create an environment file 
 1. Copy the example environment file
 ```bash
 cp .env.example electron-builder.env
-
 # and
 cp .env.example .env
-
 ```
-
+ 2. Generate Build app
 ```bash
 # For windows - Abra PowerShell como Admin 
 $ cd "C:\Users\SEU_NOME\www\flowstock-desktop"

@@ -12,7 +12,7 @@ export default function BranchesPage() {
   const fetchBranches = async () => {
     const res = await window.api.getBranches();
     if (!res.success) {
-      showToast(res.error)
+      showToast(res.error, "error")
       return
     };
     return res.data;
@@ -42,7 +42,7 @@ export default function BranchesPage() {
       const { success, error } = await window.api.addBranch(formData);
 
       if (!success) {
-        showToast(error)
+        showToast(error, "error")
         return
       };
 
@@ -69,7 +69,7 @@ export default function BranchesPage() {
 
       const result = await window.api.deleteBranch(id);
       if (!result.success) {
-        showToast(result.error)
+        showToast(result.error, "error")
         return
       };
 

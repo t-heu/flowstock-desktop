@@ -17,17 +17,21 @@ export async function apiFetch<T = any>(endpoint: string, options: ApiOptions = 
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const res = await fetch(`${API_URL}${endpoint}`, {
-    method,
-    headers,
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  
-  const result = await res.json();
+  try {
+    const res = await fetch(`${API_URL}${endpoint}`, {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    
+    const result = await res.json();
 
-  if (!res.ok) {
-    return result.error || "Erro na requisição API";
+    if (!res.ok) {
+      throw new Error(result.message || "Erro na requisição API");
+    }
+
+    return result;
+  } catch (err: any) {
+    throw new Error(err?.message === "fetch failed" ? "Falha na conexão com servidor" : err.message)
   }
-
-  return result;
 }

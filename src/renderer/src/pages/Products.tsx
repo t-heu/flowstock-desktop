@@ -43,14 +43,14 @@ export default function ProductsPage() {
           updates: formData,
         });
         if (!result.success) {
-          showToast("Erro ao atualizar")
+          showToast("Erro ao atualizar", "error")
           return;
         };
         showToast("Produto atualizado!", "success");
       } else {
         const result = await window.api.createProduct(formData);
         if (!result.success) {
-          showToast("Erro ao criar")
+          showToast("Erro ao criar", "error")
           return
         };
         showToast("Produto criado!", "success");
@@ -87,7 +87,7 @@ export default function ProductsPage() {
 
       const result = await window.api.deleteProduct(id);
       if (!result.success) {
-        showToast("Erro ao excluir")
+        showToast("Erro ao excluir", "error")
         return
       };
 

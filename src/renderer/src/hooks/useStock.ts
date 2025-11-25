@@ -9,7 +9,7 @@ export function useStock() {
   const fetchBranchStock = async () => {
     const res = await window.api.getStock();
     if (!res.success) {
-      showToast(res.error || "Falha ao carregar estoque")
+      showToast(res.error || "Falha ao carregar estoque", "error")
       return
     };
     return res.data;

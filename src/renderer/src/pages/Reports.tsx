@@ -19,7 +19,7 @@ export default function ReportsPage() {
   const fetchBranches = async () => {
     const res = await window.api.getBranches();
     if (!res.success) {
-      showToast(res.error || "Erro ao carregar filiais.")
+      showToast(res.error || "Erro ao carregar filiais.", "error")
       return
     };
     return res.data || [];
@@ -40,7 +40,7 @@ export default function ReportsPage() {
       type,
     });
     if (!res.success) {
-      showToast(res.error || "Erro ao gerar relatório.")
+      showToast(res.error || "Erro ao gerar relatório.", "error")
       return
     };
     return res;
