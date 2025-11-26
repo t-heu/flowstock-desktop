@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react"
 import { UserPlus } from "lucide-react"
 import { Trash2, Pencil } from "lucide-react"
+import useSWR from "swr"
 
 import { useToast } from "../context/ToastProvider"
-import {Branch} from "../../../shared/types"
+import { ipcFetcher } from "../utils/fetcher"
 import departments from "../../../shared/config/departments.json";
 
 interface User {
@@ -23,30 +24,21 @@ interface User {
 export default function UsersPage() {
   const { showToast } = useToast();
 
-  const [branches, setBranches] = useState<Branch[]>([])
-  const [users, setUsers] = useState<User[]>([])
-  const [formData, setFormData] = useState<any>({ name: "", email: "", department: "", username: "", branchId: "", role: "operator" })
+  const [formData, setFormData] = useState<any>({ 
+    name: "", 
+    email: "", 
+    department: "", 
+    username: "", 
+    branchId: "", 
+    role: "operator" 
+  });
   const [editUser, setEditUser] = useState<User | null>(null);
 
-  // 🔹 Carrega filiais e usuários
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const [branchesData, usersData] = await Promise.all([
-          window.api.getBranches(),
-          window.api.getUsers()
-        ]);
+  const { data: branches, error: branchesError } =
+    useSWR("branches", ipcFetcher)
 
-        setBranches(branchesData.data || [])
-        setUsers(usersData.data || [])
-      } catch (error: any) {
-        console.error("Erro ao carregar dados iniciais:", error)
-        showToast("Falha ao carregar dados. Tente novamente mais tarde.", "error")
-      }
-    }
-
-    load()
-  }, [])
+  const { data: users, error: usersError, mutate: mutateUsers } =
+    useSWR("users", ipcFetcher);
 
   // 🔹 Criar novo usuário
   const handleSubmit = async (e: React.FormEvent) => {
@@ -57,34 +49,26 @@ export default function UsersPage() {
       return
     }
 
-    try {
-      const result = await window.api.createUser(formData)
-      
-      if (!result?.success) {
-        const msg = result?.error || "Erro ao criar usuário."
-        showToast(msg, "error")
-        return
-      }
+    const result = await window.api.createUser(formData)
 
-      // ✅ Reseta formulário
-      setFormData({
-        name: "",
-        username: "",
-        email: "",
-        department: "",
-        branchId: "",
-        role: "operator"
-      })
-
-      // Atualiza lista local sem recarregar toda a página
-      const updatedUsers = await window.api.getUsers()
-      setUsers(updatedUsers.data || [])
-
-      showToast("Usuário criado com sucesso!", "success")
-    } catch (error: any) {
-      console.error("Erro ao criar usuário:", error)
-      showToast("Erro: " + (error?.message || "Falha ao criar usuário.", "error"))
+    if (!result?.success) {
+      showToast(result?.error || "Erro ao criar usuário.", "error")
+      return
     }
+
+    setFormData({
+      name: "",
+      email: "",
+      department: "",
+      username: "",
+      branchId: "",
+      role: "operator"
+    })
+
+    // 🔥 SWR revalida automaticamente
+    mutateUsers()
+
+    showToast("Usuário criado com sucesso!", "success")
   }
 
   // 🔹 Editar usuário
@@ -95,53 +79,48 @@ export default function UsersPage() {
     const payload = { ...editUser }
     if (!payload.password) delete payload.password
 
-    try {
-      const result = await window.api.updateUser({
-        id: editUser.id,
-        updates: payload
-      })
+    const result = await window.api.updateUser({
+      id: editUser.id,
+      updates: payload
+    })
 
-      if (!result?.success) {
-        const msg = result?.error || "Erro ao atualizar usuário."
-        showToast(msg, "error")
-        return
-      }
-
-      // Atualiza lista local
-      const data = users.map(u => (u.id === editUser.id ? { ...u, ...payload } : u)) || [];
-      setUsers(data)
-      setEditUser(null)
-
-      showToast("Usuário atualizado com sucesso!", "success")
-    } catch (error: any) {
-      console.error("Erro ao atualizar usuário:", error)
-      showToast("Erro: " + (error?.message || "Falha ao atualizar usuário.", "error"))
+    if (!result?.success) {
+      showToast(result?.error || "Erro ao atualizar usuário.", "error")
+      return
     }
+
+    mutateUsers()
+    setEditUser(null)
+
+    showToast("Usuário atualizado com sucesso!", "success")
   }
 
   // 🔹 Remover usuário
   const handleDelete = async (id: string) => {
-    const response = await window.api.confirmDialog({
+    const confirmed = await window.api.confirmDialog({
       message: "Tem certeza que deseja excluir este usuário?"
     })
 
-    if (!response) return
+    if (!confirmed) return
 
-    try {
-      const result = await window.api.deleteUser(id)
+    const result = await window.api.deleteUser(id)
 
-      if (!result?.success) {
-        const msg = result?.error || "Erro ao excluir usuário."
-        showToast(msg, "error")
-        return
-      }
-
-      setUsers(users.filter(u => u.id !== id))
-      showToast("Usuário excluído com sucesso!", "success")
-    } catch (error: any) {
-      console.error("Erro ao excluir usuário:", error)
-      showToast("Falha ao excluir usuário: " + (error?.message || "Erro desconhecido", "error"))
+    if (!result?.success) {
+      showToast(result?.error || "Erro ao excluir usuário.", "error")
+      return
     }
+
+    mutateUsers()
+
+    showToast("Usuário excluído!", "success")
+  }
+
+  if (branchesError || usersError) {
+    return <div>Erro ao carregar dados.</div>
+  }
+
+  if (!branches || !users) {
+    return <div>Carregando...</div>
   }
 
   return (
