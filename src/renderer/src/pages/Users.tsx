@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { UserPlus } from "lucide-react"
 import { Trash2, Pencil } from "lucide-react"
 import useSWR from "swr"
